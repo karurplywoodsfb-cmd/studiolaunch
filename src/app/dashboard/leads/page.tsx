@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Lead, LeadStatus } from '@/types'
+import { Lead, LeadStatus, LeadActivity } from '@/types'
 import { timeAgo, formatDate } from '@/lib/utils'
 
 const STATUS_OPTIONS: { value: LeadStatus; label: string; color: string }[] = [
@@ -27,6 +27,41 @@ function LeadDetailPanel({
   onStatusChange: (id: string, status: LeadStatus) => void
 }) {
   const [updating, setUpdating] = useState(false)
+  const [activities, setActivities] = useState<LeadActivity[]>([])
+  const [activitiesLoading, setActivitiesLoading] = useState(true)
+  const [noteText, setNoteText] = useState('')
+  const [addingNote, setAddingNote] = useState(false)
+
+  const fetchActivities = useCallback(async () => {
+    setActivitiesLoading(true)
+    try {
+      const res = await fetch(`/api/leads/activities?lead_id=${lead.id}`)
+      const json = await res.json()
+      setActivities(json.data || [])
+    } finally {
+      setActivitiesLoading(false)
+    }
+  }, [lead.id])
+
+  useEffect(() => { fetchActivities() }, [fetchActivities])
+
+  const addNote = async () => {
+    if (!noteText.trim()) return
+    setAddingNote(true)
+    try {
+      const res = await fetch('/api/leads/activities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lead_id: lead.id, content: noteText.trim() }),
+      })
+      if (res.ok) {
+        setNoteText('')
+        fetchActivities()
+      }
+    } finally {
+      setAddingNote(false)
+    }
+  }
 
   const updateStatus = async (status: LeadStatus) => {
     setUpdating(true)
@@ -34,6 +69,8 @@ function LeadDetailPanel({
     await supabase.from('leads').update({ status }).eq('id', lead.id)
     onStatusChange(lead.id, status)
     setUpdating(false)
+    // The DB trigger logs the status change — refresh the timeline to show it
+    fetchActivities()
   }
 
   const cfg = statusConfig(lead.status)
@@ -105,6 +142,45 @@ function LeadDetailPanel({
               </div>
             </div>
           )}
+
+          {/* Internal activity timeline */}
+          <div>
+            <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-2">Activity</div>
+
+            <div className="flex gap-2 mb-3">
+              <input
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') addNote() }}
+                placeholder="Add an internal note..."
+                className="flex-1 bg-[#0D0D0D] border border-[#2A2A2A] text-[#F5F0E8] px-3 py-2 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
+              />
+              <button
+                onClick={addNote}
+                disabled={addingNote || !noteText.trim()}
+                className="text-xs px-4 py-2 bg-[#C8A96E] text-[#0A0A0A] font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Add
+              </button>
+            </div>
+
+            {activitiesLoading ? (
+              <div className="text-xs text-[#6B6B6B] py-2">Loading timeline...</div>
+            ) : activities.length === 0 ? (
+              <div className="text-xs text-[#6B6B6B] py-2">No activity yet.</div>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {activities.map(a => (
+                  <div key={a.id} className="flex gap-3 text-xs border-l-2 border-[#2A2A2A] pl-3 py-1">
+                    <span className={a.type === 'status_change' ? 'text-[#C8A96E]' : 'text-[#F5F0E8]/80'}>
+                      {a.content}
+                    </span>
+                    <span className="text-[#6B6B6B] flex-shrink-0 ml-auto">{timeAgo(a.created_at)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* CTA actions */}

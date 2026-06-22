@@ -16,13 +16,14 @@ export const getTenantBySubdomain = cache(async (subdomain: string): Promise<Ten
   return data as Tenant
 })
 
-// ── Get tenant by custom domain ───────────────────────────────────────────────
+// ── Get tenant by custom domain (only if ownership has been verified) ────────
 export const getTenantByDomain = cache(async (domain: string): Promise<Tenant | null> => {
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('tenants')
     .select('*')
     .eq('custom_domain', domain)
+    .eq('domain_verified', true)
     .single()
   if (error || !data) return null
   return data as Tenant

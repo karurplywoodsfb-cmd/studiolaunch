@@ -21,6 +21,113 @@ const TABS: { value: Tab; label: string }[] = [
 const inputCls = 'w-full bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] px-4 py-3 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]'
 const labelCls = 'block text-xs tracking-widest uppercase text-[#6B6B6B] mb-2'
 
+function DomainVerificationPanel({
+  tenant,
+  onUpdate,
+}: {
+  tenant: Tenant
+  onUpdate: (t: Tenant) => void
+}) {
+  const [domainInput, setDomainInput] = useState(tenant.custom_domain || '')
+  const [saving, setSaving]           = useState(false)
+  const [verifying, setVerifying]     = useState(false)
+  const [message, setMessage]         = useState<{ text: string; ok: boolean } | null>(null)
+
+  const claimDomain = async () => {
+    setSaving(true)
+    setMessage(null)
+    const res = await fetch('/api/tenants/domain', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain: domainInput }),
+    })
+    const json = await res.json()
+    setSaving(false)
+    if (!res.ok) { setMessage({ text: json.error, ok: false }); return }
+    onUpdate({ ...tenant, ...json.data })
+    setMessage({ text: 'Domain saved. Add the TXT record below, then verify.', ok: true })
+  }
+
+  const verifyDomain = async () => {
+    setVerifying(true)
+    setMessage(null)
+    const res = await fetch('/api/tenants/domain')
+    const json = await res.json()
+    setVerifying(false)
+    if (json.verified) {
+      onUpdate({ ...tenant, domain_verified: true })
+      setMessage({ text: 'Domain verified! Your site is now live on this domain.', ok: true })
+    } else {
+      setMessage({ text: json.error || 'Not verified yet.', ok: false })
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <p className="text-[#6B6B6B] text-sm leading-relaxed">
+        Connect your own domain in two steps: save it, then prove ownership with a DNS TXT record
+        before it goes live.
+      </p>
+
+      <div>
+        <label className={labelCls}>Your Domain</label>
+        <div className="flex gap-3">
+          <input
+            value={domainInput}
+            onChange={e => setDomainInput(e.target.value)}
+            className={inputCls}
+            placeholder="www.yourstudio.com"
+          />
+          <button
+            onClick={claimDomain}
+            disabled={saving || !domainInput.trim()}
+            className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-6 disabled:opacity-40"
+          >
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+      </div>
+
+      {tenant.custom_domain && (
+        <>
+          <div className="bg-[#141414] border border-[#2A2A2A] p-4 text-xs space-y-3">
+            <div className="text-[#C8A96E] font-medium tracking-widest uppercase">Step 1 — Point your domain</div>
+            <div className="text-[#6B6B6B] space-y-1">
+              <div>Type: <span className="font-mono text-[#F5F0E8]/70">CNAME</span></div>
+              <div>Name: <span className="font-mono text-[#F5F0E8]/70">www</span></div>
+              <div>Value: <span className="font-mono text-[#C8A96E]">cname.studiolaunch.in</span></div>
+            </div>
+
+            <div className="text-[#C8A96E] font-medium tracking-widest uppercase pt-2">Step 2 — Verify ownership</div>
+            <div className="text-[#6B6B6B] space-y-1">
+              <div>Type: <span className="font-mono text-[#F5F0E8]/70">TXT</span></div>
+              <div>Name: <span className="font-mono text-[#F5F0E8]/70">_studiolaunch-verify.{tenant.custom_domain}</span></div>
+              <div>Value: <span className="font-mono text-[#C8A96E] break-all">{tenant.domain_verification_token}</span></div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button
+              onClick={verifyDomain}
+              disabled={verifying || tenant.domain_verified}
+              className="border border-[#2A2A2A] text-[#F5F0E8] text-xs font-medium tracking-widest uppercase px-6 py-3 hover:border-[#C8A96E]/50 disabled:opacity-40 transition-colors"
+            >
+              {tenant.domain_verified ? 'Verified ✓' : verifying ? 'Checking DNS…' : 'Verify Domain'}
+            </button>
+            {tenant.domain_verified && (
+              <span className="text-xs text-green-400">Live at {tenant.custom_domain}</span>
+            )}
+          </div>
+        </>
+      )}
+
+      {message && (
+        <p className={`text-xs ${message.ok ? 'text-green-400' : 'text-red-400'}`}>{message.text}</p>
+      )}
+    </div>
+  )
+}
+
 function SettingsInner() {
   const searchParams   = useSearchParams()
   const [tab, setTab]  = useState<Tab>((searchParams.get('tab') as Tab) || 'content')
@@ -205,21 +312,7 @@ function SettingsInner() {
                 <button onClick={() => setTab('billing')} className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-6 py-3 hover:bg-[#A8854A] transition-colors">Upgrade to Studio Plan</button>
               </div>
             ) : (
-              <div className="space-y-5">
-                <p className="text-[#6B6B6B] text-sm leading-relaxed">Add a CNAME record pointing your domain to <code className="text-[#C8A96E] bg-[#141414] px-2 py-0.5">cname.studiolaunch.in</code>, then save here.</p>
-                <div>
-                  <label className={labelCls}>Your Domain</label>
-                  <input value={tenant.custom_domain || ''} onChange={e => setTenant(prev => prev ? { ...prev, custom_domain: e.target.value } : prev)} className={inputCls} placeholder="www.yourstudio.com" />
-                </div>
-                <div className="bg-[#141414] border border-[#2A2A2A] p-4 text-xs">
-                  <div className="text-[#C8A96E] font-medium mb-3 tracking-widest uppercase">DNS Record</div>
-                  <div className="text-[#6B6B6B] space-y-1">
-                    <div>Type: <span className="font-mono text-[#F5F0E8]/70">CNAME</span></div>
-                    <div>Name: <span className="font-mono text-[#F5F0E8]/70">www</span></div>
-                    <div>Value: <span className="font-mono text-[#C8A96E]">cname.studiolaunch.in</span></div>
-                  </div>
-                </div>
-              </div>
+              <DomainVerificationPanel tenant={tenant} onUpdate={setTenant} />
             )}
           </div>
         </div>

@@ -53,6 +53,8 @@ export interface Tenant {
   user_id: string
   subdomain: string
   custom_domain: string | null
+  domain_verified?: boolean
+  domain_verification_token?: string | null
   plan: PlanType
   plan_status: 'active' | 'trialing' | 'past_due' | 'canceled'
   stripe_customer_id: string | null
@@ -159,6 +161,16 @@ export interface Lead {
   notes: string | null
   status: LeadStatus
   source: string
+  created_at: string
+}
+
+export interface LeadActivity {
+  id: string
+  lead_id: string
+  tenant_id: string
+  type: 'note' | 'status_change'
+  content: string
+  created_by: string | null
   created_at: string
 }
 

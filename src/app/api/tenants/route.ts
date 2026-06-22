@@ -1,16 +1,24 @@
 // src/app/api/tenants/route.ts — Create a new tenant
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { isSubdomainAvailable } from '@/lib/tenant'
 import { OnboardingData } from '@/types'
 
 export async function POST(req: NextRequest) {
   try {
-    const body: OnboardingData & { user_id: string } = await req.json()
+    // Identify the caller from their session — never trust a client-supplied user_id
+    const supabaseAuth = await createClient()
+    const { data: { user } } = await supabaseAuth.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const user_id = user.id
+
+    const body: OnboardingData = await req.json()
 
     const {
-      user_id, business_name, tagline, logo_letter,
+      business_name, tagline, logo_letter,
       local_city, state, street_address, pin_code, geo_latitude, geo_longitude, service_radius_km,
       phone_number, phone_display, email, instagram_handle,
       project_count, years_active, sqft_total, subdomain,
