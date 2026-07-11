@@ -1,0 +1,195 @@
+diff --git a/src/app/api/portfolio/route.ts b/src/app/api/portfolio/route.ts
+index 5c5c8df..e63084d 100644
+--- a/src/app/api/portfolio/route.ts
++++ b/src/app/api/portfolio/route.ts
+@@ -8,7 +8,7 @@ async function getTenant(supabase: Awaited<ReturnType<typeof createClient>>) {
+   const { data: { user } } = await supabase.auth.getUser()
+   if (!user) return null
+   const admin = createAdminClient()
+-  const { data } = await admin.from('tenants').select('id, plan').eq('user_id', user.id).single()
++  const { data } = await admin.from('tenants').select('id, plan, subdomain, custom_domain').eq('user_id', user.id).single()
+   return data
+ }
+ 
+@@ -26,7 +26,7 @@ export async function GET() {
+     .order('display_order', { ascending: true })
+ 
+   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+-  return NextResponse.json({ data })
++  return NextResponse.json({ data, tenant: { subdomain: tenant.subdomain, custom_domain: tenant.custom_domain } })
+ }
+ 
+ // POST — create portfolio item
+diff --git a/src/app/dashboard/portfolio/page.tsx b/src/app/dashboard/portfolio/page.tsx
+index 5f6442b..a071401 100644
+--- a/src/app/dashboard/portfolio/page.tsx
++++ b/src/app/dashboard/portfolio/page.tsx
+@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react'
+ import { useSearchParams } from 'next/navigation'
+ import { PortfolioProject, ProjectCategory, FinishTier } from '@/types'
+ import ImageUploader from '@/components/shared/ImageUploader'
++import { getTenantUrl } from '@/lib/utils'
+ 
+ // Extended type with SEO fields
+ type PortfolioFormData = Partial<PortfolioProject> & {
+@@ -381,6 +382,9 @@ function PortfolioForm({
+ export default function PortfolioPage() {
+   const searchParams = useSearchParams()
+   const [projects, setProjects] = useState<PortfolioProject[]>([])
++  const [siteBase, setSiteBase] = useState('')
++  const [copiedId, setCopiedId] = useState<string | null>(null)
++  const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
+   const [loading, setLoading]   = useState(true)
+   const [editing, setEditing]   = useState<PortfolioFormData | null>(
+     () => searchParams.get('new') === '1' ? { ...EMPTY } : null
+@@ -395,6 +399,9 @@ export default function PortfolioPage() {
+     const res  = await fetch('/api/portfolio')
+     const json = await res.json()
+     setProjects(json.data || [])
++    if (json.tenant) {
++      setSiteBase(json.tenant.custom_domain ? `https://${json.tenant.custom_domain}` : getTenantUrl(json.tenant.subdomain))
++    }
+     setLoading(false)
+   }, [])
+ 
+@@ -446,6 +453,31 @@ export default function PortfolioPage() {
+     }
+   }
+ 
++  const duplicateProject = async (project: PortfolioProject) => {
++    setDuplicatingId(project.id)
++    try {
++      const { id: _id, created_at: _createdAt, ...rest } = project as PortfolioProject & { [k: string]: unknown }
++      const res = await fetch('/api/portfolio', {
++        method: 'POST',
++        headers: { 'Content-Type': 'application/json' },
++        body: JSON.stringify({ ...rest, title: `${project.title} (Copy)`, published: false }),
++      })
++      if (res.ok) await fetchProjects()
++    } finally {
++      setDuplicatingId(null)
++    }
++  }
++
++  const copyShareLink = (project: PortfolioProject) => {
++    const slug = (project as PortfolioProject & { slug?: string }).slug
++    const url = slug && siteBase ? `${siteBase}/projects/${slug}` : siteBase
++    if (!url) return
++    navigator.clipboard.writeText(url).then(() => {
++      setCopiedId(project.id)
++      setTimeout(() => setCopiedId(prev => prev === project.id ? null : prev), 2000)
++    })
++  }
++
+   const toggleSelected = (id: string) => {
+     setSelectedIds(prev => {
+       const next = new Set(prev)
+@@ -542,7 +574,7 @@ export default function PortfolioPage() {
+ 
+       {/* Bulk action bar */}
+       {selectedIds.size > 0 && (
+-        <div className="mb-4 flex items-center justify-between bg-[#C8A96E]/10 border border-[#C8A96E]/30 px-4 py-3">
++        <div className="mb-4 flex items-center justify-between rounded-2xl bg-[#C8A96E]/10 border border-[#C8A96E]/30 px-4 py-3">
+           <span className="text-xs text-[#F5F0E8]">{selectedIds.size} selected</span>
+           <div className="flex items-center gap-2">
+             <button disabled={bulkWorking} onClick={() => bulkSetPublished(true)}
+@@ -569,29 +601,32 @@ export default function PortfolioPage() {
+       {loading ? (
+         <div className="text-center py-20 text-[#6B6B6B] text-sm">Loading projects...</div>
+       ) : projects.length === 0 && !editing ? (
+-        <div className="text-center py-20 border border-dashed border-[#2A2A2A]">
++        <div className="text-center py-20 rounded-2xl border border-dashed border-[#2A2A2A]">
+           <div className="text-[#6B6B6B] text-sm mb-4">No projects yet</div>
+           <p className="text-[#6B6B6B] text-xs max-w-xs mx-auto leading-relaxed mb-6">
+             Add your first project to populate your site&apos;s portfolio section.
+           </p>
+           <button
+             onClick={() => setEditing({ ...EMPTY })}
+-            className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-3 hover:bg-[#A8854A] transition-colors"
++            className="rounded-full bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-3 hover:bg-[#A8854A] transition-colors"
+           >
+             Add First Project
+           </button>
+         </div>
+       ) : (
+-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#1A1A1A]">
+-          {projects.map(project => (
+-            <div key={project.id} className="bg-[#0A0A0A] group relative">
++        <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 [column-fill:_balance]">
++          {projects.map(project => {
++            const slug = (project as PortfolioProject & { slug?: string }).slug
++            const previewUrl = slug && siteBase ? `${siteBase}/projects/${slug}` : siteBase
++            return (
++            <div key={project.id} className="break-inside-avoid mb-4 rounded-2xl overflow-hidden border border-[#1A1A1A] bg-[#0D0D0D] group">
+               {/* Cover image */}
+-              <div className="relative overflow-hidden bg-[#141414]" style={{aspectRatio:'4/3'}}>
++              <div className="relative overflow-hidden bg-[#141414]">
+                 {project.cover_image_url ? (
+                   <img src={project.cover_image_url} alt={project.title}
+-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-80" />
++                    className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105" />
+                 ) : (
+-                  <div className="w-full h-full flex items-center justify-center">
++                  <div className="w-full flex items-center justify-center" style={{aspectRatio:'4/3'}}>
+                     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="text-[#3A3A3A]">
+                       <rect x="2" y="4" width="28" height="24" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+                       <circle cx="11" cy="12" r="3" stroke="currentColor" strokeWidth="1.5"/>
+@@ -599,12 +634,12 @@ export default function PortfolioPage() {
+                     </svg>
+                   </div>
+                 )}
+-                {/* Published indicator */}
+-                <div className={`absolute top-2 right-2 text-xs px-2 py-0.5 font-medium ${project.published ? 'bg-green-400/20 text-green-400 border border-green-400/30' : 'bg-[#1A1A1A] text-[#6B6B6B] border border-[#2A2A2A]'}`}>
++
++                {/* Top badges */}
++                <div className={`absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full font-medium ${project.published ? 'bg-green-400/20 text-green-400 border border-green-400/30' : 'bg-[#1A1A1A] text-[#6B6B6B] border border-[#2A2A2A]'}`}>
+                   {project.published ? 'Live' : 'Draft'}
+                 </div>
+-                {/* Select checkbox */}
+-                <label className="absolute top-2 left-2 flex items-center justify-center w-6 h-6 bg-[#0A0A0A]/70 backdrop-blur-sm border border-[#2A2A2A] cursor-pointer">
++                <label className="absolute top-2 left-2 flex items-center justify-center w-6 h-6 rounded-full bg-[#0A0A0A]/70 backdrop-blur-sm border border-[#2A2A2A] cursor-pointer">
+                   <input
+                     type="checkbox"
+                     checked={selectedIds.has(project.id)}
+@@ -616,6 +651,32 @@ export default function PortfolioPage() {
+                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6l3 3 6-6" stroke="#C8A96E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                   )}
+                 </label>
++
++                {/* Hover-reveal quick actions */}
++                <div className="absolute inset-x-0 bottom-0 p-3 flex items-center justify-center gap-1.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200 bg-gradient-to-t from-[#0A0A0A]/95 to-transparent pt-8">
++                  <button onClick={() => setEditing(project)} title="Quick Edit"
++                    className="w-8 h-8 rounded-full bg-[#0A0A0A]/80 backdrop-blur-sm border border-[#2A2A2A] flex items-center justify-center text-[#F5F0E8] hover:text-[#C8A96E] hover:border-[#C8A96E]/40 transition-colors">
++                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 1.5l3 3L4 13H1v-3z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/></svg>
++                  </button>
++                  <button onClick={() => duplicateProject(project)} disabled={duplicatingId === project.id} title="Duplicate"
++                    className="w-8 h-8 rounded-full bg-[#0A0A0A]/80 backdrop-blur-sm border border-[#2A2A2A] flex items-center justify-center text-[#F5F0E8] hover:text-[#C8A96E] hover:border-[#C8A96E]/40 transition-colors disabled:opacity-40">
++                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="8" height="8" rx="1" stroke="currentColor" strokeWidth="1.2"/><path d="M5 5h7a1 1 0 011 1v7H6a1 1 0 01-1-1z" stroke="currentColor" strokeWidth="1.2"/></svg>
++                  </button>
++                  {previewUrl && (
++                    <a href={previewUrl} target="_blank" rel="noopener noreferrer" title="Preview"
++                      className="w-8 h-8 rounded-full bg-[#0A0A0A]/80 backdrop-blur-sm border border-[#2A2A2A] flex items-center justify-center text-[#F5F0E8] hover:text-[#C8A96E] hover:border-[#C8A96E]/40 transition-colors">
++                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 7s2.2-4.5 6-4.5S13 7 13 7s-2.2 4.5-6 4.5S1 7 1 7z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.2"/></svg>
++                    </a>
++                  )}
++                  <button onClick={() => copyShareLink(project)} title="Copy Share Link"
++                    className="w-8 h-8 rounded-full bg-[#0A0A0A]/80 backdrop-blur-sm border border-[#2A2A2A] flex items-center justify-center text-[#F5F0E8] hover:text-[#C8A96E] hover:border-[#C8A96E]/40 transition-colors">
++                    {copiedId === project.id ? (
++                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 3.5" stroke="#4ADE80" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>
++                    ) : (
++                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><circle cx="11" cy="3" r="1.8" stroke="currentColor" strokeWidth="1.1"/><circle cx="3" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.1"/><circle cx="11" cy="11" r="1.8" stroke="currentColor" strokeWidth="1.1"/><path d="M4.6 6.1l4.8-2.6M4.6 7.9l4.8 2.6" stroke="currentColor" strokeWidth="1.1"/></svg>
++                    )}
++                  </button>
++                </div>
+               </div>
+ 
+               {/* Info */}
+@@ -654,7 +715,7 @@ export default function PortfolioPage() {
+                 </div>
+               </div>
+             </div>
+-          ))}
++          )})}
+         </div>
+       )}
+     </div>

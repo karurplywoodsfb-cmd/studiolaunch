@@ -8,7 +8,7 @@ async function getTenant(supabase: Awaited<ReturnType<typeof createClient>>) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
   const admin = createAdminClient()
-  const { data } = await admin.from('tenants').select('id, plan').eq('user_id', user.id).single()
+  const { data } = await admin.from('tenants').select('id, plan, subdomain, custom_domain').eq('user_id', user.id).single()
   return data
 }
 
@@ -26,7 +26,7 @@ export async function GET() {
     .order('display_order', { ascending: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data })
+  return NextResponse.json({ data, tenant: { subdomain: tenant.subdomain, custom_domain: tenant.custom_domain } })
 }
 
 // POST — create portfolio item
