@@ -12,17 +12,68 @@ interface Props {
   className?:  string
 }
 
+const MAX_DIMENSION = 2400   // longest side, px — plenty for full-bleed hero use, well under typical smartphone output
+const WEBP_QUALITY   = 0.82
+const SKIP_BELOW     = 250 * 1024  // don't bother re-encoding files already under 250KB
+
+// Re-encodes an oversized smartphone photo down to a capped, WebP-compressed file
+// entirely in the browser — no server-side image processing needed. Animated GIFs
+// are passed through untouched since canvas would flatten them to one frame.
+async function compressImage(file: File): Promise<{ file: File; originalKB: number; finalKB: number }> {
+  const originalKB = Math.round(file.size / 1024)
+
+  if (file.type === 'image/gif' || file.size <= SKIP_BELOW) {
+    return { file, originalKB, finalKB: originalKB }
+  }
+
+  try {
+    const bitmap = await createImageBitmap(file)
+    const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height))
+    const w = Math.round(bitmap.width * scale)
+    const h = Math.round(bitmap.height * scale)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = w
+    canvas.height = h
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return { file, originalKB, finalKB: originalKB }
+    ctx.drawImage(bitmap, 0, 0, w, h)
+
+    const blob: Blob | null = await new Promise(resolve =>
+      canvas.toBlob(resolve, 'image/webp', WEBP_QUALITY)
+    )
+    if (!blob || blob.size >= file.size) {
+      // Compression didn't help (rare, e.g. already-optimized webp) — keep original
+      return { file, originalKB, finalKB: originalKB }
+    }
+
+    const newName = file.name.replace(/\.\w+$/, '') + '.webp'
+    const compressed = new File([blob], newName, { type: 'image/webp' })
+    return { file: compressed, originalKB, finalKB: Math.round(blob.size / 1024) }
+  } catch {
+    // createImageBitmap/canvas unsupported or failed — fall back to the original file
+    return { file, originalKB, finalKB: originalKB }
+  }
+}
+
 export default function ImageUploader({
   value, onChange, folder = 'general', label = 'Upload Image', aspectHint, className = '',
 }: Props) {
   const [uploading, setUploading] = useState(false)
   const [error, setError]         = useState('')
   const [dragOver, setDragOver]   = useState(false)
+  const [savedPct, setSavedPct]   = useState<number | null>(null)
   const inputRef                  = useRef<HTMLInputElement>(null)
 
-  const upload = useCallback(async (file: File) => {
+  const upload = useCallback(async (rawFile: File) => {
     setUploading(true)
     setError('')
+    setSavedPct(null)
+
+    const { file, originalKB, finalKB } = await compressImage(rawFile)
+    if (finalKB < originalKB) {
+      setSavedPct(Math.round((1 - finalKB / originalKB) * 100))
+    }
 
     const formData = new FormData()
     formData.append('file', file)
@@ -127,6 +178,12 @@ export default function ImageUploader({
       {error && (
         <div className="text-red-400 text-xs mt-2 border border-red-400/20 bg-red-400/5 px-3 py-2">
           {error}
+        </div>
+      )}
+
+      {!error && savedPct !== null && savedPct > 0 && (
+        <div className="text-xs text-[#6B6B6B] mt-2">
+          Compressed to WebP — {savedPct}% smaller, faster loading for visitors.
         </div>
       )}
 

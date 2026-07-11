@@ -2,6 +2,7 @@
 // src/app/dashboard/portfolio/page.tsx
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { PortfolioProject, ProjectCategory, FinishTier } from '@/types'
 import ImageUploader from '@/components/shared/ImageUploader'
 
@@ -15,6 +16,9 @@ type PortfolioFormData = Partial<PortfolioProject> & {
   solution_text?:      string
   testimonial_quote?:  string
   testimonial_name?:   string
+  materials?:          { label: string; value: string }[]
+  geo_latitude?:       string
+  geo_longitude?:      string
 }
 
 const CATEGORIES: { value: ProjectCategory; label: string }[] = [
@@ -35,6 +39,7 @@ const EMPTY: PortfolioFormData = {
   cover_image_url: '', tags: [], published: false, display_order: 0,
   slug: '', seo_title: '', seo_description: '', full_description: '',
   challenge_text: '', solution_text: '', testimonial_quote: '', testimonial_name: '',
+  materials: [], geo_latitude: '', geo_longitude: '',
 }
 
 function PortfolioForm({
@@ -50,8 +55,40 @@ function PortfolioForm({
 }) {
   const [form, setForm] = useState<PortfolioFormData>(initial)
   const [tagInput, setTagInput] = useState('')
+  const [aiNotes, setAiNotes] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiError, setAiError] = useState('')
 
   const set = (k: string, v: unknown) => setForm(p => ({ ...p, [k]: v }))
+
+  const generateWithAI = async () => {
+    if (!aiNotes.trim()) { setAiError('Add a few bullet points about the project first'); return }
+    setAiLoading(true)
+    setAiError('')
+    try {
+      const res = await fetch('/api/portfolio/ai-copywriter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title, category: form.category, location: form.location,
+          area_sqft: form.area_sqft, finish_tier: form.finish_tier, notes: aiNotes,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) { setAiError(json.error || 'Generation failed'); return }
+      set('full_description', json.data.full_description || '')
+      set('challenge_text', json.data.challenge_text || '')
+      set('solution_text', json.data.solution_text || '')
+      if (json.data.suggested_tags?.length) {
+        const merged = Array.from(new Set([...(form.tags || []), ...json.data.suggested_tags]))
+        set('tags', merged)
+      }
+    } catch {
+      setAiError('Something went wrong. Please try again.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const addTag = () => {
     const t = tagInput.trim()
@@ -185,6 +222,30 @@ function PortfolioForm({
                 className={inputCls + ' resize-y'} rows={2} maxLength={160}
                 placeholder="Luxury 4200 sq.ft villa interior designed by Forma Studio in Coimbatore. Italian marble flooring, custom joinery, full home design." />
             </div>
+            <div className="border border-[#C8A96E]/25 bg-[#C8A96E]/5 p-4">
+              <label className={labelCls}>✦ AI Project Arc Copywriter <span className="text-[#6B6B6B] normal-case tracking-normal">(Studio plan+)</span></label>
+              <textarea
+                value={aiNotes}
+                onChange={e => setAiNotes(e.target.value)}
+                className={inputCls + ' resize-y mb-2'}
+                rows={2}
+                placeholder="Quick bullet points: e.g. small 900 sqft apartment, client wanted more natural light, added a sliding partition between kitchen and living, warm wood tones..."
+              />
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={generateWithAI}
+                  disabled={aiLoading}
+                  className="text-xs font-semibold tracking-widest uppercase px-4 py-2 bg-[#C8A96E] text-[#0A0A0A] hover:bg-[#A8854A] transition-colors disabled:opacity-50"
+                >
+                  {aiLoading ? 'Writing...' : 'Generate Description, Challenge & Solution'}
+                </button>
+                {aiError && <span className="text-xs text-red-400">{aiError}</span>}
+              </div>
+              <p className="text-xs text-[#6B6B6B] mt-2">
+                Fills in the fields below — review and edit before saving. Never generates a client testimonial; that has to be the client&apos;s real words.
+              </p>
+            </div>
             <div>
               <label className={labelCls}>Project Description <span className="text-[#6B6B6B] normal-case tracking-normal">(shown on project page)</span></label>
               <textarea value={(form as PortfolioFormData).full_description || ''} onChange={e => set('full_description', e.target.value)}
@@ -214,6 +275,70 @@ function PortfolioForm({
                 <input value={(form as PortfolioFormData).testimonial_name || ''} onChange={e => set('testimonial_name', e.target.value)}
                   className={inputCls} placeholder="e.g. Ravi & Priya Shankar" />
               </div>
+            </div>
+            <div>
+              <label className={labelCls}>Materials &amp; Specifications <span className="text-[#6B6B6B] normal-case tracking-normal">(e.g. Flooring — Italian marble)</span></label>
+              <div className="space-y-2">
+                {(form.materials || []).map((m, i) => (
+                  <div key={i} className="flex gap-2">
+                    <input
+                      value={m.label}
+                      onChange={e => {
+                        const next = [...(form.materials || [])]
+                        next[i] = { ...next[i], label: e.target.value }
+                        set('materials', next)
+                      }}
+                      placeholder="Flooring"
+                      className={inputCls + ' flex-1'}
+                    />
+                    <input
+                      value={m.value}
+                      onChange={e => {
+                        const next = [...(form.materials || [])]
+                        next[i] = { ...next[i], value: e.target.value }
+                        set('materials', next)
+                      }}
+                      placeholder="Italian marble"
+                      className={inputCls + ' flex-[2]'}
+                    />
+                    <button type="button"
+                      onClick={() => set('materials', (form.materials || []).filter((_, idx) => idx !== i))}
+                      className="px-3 text-[#6B6B6B] hover:text-red-400 transition-colors text-xs"
+                      aria-label={`Remove ${m.label || 'material'} row`}
+                    >✕</button>
+                  </div>
+                ))}
+                <button type="button"
+                  onClick={() => set('materials', [...(form.materials || []), { label: '', value: '' }])}
+                  className="text-xs font-medium tracking-widest uppercase text-[#C8A96E] hover:text-[#A8854A] transition-colors"
+                >
+                  + Add Material / Spec
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className={labelCls}>
+                Project GPS Coordinates <span className="text-[#6B6B6B] normal-case tracking-normal">(optional — boosts hyper-local search for this project&apos;s neighborhood)</span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <input
+                  value={form.geo_latitude || ''}
+                  onChange={e => set('geo_latitude', e.target.value)}
+                  placeholder="Latitude, e.g. 10.8155"
+                  className={inputCls}
+                  inputMode="decimal"
+                />
+                <input
+                  value={form.geo_longitude || ''}
+                  onChange={e => set('geo_longitude', e.target.value)}
+                  placeholder="Longitude, e.g. 78.6963"
+                  className={inputCls}
+                  inputMode="decimal"
+                />
+              </div>
+              <p className="text-xs text-[#6B6B6B] mt-1.5">
+                On Google Maps: right-click the project&apos;s location → tap the coordinates at the top of the menu to copy them.
+              </p>
             </div>
           </div>
         </div>
@@ -254,12 +379,17 @@ function PortfolioForm({
 }
 
 export default function PortfolioPage() {
+  const searchParams = useSearchParams()
   const [projects, setProjects] = useState<PortfolioProject[]>([])
   const [loading, setLoading]   = useState(true)
-  const [editing, setEditing]   = useState<PortfolioFormData | null>(null)
+  const [editing, setEditing]   = useState<PortfolioFormData | null>(
+    () => searchParams.get('new') === '1' ? { ...EMPTY } : null
+  )
   const [saving, setSaving]     = useState(false)
   const [error, setError]       = useState('')
   const [limitError, setLimitError] = useState('')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkWorking, setBulkWorking] = useState(false)
 
   const fetchProjects = useCallback(async () => {
     const res  = await fetch('/api/portfolio')
@@ -314,6 +444,44 @@ export default function PortfolioPage() {
     if (res.ok) {
       setProjects(prev => prev.map(p => p.id === project.id ? { ...p, published: !p.published } : p))
     }
+  }
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const bulkSetPublished = async (published: boolean) => {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) return
+    setBulkWorking(true)
+    await Promise.all(ids.map(id => fetch('/api/portfolio', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, published }),
+    })))
+    setProjects(prev => prev.map(p => ids.includes(p.id) ? { ...p, published } : p))
+    setSelectedIds(new Set())
+    setBulkWorking(false)
+  }
+
+  const bulkDelete = async () => {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) return
+    if (!confirm(`Delete ${ids.length} selected project${ids.length > 1 ? 's' : ''}? This cannot be undone.`)) return
+    setBulkWorking(true)
+    await Promise.all(ids.map(id => fetch('/api/portfolio', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })))
+    setProjects(prev => prev.filter(p => !ids.includes(p.id)))
+    setSelectedIds(new Set())
+    setBulkWorking(false)
   }
 
   return (
@@ -372,6 +540,31 @@ export default function PortfolioPage() {
         </div>
       )}
 
+      {/* Bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="mb-4 flex items-center justify-between bg-[#C8A96E]/10 border border-[#C8A96E]/30 px-4 py-3">
+          <span className="text-xs text-[#F5F0E8]">{selectedIds.size} selected</span>
+          <div className="flex items-center gap-2">
+            <button disabled={bulkWorking} onClick={() => bulkSetPublished(true)}
+              className="text-xs px-3 py-1.5 border border-[#2A2A2A] text-[#6B6B6B] hover:text-green-400 hover:border-green-400/40 transition-colors disabled:opacity-50">
+              Publish
+            </button>
+            <button disabled={bulkWorking} onClick={() => bulkSetPublished(false)}
+              className="text-xs px-3 py-1.5 border border-[#2A2A2A] text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors disabled:opacity-50">
+              Unpublish
+            </button>
+            <button disabled={bulkWorking} onClick={bulkDelete}
+              className="text-xs px-3 py-1.5 border border-[#2A2A2A] text-[#6B6B6B] hover:text-red-400 hover:border-red-400/40 transition-colors disabled:opacity-50">
+              Delete
+            </button>
+            <button onClick={() => setSelectedIds(new Set())}
+              className="text-xs px-3 py-1.5 text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors">
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Project grid */}
       {loading ? (
         <div className="text-center py-20 text-[#6B6B6B] text-sm">Loading projects...</div>
@@ -410,6 +603,19 @@ export default function PortfolioPage() {
                 <div className={`absolute top-2 right-2 text-xs px-2 py-0.5 font-medium ${project.published ? 'bg-green-400/20 text-green-400 border border-green-400/30' : 'bg-[#1A1A1A] text-[#6B6B6B] border border-[#2A2A2A]'}`}>
                   {project.published ? 'Live' : 'Draft'}
                 </div>
+                {/* Select checkbox */}
+                <label className="absolute top-2 left-2 flex items-center justify-center w-6 h-6 bg-[#0A0A0A]/70 backdrop-blur-sm border border-[#2A2A2A] cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(project.id)}
+                    onChange={() => toggleSelected(project.id)}
+                    className="sr-only"
+                    aria-label={`Select ${project.title}`}
+                  />
+                  {selectedIds.has(project.id) && (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 6l3 3 6-6" stroke="#C8A96E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  )}
+                </label>
               </div>
 
               {/* Info */}

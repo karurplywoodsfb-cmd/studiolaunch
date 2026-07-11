@@ -256,10 +256,21 @@ function SettingsInner() {
                 <input value={tenant.branding.accent_color} onChange={e => update('branding','accent_color',e.target.value)} className={inputCls + ' flex-1'} placeholder="#C8A96E" />
               </div>
             </div>
+            <div>
+              <label className={labelCls}>Site Template</label>
+              <select value={tenant.branding.theme || 'noir'} onChange={e => update('branding','theme', e.target.value)} className={inputCls}>
+                <option value="noir">Noir — full-bleed dark editorial</option>
+                <option value="ivory">Ivory — light, split-hero minimal</option>
+              </select>
+            </div>
           </div>
           <div className="pt-4 border-t border-[#1A1A1A] grid grid-cols-2 gap-5">
             <div><label className={labelCls}>Phone Number</label><input value={tenant.contact.phone_number} onChange={e => update('contact','phone_number',e.target.value)} className={inputCls} type="tel" /></div>
             <div><label className={labelCls}>Phone Display</label><input value={tenant.contact.phone_display} onChange={e => update('contact','phone_display',e.target.value)} className={inputCls} placeholder="+91 98765 43210" /></div>
+            <div>
+              <label className={labelCls}>WhatsApp Number</label>
+              <input value={tenant.contact.whatsapp_number || ''} onChange={e => update('contact','whatsapp_number',e.target.value)} className={inputCls} type="tel" placeholder="919876543210 (defaults to phone number)" />
+            </div>
             <div><label className={labelCls}>Email</label><input value={tenant.contact.email} onChange={e => update('contact','email',e.target.value)} className={inputCls} type="email" /></div>
             <div>
               <label className={labelCls}>Instagram Handle</label>

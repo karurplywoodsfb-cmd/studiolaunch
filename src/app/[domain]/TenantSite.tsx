@@ -2,9 +2,16 @@
 // src/app/[domain]/TenantSite.tsx
 // Full rendered studio site — driven entirely by tenant data
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Tenant, PortfolioProject, CaseStudy, FAQItem, GoogleReview } from '@/types'
 import AnalyticsTracker from '@/components/shared/AnalyticsTracker'
+import SchemaScript from '@/components/tenant-site/SchemaScript'
+import BeforeAfterSlider, { PLACEHOLDER_IMG } from '@/components/tenant-site/BeforeAfterSlider'
+import ConsultationForm from '@/components/tenant-site/ConsultationForm'
+import FAQAccordion from '@/components/tenant-site/FAQAccordion'
+import WhatsAppButton from '@/components/tenant-site/WhatsAppButton'
+import StickyMobileCTA from '@/components/tenant-site/StickyMobileCTA'
+import PortfolioLightbox from '@/components/tenant-site/PortfolioLightbox'
 
 interface SiteData {
   portfolio:  PortfolioProject[]
@@ -19,341 +26,10 @@ interface Props {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const PLACEHOLDER_IMG = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect width=%22800%22 height=%22600%22 fill=%22%23141414%22/%3E%3C/svg%3E'
-
 function eyebrow(text: string) {
   return (
     <div style={{fontFamily:'Inter,sans-serif',fontSize:'0.65rem',fontWeight:500,letterSpacing:'0.3em',textTransform:'uppercase',color:'#C8A96E',marginBottom:'1rem'}}>
       {text}
-    </div>
-  )
-}
-
-// ── Schema JSON-LD ────────────────────────────────────────────────────────────
-function SchemaScript({ tenant, faqs }: { tenant: Tenant; faqs: FAQItem[] }) {
-  const { branding, contact, location } = tenant
-
-  const schema = {
-    '@context': 'https://schema.org',
-    '@graph': [
-      {
-        '@type': ['ArchitecturalService', 'LocalBusiness'],
-        '@id': `https://${tenant.subdomain}.studiolaunch.in/#organization`,
-        name: branding.business_name,
-        telephone: contact.phone_number,
-        email: contact.email,
-        priceRange: '₹₹₹₹',
-        description: `${branding.business_name} is a premium architectural and interior design studio in ${location.local_city}.`,
-        address: {
-          '@type': 'PostalAddress',
-          streetAddress: location.street_address,
-          addressLocality: location.local_city,
-          addressRegion: location.state,
-          postalCode: location.pin_code,
-          addressCountry: 'IN',
-        },
-        geo: {
-          '@type': 'GeoCoordinates',
-          latitude: location.geo_latitude,
-          longitude: location.geo_longitude,
-        },
-        areaServed: [{ '@type': 'City', name: location.local_city }],
-      },
-      faqs.length > 0 && {
-        '@type': 'FAQPage',
-        mainEntity: faqs.map(f => ({
-          '@type': 'Question',
-          name: f.question,
-          acceptedAnswer: { '@type': 'Answer', text: f.answer },
-        })),
-      },
-    ].filter(Boolean),
-  }
-
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  )
-}
-
-// ── Before/After Slider ───────────────────────────────────────────────────────
-function BeforeAfterSlider({ beforeUrl, afterUrl, beforeAlt, afterAlt }: {
-  beforeUrl: string; afterUrl: string; beforeAlt: string; afterAlt: string
-}) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [pct, setPct]       = useState(50)
-  const [dragging, setDragging] = useState(false)
-
-  const getX = (e: MouseEvent | TouchEvent) => {
-    const touch = 'touches' in e ? e.touches[0] : e
-    return touch.clientX
-  }
-
-  const setPos = useCallback((x: number) => {
-    if (!containerRef.current) return
-    const rect = containerRef.current.getBoundingClientRect()
-    const newPct = Math.max(2, Math.min(98, ((x - rect.left) / rect.width) * 100))
-    setPct(newPct)
-  }, [])
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent | TouchEvent) => { if (dragging) setPos(getX(e)) }
-    const onEnd  = () => setDragging(false)
-    window.addEventListener('mousemove', onMove)
-    window.addEventListener('mouseup',  onEnd)
-    window.addEventListener('touchmove', onMove as EventListener, { passive: true })
-    window.addEventListener('touchend',  onEnd)
-    return () => {
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseup',  onEnd)
-      window.removeEventListener('touchmove', onMove as EventListener)
-      window.removeEventListener('touchend',  onEnd)
-    }
-  }, [dragging, setPos])
-
-  return (
-    <div
-      ref={containerRef}
-      onMouseDown={e => { setDragging(true); setPos(e.clientX) }}
-      onTouchStart={e => { setDragging(true); setPos(e.touches[0].clientX) }}
-      style={{
-        position:'relative', overflow:'hidden', cursor:'ew-resize',
-        height:'clamp(280px,52vw,620px)', background:'#141414', userSelect:'none',
-      }}
-      role="img"
-      aria-label="Before and after comparison slider"
-    >
-      {/* Before */}
-      <img src={beforeUrl || PLACEHOLDER_IMG} alt={beforeAlt}
-        style={{width:'100%',height:'100%',objectFit:'cover',display:'block',pointerEvents:'none'}} loading="lazy" />
-
-      {/* After (clipped) */}
-      <div style={{position:'absolute',inset:0,overflow:'hidden',width:`${pct}%`}}>
-        <img src={afterUrl || PLACEHOLDER_IMG} alt={afterAlt}
-          style={{position:'absolute',top:0,left:0,width:containerRef.current?.offsetWidth||'100%',height:'100%',objectFit:'cover',pointerEvents:'none'}}
-          loading="lazy" />
-      </div>
-
-      {/* Handle */}
-      <div style={{position:'absolute',top:0,bottom:0,left:`${pct}%`,width:'3px',background:'#C8A96E',transform:'translateX(-50%)',zIndex:10,boxShadow:'0 0 20px rgba(200,169,110,0.4)'}}>
-        <div style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',width:'44px',height:'44px',borderRadius:'50%',background:'#C8A96E',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 24px rgba(0,0,0,0.5)'}}>
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M5 9H1M1 9l3-3M1 9l3 3M13 9h4M17 9l-3-3M17 9l-3 3" stroke="#0A0A0A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </div>
-
-      <span style={{position:'absolute',bottom:'1.25rem',left:'1.25rem',fontSize:'0.6rem',fontWeight:600,letterSpacing:'0.25em',textTransform:'uppercase',padding:'0.35rem 0.75rem',background:'rgba(10,10,10,0.75)',backdropFilter:'blur(8px)',color:'#6B6B6B'}}>Before</span>
-      <span style={{position:'absolute',bottom:'1.25rem',right:'1.25rem',fontSize:'0.6rem',fontWeight:600,letterSpacing:'0.25em',textTransform:'uppercase',padding:'0.35rem 0.75rem',background:'rgba(10,10,10,0.75)',backdropFilter:'blur(8px)',color:'#C8A96E'}}>After</span>
-    </div>
-  )
-}
-
-// ── Consultation Form ─────────────────────────────────────────────────────────
-function ConsultationForm({ tenantId, city }: { tenantId: string; city: string }) {
-  const [step, setStep]       = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [done, setDone]       = useState(false)
-  const [form, setForm]       = useState({
-    name:'', phone:'', email:'', project_location:'', notes:'',
-    property_type:'', scope:'', budget_tier:'',
-  })
-
-  const set = (k: string, v: string) => setForm(p => ({...p,[k]:v}))
-
-  const choiceCard = (name: string, value: string, title: string, sub: string) => {
-    const selected = form[name as keyof typeof form] === value
-    return (
-      <div
-        key={value}
-        onClick={() => set(name, value)}
-        style={{
-          border:`1px solid ${selected ? '#C8A96E' : '#2A2A2A'}`,
-          background: selected ? 'rgba(200,169,110,0.06)' : 'transparent',
-          padding:'1rem 1.25rem', cursor:'pointer', display:'flex', alignItems:'center', gap:'1rem',
-          transition:'border-color 0.2s',
-        }}
-      >
-        <div style={{width:'18px',height:'18px',border:`1px solid ${selected?'#C8A96E':'#3A3A3A'}`,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-          {selected && <div style={{width:'8px',height:'8px',borderRadius:'50%',background:'#C8A96E'}} />}
-        </div>
-        <div>
-          <div style={{fontSize:'0.9rem',fontWeight:500,color:'#F5F0E8'}}>{title}</div>
-          <div style={{fontSize:'0.72rem',color:'#6B6B6B',marginTop:'0.15rem'}}>{sub}</div>
-        </div>
-      </div>
-    )
-  }
-
-  const inputStyle: React.CSSProperties = {
-    width:'100%', background:'#1A1A1A', border:'1px solid #2A2A2A', color:'#F5F0E8',
-    fontFamily:'Inter,sans-serif', fontSize:'0.9rem', padding:'0.85rem 1rem',
-    outline:'none', transition:'border-color 0.2s',
-  }
-
-  const handleSubmit = async () => {
-    setLoading(true)
-    await fetch('/api/leads', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ tenant_id: tenantId, ...form }),
-    })
-    setLoading(false)
-    setDone(true)
-  }
-
-  if (done) return (
-    <div style={{textAlign:'center',padding:'3rem 0'}}>
-      <div style={{width:'64px',height:'64px',border:'1px solid #C8A96E',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 1.5rem'}}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M2 12l7 7L22 5" stroke="#C8A96E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      </div>
-      <h3 style={{fontFamily:'Georgia,serif',fontSize:'2rem',fontWeight:300,color:'#F5F0E8',marginBottom:'0.75rem'}}>Thank you.</h3>
-      <p style={{color:'#6B6B6B',fontSize:'0.9rem',lineHeight:1.7}}>We&apos;ve received your request and will confirm a consultation time within one business day.</p>
-    </div>
-  )
-
-  const dots = [1,2,3,4].map(n => (
-    <div key={n} style={{width:'6px',height:'6px',borderRadius:'50%',background: step===n ? '#C8A96E' : step>n ? 'rgba(200,169,110,0.4)' : '#2A2A2A',transform: step===n ? 'scale(1.4)' : 'none',transition:'all 0.3s'}} />
-  ))
-
-  const btnNext = (label: string, action: ()=>void, disabled=false) => (
-    <button onClick={action} disabled={disabled} style={{background:'#C8A96E',color:'#0A0A0A',fontFamily:'Inter,sans-serif',fontSize:'0.7rem',fontWeight:600,letterSpacing:'0.18em',textTransform:'uppercase',padding:'0.85rem 1.75rem',border:'none',cursor:disabled?'not-allowed':'pointer',opacity:disabled?0.5:1}}>
-      {label}
-    </button>
-  )
-  const btnBack = (action: ()=>void) => (
-    <button onClick={action} style={{background:'transparent',color:'#6B6B6B',fontFamily:'Inter,sans-serif',fontSize:'0.7rem',fontWeight:500,letterSpacing:'0.18em',textTransform:'uppercase',padding:'0.85rem 1.5rem',border:'1px solid #2A2A2A',cursor:'pointer'}}>
-      Back
-    </button>
-  )
-
-  return (
-    <div>
-      <div style={{display:'flex',gap:'0.5rem',alignItems:'center',marginBottom:'2rem'}}>
-        {dots}
-        <span style={{marginLeft:'auto',fontSize:'0.6rem',letterSpacing:'0.2em',textTransform:'uppercase',color:'#6B6B6B'}}>Step {step} of 4</span>
-      </div>
-
-      {step === 1 && (
-        <div>
-          <h3 style={{fontFamily:'Georgia,serif',fontSize:'1.75rem',fontWeight:300,color:'#F5F0E8',marginBottom:'0.5rem'}}>What type of property?</h3>
-          <p style={{color:'#6B6B6B',fontSize:'0.8rem',marginBottom:'1.5rem'}}>Select the option that best describes your project.</p>
-          <div style={{display:'grid',gap:'0.75rem'}}>
-            {choiceCard('property_type','Villa / Independent House','Villa / Independent House','Standalone residential property')}
-            {choiceCard('property_type','Apartment / Flat','Apartment / Flat','Multi-unit residential building')}
-            {choiceCard('property_type','Commercial Office','Commercial Office','Workspace, retail, or hospitality')}
-            {choiceCard('property_type','Other','Other / Not Sure','We\'ll discuss in the consultation')}
-          </div>
-          <div style={{marginTop:'2rem',display:'flex',justifyContent:'flex-end'}}>
-            {btnNext('Continue', () => setStep(2))}
-          </div>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div>
-          <h3 style={{fontFamily:'Georgia,serif',fontSize:'1.75rem',fontWeight:300,color:'#F5F0E8',marginBottom:'0.5rem'}}>Project scope?</h3>
-          <p style={{color:'#6B6B6B',fontSize:'0.8rem',marginBottom:'1.5rem'}}>How much of the space are we designing?</p>
-          <div style={{display:'grid',gap:'0.75rem'}}>
-            {choiceCard('scope','Full Home','Full Home / Complete Interior','All rooms — living, bedrooms, kitchen, bathrooms')}
-            {choiceCard('scope','Living & Dining Only','Living & Dining Space','Primary entertainment and family areas')}
-            {choiceCard('scope','Kitchen Only','Kitchen Only','Modular or custom kitchen design')}
-            {choiceCard('scope','Custom Scope','Custom / Select Rooms','I\'ll specify which rooms in the consultation')}
-          </div>
-          <div style={{marginTop:'2rem',display:'flex',justifyContent:'space-between'}}>
-            {btnBack(() => setStep(1))}
-            {btnNext('Continue', () => setStep(3))}
-          </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div>
-          <h3 style={{fontFamily:'Georgia,serif',fontSize:'1.75rem',fontWeight:300,color:'#F5F0E8',marginBottom:'0.5rem'}}>Finish tier?</h3>
-          <p style={{color:'#6B6B6B',fontSize:'0.8rem',marginBottom:'1.5rem'}}>Helps us recommend the right approach.</p>
-          <div style={{display:'grid',gap:'0.75rem'}}>
-            {choiceCard('budget_tier','Premium (₹800–1,500/sq.ft)','Premium','₹800–₹1,500 per sq.ft · Quality materials, refined finish')}
-            {choiceCard('budget_tier','Luxury (₹1,500–3,000/sq.ft)','Luxury','₹1,500–₹3,000 per sq.ft · Imported materials, bespoke joinery')}
-            {choiceCard('budget_tier','Ultra Luxury (₹3,000+/sq.ft)','Ultra Luxury','₹3,000+ per sq.ft · No-limit finishes, full bespoke')}
-            {choiceCard('budget_tier','To Discuss','I\'d Like to Discuss','We\'ll explore options in the consultation')}
-          </div>
-          <div style={{marginTop:'2rem',display:'flex',justifyContent:'space-between'}}>
-            {btnBack(() => setStep(2))}
-            {btnNext('Continue', () => setStep(4))}
-          </div>
-        </div>
-      )}
-
-      {step === 4 && (
-        <div>
-          <h3 style={{fontFamily:'Georgia,serif',fontSize:'1.75rem',fontWeight:300,color:'#F5F0E8',marginBottom:'0.5rem'}}>How can we reach you?</h3>
-          <p style={{color:'#6B6B6B',fontSize:'0.8rem',marginBottom:'1.5rem'}}>We&apos;ll confirm a time within one business day.</p>
-          <div style={{display:'grid',gap:'1.25rem'}}>
-            <div>
-              <label style={{display:'block',fontSize:'0.65rem',fontWeight:500,letterSpacing:'0.18em',textTransform:'uppercase',color:'#6B6B6B',marginBottom:'0.5rem'}}>Your Name *</label>
-              <input value={form.name} onChange={e=>set('name',e.target.value)} placeholder="Full name" style={inputStyle} />
-            </div>
-            <div>
-              <label style={{display:'block',fontSize:'0.65rem',fontWeight:500,letterSpacing:'0.18em',textTransform:'uppercase',color:'#6B6B6B',marginBottom:'0.5rem'}}>Phone Number *</label>
-              <input value={form.phone} onChange={e=>set('phone',e.target.value)} placeholder="+91 XXXXX XXXXX" type="tel" style={inputStyle} />
-            </div>
-            <div>
-              <label style={{display:'block',fontSize:'0.65rem',fontWeight:500,letterSpacing:'0.18em',textTransform:'uppercase',color:'#6B6B6B',marginBottom:'0.5rem'}}>Email Address</label>
-              <input value={form.email} onChange={e=>set('email',e.target.value)} placeholder="your@email.com" type="email" style={inputStyle} />
-            </div>
-            <div>
-              <label style={{display:'block',fontSize:'0.65rem',fontWeight:500,letterSpacing:'0.18em',textTransform:'uppercase',color:'#6B6B6B',marginBottom:'0.5rem'}}>Project Area / Location</label>
-              <input value={form.project_location} onChange={e=>set('project_location',e.target.value)} placeholder={`${city} area, layout, PIN...`} style={inputStyle} />
-            </div>
-            <div>
-              <label style={{display:'block',fontSize:'0.65rem',fontWeight:500,letterSpacing:'0.18em',textTransform:'uppercase',color:'#6B6B6B',marginBottom:'0.5rem'}}>Anything else?</label>
-              <textarea value={form.notes} onChange={e=>set('notes',e.target.value)} rows={3} placeholder="Timeline, specific rooms, references..." style={{...inputStyle,resize:'vertical'}} />
-            </div>
-          </div>
-          <div style={{marginTop:'2rem',display:'flex',justifyContent:'space-between',alignItems:'center',gap:'1rem'}}>
-            {btnBack(() => setStep(3))}
-            <button
-              onClick={handleSubmit}
-              disabled={loading || !form.name || !form.phone}
-              style={{flex:1,background:'#C8A96E',color:'#0A0A0A',fontFamily:'Inter,sans-serif',fontSize:'0.7rem',fontWeight:600,letterSpacing:'0.18em',textTransform:'uppercase',padding:'0.85rem',border:'none',cursor:'pointer',opacity:(loading||!form.name||!form.phone)?0.5:1}}
-            >
-              {loading ? 'Submitting...' : 'Request Consultation'}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── FAQ Accordion ─────────────────────────────────────────────────────────────
-function FAQAccordion({ faqs }: { faqs: FAQItem[] }) {
-  const [open, setOpen] = useState<string | null>(null)
-
-  return (
-    <div>
-      {faqs.map(faq => (
-        <div key={faq.id} style={{borderBottom:'1px solid #2A2A2A'}}>
-          <button
-            onClick={() => setOpen(open === faq.id ? null : faq.id)}
-            style={{width:'100%',display:'flex',justifyContent:'space-between',alignItems:'center',padding:'1.5rem 0',background:'transparent',border:'none',cursor:'pointer',textAlign:'left',gap:'1rem'}}
-          >
-            <span style={{fontFamily:'Georgia,serif',fontSize:'1.2rem',fontWeight:400,color: open===faq.id ? '#C8A96E' : '#F5F0E8',transition:'color 0.2s',lineHeight:1.4}}>
-              {faq.question}
-            </span>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style={{flexShrink:0,transform: open===faq.id ? 'rotate(45deg)' : 'none',transition:'transform 0.3s',color:'#C8A96E'}}>
-              <path d="M12 4v16M4 12h16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </button>
-          {open === faq.id && (
-            <div style={{paddingBottom:'1.5rem',color:'#6B6B6B',fontSize:'0.9rem',lineHeight:1.75}}>
-              {faq.answer}
-            </div>
-          )}
-        </div>
-      ))}
     </div>
   )
 }
@@ -364,6 +40,7 @@ export default function TenantSite({ tenant, siteData }: Props) {
   const { portfolio, caseStudy, faqs, reviews } = siteData
   const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [lightbox, setLightbox] = useState<{ project: PortfolioProject; index: number } | null>(null)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60)
@@ -372,6 +49,8 @@ export default function TenantSite({ tenant, siteData }: Props) {
   }, [])
 
   const accentColor = branding.accent_color || '#C8A96E'
+  const whatsappNumber = contact.whatsapp_number || contact.phone_number
+
 
   // ── Nav ──────────────────────────────────────────────────────────────────────
   const nav = (
@@ -414,7 +93,7 @@ export default function TenantSite({ tenant, siteData }: Props) {
             Book Consultation
           </a>
           {/* Mobile menu btn */}
-          <button onClick={() => setMenuOpen(true)} style={{background:'transparent',border:'none',cursor:'pointer',padding:'0.5rem',display:'flex',flexDirection:'column',gap:'5px'}} aria-label="Open menu" className="lg-hidden">
+          <button onClick={() => setMenuOpen(true)} style={{background:'transparent',border:'none',cursor:'pointer',padding:'0.5rem',display:'flex',flexDirection:'column',gap:'5px'}} aria-label="Open menu" aria-expanded={menuOpen} className="lg-hidden ts-focusable">
             <span style={{display:'block',width:'22px',height:'1px',background:'#F5F0E8'}} />
             <span style={{display:'block',width:'16px',height:'1px',background:accentColor}} />
             <span style={{display:'block',width:'19px',height:'1px',background:'#F5F0E8'}} />
@@ -487,6 +166,7 @@ export default function TenantSite({ tenant, siteData }: Props) {
         {portfolio.map(p => {
           const slug = (p as PortfolioProject & {slug?:string}).slug
           const projectUrl = slug ? `/projects/${slug}` : null
+          const galleryImages = [p.cover_image_url, ...(p.images || [])].filter(Boolean)
           return (
             <div
               key={p.id}
@@ -500,6 +180,17 @@ export default function TenantSite({ tenant, siteData }: Props) {
                 onMouseEnter={e => { e.currentTarget.style.transform='scale(1.05)'; e.currentTarget.style.opacity='1' }}
                 onMouseLeave={e => { e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.opacity='0.75' }}
               />
+              {galleryImages.length > 1 && (
+                <button
+                  onClick={e => { e.stopPropagation(); setLightbox({ project: p, index: 0 }) }}
+                  aria-label={`View ${galleryImages.length} photos of ${p.title}`}
+                  className="ts-focusable"
+                  style={{position:'absolute',top:'0.9rem',right:'0.9rem',background:'rgba(10,10,10,0.7)',backdropFilter:'blur(6px)',border:`1px solid ${accentColor}55`,color:'#F5F0E8',fontSize:'0.65rem',fontWeight:600,letterSpacing:'0.05em',padding:'0.4rem 0.65rem',display:'flex',alignItems:'center',gap:'0.35rem',cursor:'pointer'}}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#F5F0E8" strokeWidth="1.4"/><circle cx="8.5" cy="8.5" r="1.5" fill="#F5F0E8"/><path d="M21 15l-5-5L5 21" stroke="#F5F0E8" strokeWidth="1.4"/></svg>
+                  {galleryImages.length}
+                </button>
+              )}
               <div style={{position:'absolute',bottom:0,left:0,right:0,background:'linear-gradient(to top,rgba(10,10,10,0.9),transparent)',padding:'1.5rem'}}>
                 <div style={{fontSize:'0.6rem',letterSpacing:'0.25em',textTransform:'uppercase',color:accentColor,marginBottom:'0.25rem'}}>{p.category}</div>
                 <div style={{fontFamily:'Georgia,serif',fontSize:'1.1rem',color:'#F5F0E8'}}>{p.title}</div>
@@ -608,7 +299,7 @@ export default function TenantSite({ tenant, siteData }: Props) {
             </div>
           </div>
           <div style={{background:'#0D0D0D',border:'1px solid #1A1A1A',padding:'2.5rem'}}>
-            <ConsultationForm tenantId={tenant.id} city={location.local_city} />
+            <ConsultationForm tenantId={tenant.id} city={location.local_city} accentColor={accentColor} />
           </div>
         </div>
       </div>
@@ -772,10 +463,14 @@ export default function TenantSite({ tenant, siteData }: Props) {
         .lg-flex { display: none !important; }
         .lg-block { display: none !important; }
         .lg-hidden { display: flex !important; }
+        .ts-mobile-only { display: flex; }
+        .ts-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+        .ts-focusable:focus-visible { outline: 2px solid ${accentColor}; outline-offset: 2px; }
         @media (min-width: 1024px) {
           .lg-flex   { display: flex   !important; }
           .lg-block  { display: block  !important; }
           .lg-hidden { display: none   !important; }
+          .ts-mobile-only { display: none !important; }
         }
         @media (max-width: 768px) {
           #case-study .grid-2col,
@@ -787,11 +482,11 @@ export default function TenantSite({ tenant, siteData }: Props) {
       {/* Mobile menu overlay */}
       {menuOpen && (
         <div style={{position:'fixed',inset:0,background:'#0A0A0A',zIndex:200,display:'flex',flexDirection:'column',padding:'5rem 2rem 3rem'}}>
-          <button onClick={() => setMenuOpen(false)} style={{position:'absolute',top:'1.5rem',right:'1.5rem',background:'transparent',border:'none',cursor:'pointer'}}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 2l16 16M18 2L2 18" stroke={accentColor} strokeWidth="1.5" strokeLinecap="round"/></svg>
+          <button onClick={() => setMenuOpen(false)} aria-label="Close menu" className="ts-focusable" style={{position:'absolute',top:'1.5rem',right:'1.5rem',background:'transparent',border:'none',cursor:'pointer'}}>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M2 2l16 16M18 2L2 18" stroke={accentColor} strokeWidth="1.5" strokeLinecap="round"/></svg>
           </button>
           {['Work','Services','Process','FAQ','Consult'].map(l => (
-            <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setMenuOpen(false)}
+            <a key={l} href={`#${l.toLowerCase()}`} onClick={() => setMenuOpen(false)} className="ts-focusable"
               style={{fontFamily:'Georgia,serif',fontSize:'2rem',fontWeight:300,color:'#F5F0E8',textDecoration:'none',borderBottom:'1px solid #1A1A1A',padding:'1rem 0'}}>
               {l}
             </a>
@@ -809,6 +504,20 @@ export default function TenantSite({ tenant, siteData }: Props) {
         {faqs.length > 0 && faqSection}
       </main>
       {footer}
+
+      <WhatsAppButton phoneNumber={whatsappNumber} businessName={branding.business_name} accentColor={accentColor} bottomOffset="5.5rem" />
+      <StickyMobileCTA phoneNumber={contact.phone_number} phoneDisplay={contact.phone_display} accentColor={accentColor} />
+
+      {lightbox && (
+        <PortfolioLightbox
+          images={[lightbox.project.cover_image_url, ...(lightbox.project.images || [])].filter(Boolean)}
+          title={lightbox.project.title}
+          category={lightbox.project.category}
+          accentColor={accentColor}
+          startIndex={lightbox.index}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </>
   )
 }

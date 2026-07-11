@@ -22,6 +22,20 @@ async function getDashboardData(tenantId: string) {
   const allLeads = leadsRes.data || []
   const newLeads = allLeads.filter(l => l.status === 'new').length
 
+  // Daily lead counts for the last 14 days, for the trend sparkline
+  const dayBuckets: { date: string; count: number }[] = []
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 86400000)
+    const key = d.toISOString().slice(0, 10)
+    dayBuckets.push({ date: key, count: 0 })
+  }
+  const bucketIndex = new Map(dayBuckets.map((b, i) => [b.date, i]))
+  for (const lead of allLeads) {
+    const key = new Date(lead.created_at).toISOString().slice(0, 10)
+    const idx = bucketIndex.get(key)
+    if (idx !== undefined) dayBuckets[idx].count++
+  }
+
   return {
     totalLeads:     leadsRes.count      || 0,
     newLeads,
@@ -29,7 +43,29 @@ async function getDashboardData(tenantId: string) {
     caseStudies:    caseRes.count       || 0,
     pageViews:      viewsRes.count      || 0,
     recentLeads:    (recentLeadsRes.data || []) as Lead[],
+    leadsTrend:     dayBuckets,
   }
+}
+
+function Sparkline({ data, color = '#C8A96E' }: { data: { date: string; count: number }[]; color?: string }) {
+  const max = Math.max(1, ...data.map(d => d.count))
+  const w = 100, h = 32, step = w / (data.length - 1 || 1)
+  const points = data.map((d, i) => `${i * step},${h - (d.count / max) * (h - 4) - 2}`).join(' ')
+  const total = data.reduce((a, d) => a + d.count, 0)
+  return (
+    <div className="flex items-center gap-4">
+      <svg viewBox={`0 0 ${w} ${h}`} className="flex-1 h-8" preserveAspectRatio="none">
+        <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        {data.map((d, i) => d.count > 0 && (
+          <circle key={i} cx={i * step} cy={h - (d.count / max) * (h - 4) - 2} r="1.4" fill={color} />
+        ))}
+      </svg>
+      <div className="text-right flex-shrink-0">
+        <div className="text-lg font-light text-[#F5F0E8]" style={{fontFamily:'Georgia,serif'}}>{total}</div>
+        <div className="text-[10px] text-[#6B6B6B] tracking-widest uppercase">14 days</div>
+      </div>
+    </div>
+  )
 }
 
 export default async function DashboardPage({
@@ -97,6 +133,15 @@ export default async function DashboardPage({
         ))}
       </div>
 
+      {/* Leads trend */}
+      <div className="bg-[#0D0D0D] border border-[#1A1A1A] p-5 mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-xs tracking-widest uppercase text-[#6B6B6B]">Leads Trend</div>
+          <Link href="/dashboard/leads" className="text-xs text-[#C8A96E] hover:text-[#F5F0E8] transition-colors tracking-widest uppercase">View Pipeline</Link>
+        </div>
+        <Sparkline data={data.leadsTrend} />
+      </div>
+
       <div className="grid lg:grid-cols-5 gap-6">
 
         {/* Recent leads */}
@@ -144,7 +189,7 @@ export default async function DashboardPage({
             <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-4">Quick Actions</div>
             <div className="space-y-2">
               {[
-                { href: '/dashboard/portfolio',    label: 'Add Portfolio Item',  icon: '＋' },
+                { href: '/dashboard/portfolio?new=1', label: 'Add Portfolio Item',  icon: '＋' },
                 { href: '/dashboard/case-studies', label: 'Create Case Study',   icon: '＋' },
                 { href: '/dashboard/settings',     label: 'Edit Site Content',   icon: '✎' },
                 { href: siteUrl,                   label: 'View Live Site',       icon: '↗', external: true },

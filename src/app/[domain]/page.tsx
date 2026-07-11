@@ -6,6 +6,7 @@ import type { Metadata } from 'next'
 import { getTenantBySubdomain, getTenantByDomain, getSiteData } from '@/lib/tenant'
 import { Tenant } from '@/types'
 import TenantSite from './TenantSite'
+import IvoryTemplate from './IvoryTemplate'
 
 interface Props {
   params: Promise<{ domain: string }>
@@ -31,16 +32,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const tenant = await resolveTenant(domain)
   if (!tenant) return { title: 'Not Found' }
 
-  const { branding, location, contact } = tenant
+  const { branding, location, content } = tenant
   const title = `${branding.business_name} — ${branding.tagline} | ${location.local_city}`
+  const description = tenant.meta_description || `${branding.business_name} is ${location.local_city}'s premium architectural and interior design studio. Book a consultation today.`
+  const ogImage = content.hero_image_url || undefined
 
   return {
     title,
-    description: tenant.meta_description || `${branding.business_name} is ${location.local_city}'s premium architectural and interior design studio. Book a consultation today.`,
+    description,
     openGraph: {
       title,
-      description: tenant.meta_description || '',
+      description,
       type: 'website',
+      ...(ogImage ? { images: [{ url: ogImage, width: 1200, height: 630, alt: branding.business_name }] } : {}),
+    },
+    twitter: {
+      card: ogImage ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
     },
     alternates: {
       canonical: tenant.custom_domain
@@ -60,5 +70,8 @@ export default async function TenantPage({ params }: Props) {
 
   const siteData = await getSiteData(tenant.id)
 
+  if (tenant.branding.theme === 'ivory') {
+    return <IvoryTemplate tenant={tenant} siteData={siteData} />
+  }
   return <TenantSite tenant={tenant} siteData={siteData} />
 }

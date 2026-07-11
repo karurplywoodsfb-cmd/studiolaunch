@@ -118,6 +118,13 @@ export default async function ProjectPage({ params }: Props) {
             addressRegion:    location.state,
             addressCountry:   'IN',
           },
+          ...(project.geo_latitude && project.geo_longitude ? {
+            geo: {
+              '@type':    'GeoCoordinates',
+              latitude:   project.geo_latitude,
+              longitude:  project.geo_longitude,
+            },
+          } : {}),
         },
       },
       // BreadcrumbList for rich results

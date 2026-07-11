@@ -7,12 +7,15 @@ export type ProjectCategory = 'villa' | 'apartment' | 'commercial' | 'other'
 
 // ─── Tenant (Studio) ──────────────────────────────────────────────────────────
 
+export type SiteTheme = 'noir' | 'ivory'
+
 export interface StudioBranding {
   business_name: string
   tagline: string
   logo_letter: string
   primary_color: string      // hex
   accent_color: string       // hex
+  theme?: SiteTheme          // which tenant-site template to render, defaults to 'noir'
 }
 
 export interface StudioContact {
@@ -21,6 +24,7 @@ export interface StudioContact {
   email: string
   instagram_handle: string
   houzz_handle?: string
+  whatsapp_number?: string   // digits only w/ country code, e.g. "919876543210" — falls back to phone_number
 }
 
 export interface StudioLocation {
@@ -274,6 +278,9 @@ export interface PortfolioProjectSEO extends PortfolioProject {
   solution_text?:      string
   testimonial_quote?:  string
   testimonial_name?:   string
+  materials?:          { label: string; value: string }[]   // e.g. {label:"Flooring", value:"Italian marble"}
+  geo_latitude?:       string   // per-project GPS, e.g. "10.8155" — improves local search relevance for that specific neighborhood
+  geo_longitude?:      string
 }
 
 export interface PlanConfig {

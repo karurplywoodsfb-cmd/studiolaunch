@@ -217,12 +217,76 @@ function LeadDetailPanel({
   )
 }
 
+function KanbanBoard({
+  leads,
+  onOpen,
+  onStatusChange,
+}: {
+  leads: Lead[]
+  onOpen: (lead: Lead) => void
+  onStatusChange: (id: string, status: LeadStatus) => void
+}) {
+  const [dragOverCol, setDragOverCol] = useState<string | null>(null)
+
+  const moveLead = async (id: string, status: LeadStatus) => {
+    onStatusChange(id, status)
+    const supabase = createClient()
+    await supabase.from('leads').update({ status }).eq('id', id)
+  }
+
+  return (
+    <div className="flex gap-4 overflow-x-auto pb-4">
+      {STATUS_OPTIONS.map(col => {
+        const colLeads = leads.filter(l => l.status === col.value)
+        return (
+          <div
+            key={col.value}
+            onDragOver={e => { e.preventDefault(); setDragOverCol(col.value) }}
+            onDragLeave={() => setDragOverCol(prev => prev === col.value ? null : prev)}
+            onDrop={e => {
+              e.preventDefault()
+              const id = e.dataTransfer.getData('text/lead-id')
+              if (id) moveLead(id, col.value)
+              setDragOverCol(null)
+            }}
+            className={`flex-shrink-0 w-72 border transition-colors ${dragOverCol === col.value ? 'border-[#C8A96E]/60 bg-[#C8A96E]/5' : 'border-[#1A1A1A] bg-[#0D0D0D]'}`}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
+              <span className={`text-xs font-semibold tracking-widest uppercase ${col.color.split(' ')[0]}`}>{col.label}</span>
+              <span className="text-xs text-[#6B6B6B]">{colLeads.length}</span>
+            </div>
+            <div className="p-2 space-y-2 min-h-[120px] max-h-[calc(100vh-320px)] overflow-y-auto">
+              {colLeads.length === 0 && (
+                <div className="text-xs text-[#3A3A3A] text-center py-6">No leads</div>
+              )}
+              {colLeads.map(lead => (
+                <div
+                  key={lead.id}
+                  draggable
+                  onDragStart={e => e.dataTransfer.setData('text/lead-id', lead.id)}
+                  onClick={() => onOpen(lead)}
+                  className="bg-[#141414] border border-[#2A2A2A] p-3 cursor-grab active:cursor-grabbing hover:border-[#C8A96E]/40 transition-colors"
+                >
+                  <div className="text-sm text-[#F5F0E8] font-medium truncate mb-1">{lead.name}</div>
+                  <div className="text-xs text-[#6B6B6B] truncate mb-2">{lead.property_type || '—'}</div>
+                  <div className="text-xs text-[#3A3A3A]">{timeAgo(lead.created_at)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function LeadsPage() {
   const [leads, setLeads]             = useState<Lead[]>([])
   const [loading, setLoading]         = useState(true)
   const [selected, setSelected]       = useState<Lead | null>(null)
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [search, setSearch]           = useState('')
+  const [view, setView]               = useState<'table' | 'pipeline'>('table')
   const [tenantId, setTenantId]       = useState<string>('')
 
   const fetchLeads = useCallback(async () => {
@@ -279,6 +343,13 @@ export default function LeadsPage() {
     return matchStatus && matchSearch
   })
 
+  // Pipeline groups by status itself, so it only needs the search filter, not the status tabs
+  const searchFiltered = leads.filter(l => {
+    const matchSearch = !search || [l.name, l.phone, l.email, l.property_type, l.project_location]
+      .some(v => v?.toLowerCase().includes(search.toLowerCase()))
+    return matchSearch
+  })
+
   const counts = STATUS_OPTIONS.reduce((acc, s) => {
     acc[s.value] = leads.filter(l => l.status === s.value).length
     return acc
@@ -294,13 +365,26 @@ export default function LeadsPage() {
             Consultation <em>Inbox</em>
           </h1>
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-light text-[#C8A96E]" style={{fontFamily:'Georgia,serif'}}>{leads.filter(l=>l.status==='new').length}</div>
-          <div className="text-xs text-[#6B6B6B] tracking-widest uppercase">New</div>
+        <div className="flex items-center gap-4">
+          <div className="flex border border-[#2A2A2A]">
+            <button
+              onClick={() => setView('table')}
+              className={`text-xs px-3 py-2 tracking-widest uppercase transition-colors ${view === 'table' ? 'bg-[#C8A96E] text-[#0A0A0A]' : 'text-[#6B6B6B] hover:text-[#F5F0E8]'}`}
+            >Table</button>
+            <button
+              onClick={() => setView('pipeline')}
+              className={`text-xs px-3 py-2 tracking-widest uppercase transition-colors ${view === 'pipeline' ? 'bg-[#C8A96E] text-[#0A0A0A]' : 'text-[#6B6B6B] hover:text-[#F5F0E8]'}`}
+            >Pipeline</button>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-light text-[#C8A96E]" style={{fontFamily:'Georgia,serif'}}>{leads.filter(l=>l.status==='new').length}</div>
+            <div className="text-xs text-[#6B6B6B] tracking-widest uppercase">New</div>
+          </div>
         </div>
       </div>
 
       {/* Status filter tabs */}
+      {view === 'table' && (
       <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
         <button
           onClick={() => setFilterStatus('all')}
@@ -326,6 +410,7 @@ export default function LeadsPage() {
           </button>
         ))}
       </div>
+      )}
 
       {/* Search */}
       <div className="relative mb-6">
@@ -341,9 +426,11 @@ export default function LeadsPage() {
         />
       </div>
 
-      {/* Table */}
+      {/* Board */}
       {loading ? (
         <div className="text-center py-20 text-[#6B6B6B] text-sm">Loading leads...</div>
+      ) : view === 'pipeline' ? (
+        <KanbanBoard leads={searchFiltered} onOpen={setSelected} onStatusChange={handleStatusChange} />
       ) : filtered.length === 0 ? (
         <div className="text-center py-20 border border-[#1A1A1A] bg-[#0D0D0D]">
           <div className="text-[#6B6B6B] text-sm mb-2">
