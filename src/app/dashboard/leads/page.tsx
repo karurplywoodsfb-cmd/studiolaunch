@@ -77,7 +77,7 @@ function LeadDetailPanel({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-[#0D0D0D] border border-[#2A2A2A] w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-[#0D0D0D] border border-[#2A2A2A] rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1A1A]">
           <div>
@@ -100,7 +100,7 @@ function LeadDetailPanel({
                 key={opt.value}
                 onClick={() => updateStatus(opt.value)}
                 disabled={updating || lead.status === opt.value}
-                className={`text-xs px-3 py-1.5 border font-medium tracking-wide transition-all ${
+                className={`text-xs px-3 py-1.5 rounded-full border font-medium tracking-wide transition-all ${
                   lead.status === opt.value
                     ? opt.color + ' opacity-100'
                     : 'text-[#6B6B6B] bg-transparent border-[#2A2A2A] hover:border-[#C8A96E]/40'
@@ -137,7 +137,7 @@ function LeadDetailPanel({
           {lead.notes && (
             <div>
               <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-2">Notes</div>
-              <div className="bg-[#141414] border border-[#2A2A2A] p-4 text-sm text-[#F5F0E8]/80 leading-relaxed">
+              <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-4 text-sm text-[#F5F0E8]/80 leading-relaxed">
                 {lead.notes}
               </div>
             </div>
@@ -153,12 +153,12 @@ function LeadDetailPanel({
                 onChange={e => setNoteText(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') addNote() }}
                 placeholder="Add an internal note..."
-                className="flex-1 bg-[#0D0D0D] border border-[#2A2A2A] text-[#F5F0E8] px-3 py-2 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
+                className="flex-1 bg-[#0D0D0D] border border-[#2A2A2A] rounded-xl text-[#F5F0E8] px-3 py-2 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
               />
               <button
                 onClick={addNote}
                 disabled={addingNote || !noteText.trim()}
-                className="text-xs px-4 py-2 bg-[#C8A96E] text-[#0A0A0A] font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
+                className="text-xs px-4 py-2 rounded-xl bg-[#C8A96E] text-[#0A0A0A] font-semibold tracking-wide disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Add
               </button>
@@ -188,7 +188,7 @@ function LeadDetailPanel({
           {lead.phone && (
             <a
               href={`tel:${lead.phone}`}
-              className="flex-1 bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase py-3 text-center hover:bg-[#A8854A] transition-colors"
+              className="flex-1 rounded-xl bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase py-3 text-center hover:bg-[#A8854A] transition-colors"
             >
               Call Now
             </a>
@@ -196,7 +196,7 @@ function LeadDetailPanel({
           {lead.email && (
             <a
               href={`mailto:${lead.email}?subject=Re: Design Consultation`}
-              className="flex-1 border border-[#2A2A2A] text-[#F5F0E8]/70 text-xs font-medium tracking-widest uppercase py-3 text-center hover:border-[#C8A96E]/50 transition-colors"
+              className="flex-1 rounded-xl border border-[#2A2A2A] text-[#F5F0E8]/70 text-xs font-medium tracking-widest uppercase py-3 text-center hover:border-[#C8A96E]/50 transition-colors"
             >
               Send Email
             </a>
@@ -206,7 +206,7 @@ function LeadDetailPanel({
               href={`https://wa.me/${lead.phone.replace(/\D/g, '')}?text=Hi ${lead.name}, thank you for your consultation request. I'd love to discuss your project further.`}
               target="_blank"
               rel="noopener noreferrer"
-              className="border border-[#2A2A2A] text-[#6B6B6B] text-xs font-medium tracking-widest uppercase px-4 py-3 hover:border-green-500/50 hover:text-green-400 transition-colors"
+              className="rounded-xl border border-[#2A2A2A] text-[#6B6B6B] text-xs font-medium tracking-widest uppercase px-4 py-3 hover:border-green-500/50 hover:text-green-400 transition-colors"
             >
               WhatsApp
             </a>
@@ -227,11 +227,17 @@ function KanbanBoard({
   onStatusChange: (id: string, status: LeadStatus) => void
 }) {
   const [dragOverCol, setDragOverCol] = useState<string | null>(null)
+  const [draggingId, setDraggingId]   = useState<string | null>(null)
 
   const moveLead = async (id: string, status: LeadStatus) => {
     onStatusChange(id, status)
     const supabase = createClient()
     await supabase.from('leads').update({ status }).eq('id', id)
+  }
+
+  const accentBar: Record<string, string> = {
+    new: 'bg-[#C8A96E]', contacted: 'bg-blue-400', qualified: 'bg-purple-400',
+    converted: 'bg-green-400', lost: 'bg-[#3A3A3A]',
   }
 
   return (
@@ -248,12 +254,14 @@ function KanbanBoard({
               const id = e.dataTransfer.getData('text/lead-id')
               if (id) moveLead(id, col.value)
               setDragOverCol(null)
+              setDraggingId(null)
             }}
-            className={`flex-shrink-0 w-72 border transition-colors ${dragOverCol === col.value ? 'border-[#C8A96E]/60 bg-[#C8A96E]/5' : 'border-[#1A1A1A] bg-[#0D0D0D]'}`}
+            className={`flex-shrink-0 w-72 rounded-2xl border transition-colors duration-200 overflow-hidden ${dragOverCol === col.value ? 'border-[#C8A96E]/60 bg-[#C8A96E]/5' : 'border-[#1A1A1A] bg-[#0D0D0D]'}`}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#1A1A1A]">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-[#1A1A1A]">
+              <span className={`w-1.5 h-1.5 rounded-full ${accentBar[col.value]}`} />
               <span className={`text-xs font-semibold tracking-widest uppercase ${col.color.split(' ')[0]}`}>{col.label}</span>
-              <span className="text-xs text-[#6B6B6B]">{colLeads.length}</span>
+              <span className="text-xs text-[#6B6B6B] ml-auto bg-[#1A1A1A] rounded-full px-2 py-0.5">{colLeads.length}</span>
             </div>
             <div className="p-2 space-y-2 min-h-[120px] max-h-[calc(100vh-320px)] overflow-y-auto">
               {colLeads.length === 0 && (
@@ -263,13 +271,33 @@ function KanbanBoard({
                 <div
                   key={lead.id}
                   draggable
-                  onDragStart={e => e.dataTransfer.setData('text/lead-id', lead.id)}
+                  onDragStart={e => { e.dataTransfer.setData('text/lead-id', lead.id); setDraggingId(lead.id) }}
+                  onDragEnd={() => setDraggingId(null)}
                   onClick={() => onOpen(lead)}
-                  className="bg-[#141414] border border-[#2A2A2A] p-3 cursor-grab active:cursor-grabbing hover:border-[#C8A96E]/40 transition-colors"
+                  className={`rounded-xl bg-[#141414] border border-[#2A2A2A] p-3 cursor-grab active:cursor-grabbing hover:border-[#C8A96E]/40 hover:-translate-y-0.5 transition-all duration-200 ${draggingId === lead.id ? 'opacity-40' : 'opacity-100'}`}
                 >
-                  <div className="text-sm text-[#F5F0E8] font-medium truncate mb-1">{lead.name}</div>
-                  <div className="text-xs text-[#6B6B6B] truncate mb-2">{lead.property_type || '—'}</div>
-                  <div className="text-xs text-[#3A3A3A]">{timeAgo(lead.created_at)}</div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-7 h-7 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center flex-shrink-0 text-xs font-medium text-[#C8A96E]">
+                      {lead.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm text-[#F5F0E8] font-medium truncate">{lead.name}</div>
+                      <div className="text-xs text-[#6B6B6B] truncate">{lead.property_type || '—'}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-[#3A3A3A]">{timeAgo(lead.created_at)}</span>
+                    <div className="flex items-center gap-1">
+                      <a href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} aria-label={`Call ${lead.name}`}
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-[#6B6B6B] hover:text-[#C8A96E] hover:bg-[#1A1A1A] transition-colors">
+                        <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M3.3 5.4c.7 1.4 1.9 2.6 3.3 3.3l1.1-1.1c.15-.15.35-.2.5-.1.55.2 1.15.3 1.8.3.3 0 .5.2.5.5V10c0 .3-.2.5-.5.5C5.85 10.5 1.5 6.15 1.5 1.5c0-.3.2-.5.5-.5h1.75c.3 0 .5.2.5.5 0 .65.1 1.25.3 1.8.05.15 0 .35-.1.5z" stroke="currentColor" strokeWidth="1"/></svg>
+                      </a>
+                      <a href={`https://wa.me/${lead.phone.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} aria-label={`WhatsApp ${lead.name}`}
+                        className="w-6 h-6 rounded-full flex items-center justify-center text-[#6B6B6B] hover:text-green-400 hover:bg-[#1A1A1A] transition-colors">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.1-1.33A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" fill="currentColor"/></svg>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -300,7 +328,7 @@ export default function LeadsPage() {
 
     setTenantId(tenant.id)
 
-    let query = supabase
+    const query = supabase
       .from('leads')
       .select('*')
       .eq('tenant_id', tenant.id)
@@ -356,9 +384,9 @@ export default function LeadsPage() {
   }, {} as Record<string, number>)
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-7xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
         <div>
           <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Leads</div>
           <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
@@ -366,14 +394,14 @@ export default function LeadsPage() {
           </h1>
         </div>
         <div className="flex items-center gap-4">
-          <div className="flex border border-[#2A2A2A]">
+          <div className="flex border border-[#2A2A2A] rounded-full p-1">
             <button
               onClick={() => setView('table')}
-              className={`text-xs px-3 py-2 tracking-widest uppercase transition-colors ${view === 'table' ? 'bg-[#C8A96E] text-[#0A0A0A]' : 'text-[#6B6B6B] hover:text-[#F5F0E8]'}`}
-            >Table</button>
+              className={`text-xs px-3 py-1.5 rounded-full tracking-widest uppercase transition-colors ${view === 'table' ? 'bg-[#C8A96E] text-[#0A0A0A]' : 'text-[#6B6B6B] hover:text-[#F5F0E8]'}`}
+            >Cards</button>
             <button
               onClick={() => setView('pipeline')}
-              className={`text-xs px-3 py-2 tracking-widest uppercase transition-colors ${view === 'pipeline' ? 'bg-[#C8A96E] text-[#0A0A0A]' : 'text-[#6B6B6B] hover:text-[#F5F0E8]'}`}
+              className={`text-xs px-3 py-1.5 rounded-full tracking-widest uppercase transition-colors ${view === 'pipeline' ? 'bg-[#C8A96E] text-[#0A0A0A]' : 'text-[#6B6B6B] hover:text-[#F5F0E8]'}`}
             >Pipeline</button>
           </div>
           <div className="text-right">
@@ -388,7 +416,7 @@ export default function LeadsPage() {
       <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
         <button
           onClick={() => setFilterStatus('all')}
-          className={`text-xs px-4 py-2 border whitespace-nowrap transition-colors ${
+          className={`text-xs px-4 py-2 rounded-full border whitespace-nowrap transition-colors ${
             filterStatus === 'all'
               ? 'bg-[#C8A96E]/10 border-[#C8A96E]/30 text-[#C8A96E]'
               : 'border-[#2A2A2A] text-[#6B6B6B] hover:text-[#F5F0E8]'
@@ -400,7 +428,7 @@ export default function LeadsPage() {
           <button
             key={opt.value}
             onClick={() => setFilterStatus(opt.value)}
-            className={`text-xs px-4 py-2 border whitespace-nowrap transition-colors ${
+            className={`text-xs px-4 py-2 rounded-full border whitespace-nowrap transition-colors ${
               filterStatus === opt.value
                 ? opt.color
                 : 'border-[#2A2A2A] text-[#6B6B6B] hover:text-[#F5F0E8]'
@@ -422,7 +450,7 @@ export default function LeadsPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search by name, phone, email, location..."
-          className="w-full bg-[#0D0D0D] border border-[#2A2A2A] text-[#F5F0E8] pl-10 pr-4 py-3 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
+          className="w-full bg-[#0D0D0D] border border-[#2A2A2A] rounded-xl text-[#F5F0E8] pl-10 pr-4 py-3 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
         />
       </div>
 
@@ -432,9 +460,9 @@ export default function LeadsPage() {
       ) : view === 'pipeline' ? (
         <KanbanBoard leads={searchFiltered} onOpen={setSelected} onStatusChange={handleStatusChange} />
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20 border border-[#1A1A1A] bg-[#0D0D0D]">
-          <div className="text-[#6B6B6B] text-sm mb-2">
-            {leads.length === 0 ? 'No leads yet' : 'No leads match your filters'}
+        <div className="text-center py-20 rounded-2xl border border-[#1A1A1A] bg-[#0D0D0D]">
+          <div className="text-[#F5F0E8]/80 text-sm mb-2">
+            {leads.length === 0 ? 'Share your website to start receiving consultation requests.' : 'No leads match your filters'}
           </div>
           {leads.length === 0 && (
             <p className="text-[#6B6B6B] text-xs max-w-xs mx-auto leading-relaxed mt-2">
@@ -443,44 +471,59 @@ export default function LeadsPage() {
           )}
         </div>
       ) : (
-        <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
-          {/* Table header */}
-          <div className="grid grid-cols-12 gap-4 px-5 py-3 border-b border-[#1A1A1A] text-xs tracking-widest uppercase text-[#6B6B6B]">
-            <div className="col-span-3">Name</div>
-            <div className="col-span-2 hidden md:block">Property</div>
-            <div className="col-span-2 hidden lg:block">Budget</div>
-            <div className="col-span-2 hidden md:block">Status</div>
-            <div className="col-span-2 hidden lg:block">Received</div>
-            <div className="col-span-1" />
-          </div>
-
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map(lead => {
             const cfg = statusConfig(lead.status)
             return (
               <div
                 key={lead.id}
                 onClick={() => setSelected(lead)}
-                className="grid grid-cols-12 gap-4 px-5 py-4 border-b border-[#1A1A1A] last:border-0 hover:bg-[#141414] cursor-pointer transition-colors items-center"
+                className="rounded-2xl border border-[#1A1A1A] bg-[#0D0D0D] p-5 hover:border-[#C8A96E]/40 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col"
               >
-                <div className="col-span-3 flex items-center gap-3 min-w-0">
-                  <div className="w-7 h-7 bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center flex-shrink-0 text-xs font-medium text-[#C8A96E]">
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center flex-shrink-0 text-sm font-medium text-[#C8A96E]">
                     {lead.name.charAt(0).toUpperCase()}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="text-sm text-[#F5F0E8] font-medium truncate">{lead.name}</div>
                     <div className="text-xs text-[#6B6B6B] truncate">{lead.phone}</div>
                   </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize flex-shrink-0 ${cfg.color}`}>{lead.status}</span>
                 </div>
-                <div className="col-span-2 hidden md:block text-xs text-[#6B6B6B] truncate">{lead.property_type || '—'}</div>
-                <div className="col-span-2 hidden lg:block text-xs text-[#6B6B6B] truncate">{lead.budget_tier?.split('(')[0]?.trim() || '—'}</div>
-                <div className="col-span-2 hidden md:block">
-                  <span className={`text-xs px-2 py-1 border font-medium capitalize ${cfg.color}`}>{lead.status}</span>
+
+                <div className="grid grid-cols-2 gap-2 mb-4 flex-1">
+                  <div>
+                    <div className="text-[10px] tracking-widest uppercase text-[#6B6B6B]">Project</div>
+                    <div className="text-xs text-[#F5F0E8]/80 truncate">{lead.property_type || '—'}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] tracking-widest uppercase text-[#6B6B6B]">Budget</div>
+                    <div className="text-xs text-[#F5F0E8]/80 truncate">{lead.budget_tier?.split('(')[0]?.trim() || '—'}</div>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="text-[10px] tracking-widest uppercase text-[#6B6B6B]">Location</div>
+                    <div className="text-xs text-[#F5F0E8]/80 truncate">{lead.project_location || '—'}</div>
+                  </div>
                 </div>
-                <div className="col-span-2 hidden lg:block text-xs text-[#6B6B6B]">{timeAgo(lead.created_at)}</div>
-                <div className="col-span-1 flex justify-end">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#6B6B6B]">
-                    <path d="M1 7h12M7.5 1.5L13 7l-5.5 5.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+
+                <div className="flex items-center justify-between pt-3 border-t border-[#1A1A1A]">
+                  <span className="text-xs text-[#6B6B6B]">Received {timeAgo(lead.created_at)}</span>
+                  <div className="flex items-center gap-1">
+                    <a href={`tel:${lead.phone}`} onClick={e => e.stopPropagation()} aria-label={`Call ${lead.name}`}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-[#6B6B6B] hover:text-[#C8A96E] hover:bg-[#1A1A1A] transition-colors">
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M3.3 5.4c.7 1.4 1.9 2.6 3.3 3.3l1.1-1.1c.15-.15.35-.2.5-.1.55.2 1.15.3 1.8.3.3 0 .5.2.5.5V10c0 .3-.2.5-.5.5C5.85 10.5 1.5 6.15 1.5 1.5c0-.3.2-.5.5-.5h1.75c.3 0 .5.2.5.5 0 .65.1 1.25.3 1.8.05.15 0 .35-.1.5z" stroke="currentColor" strokeWidth="1"/></svg>
+                    </a>
+                    {lead.email && (
+                      <a href={`mailto:${lead.email}`} onClick={e => e.stopPropagation()} aria-label={`Email ${lead.name}`}
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-[#6B6B6B] hover:text-blue-400 hover:bg-[#1A1A1A] transition-colors">
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="2.5" width="12" height="9" rx="1" stroke="currentColor" strokeWidth="1.1"/><path d="M1.5 3.5l5.5 4 5.5-4" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/></svg>
+                      </a>
+                    )}
+                    <a href={`https://wa.me/${lead.phone.replace(/\D/g,'')}?text=Hi ${lead.name}, thank you for your consultation request.`} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} aria-label={`WhatsApp ${lead.name}`}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-[#6B6B6B] hover:text-green-400 hover:bg-[#1A1A1A] transition-colors">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.1-1.33A9.94 9.94 0 0012 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" fill="currentColor"/></svg>
+                    </a>
+                  </div>
                 </div>
               </div>
             )
