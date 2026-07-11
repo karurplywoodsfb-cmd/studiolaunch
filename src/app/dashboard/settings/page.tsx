@@ -193,7 +193,7 @@ function SettingsInner() {
     <div className="max-w-3xl">
       <div className="mb-8">
         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Settings</div>
-        <h1 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8]">
+        <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
           Studio <em>Configuration</em>
         </h1>
       </div>
@@ -288,7 +288,7 @@ function SettingsInner() {
         <div className="space-y-6">
           <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-6">
             <div className="text-[#C8A96E] text-xs tracking-widest uppercase mb-3">AI SEO Enrichment</div>
-            <h3 style={{fontFamily:'Georgia,serif'}} className="text-xl font-light text-[#F5F0E8] mb-3">Auto-generate your local SEO content</h3>
+            <h3 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8] mb-3">Auto-generate your local SEO content</h3>
             <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">
               Generates city-specific FAQ answers, an optimised meta description, and keyword content tuned to your location. Runs in ~10 seconds via AI.
             </p>
@@ -316,7 +316,7 @@ function SettingsInner() {
         <div className="space-y-6">
           <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-6">
             <div className="text-[#C8A96E] text-xs tracking-widest uppercase mb-3">Custom Domain</div>
-            <h3 style={{fontFamily:'Georgia,serif'}} className="text-xl font-light text-[#F5F0E8] mb-4">Connect your own domain</h3>
+            <h3 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8] mb-4">Connect your own domain</h3>
             {tenant.plan === 'starter' ? (
               <div>
                 <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">Custom domains are on Studio and Agency plans. Your site is live at <span className="text-[#C8A96E]">{tenant.subdomain}.studiolaunch.in</span></p>
@@ -334,7 +334,7 @@ function SettingsInner() {
         <div className="space-y-6">
           <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-6">
             <div className="text-[#C8A96E] text-xs tracking-widest uppercase mb-3">White Label</div>
-            <h3 style={{fontFamily:'Georgia,serif'}} className="text-xl font-light text-[#F5F0E8] mb-3">
+            <h3 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8] mb-3">
               Remove StudioLaunch branding
             </h3>
             {tenant.plan !== 'agency' ? (
@@ -404,7 +404,7 @@ function SettingsInner() {
             <div className="flex items-center justify-between mb-2">
               <div>
                 <div className="text-[#C8A96E] text-xs tracking-widest uppercase mb-1">Current Plan</div>
-                <div className="text-2xl font-light text-[#F5F0E8] capitalize" style={{fontFamily:'Georgia,serif'}}>{tenant.plan}</div>
+                <div className="text-2xl font-light text-[#F5F0E8] capitalize" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>{tenant.plan}</div>
               </div>
               <span className={`text-xs px-3 py-1 border font-medium capitalize ${['active','trialing'].includes(tenant.plan_status) ? 'text-green-400 border-green-400/30 bg-green-400/10' : 'text-red-400 border-red-400/30 bg-red-400/10'}`}>{tenant.plan_status}</span>
             </div>
@@ -424,7 +424,7 @@ function SettingsInner() {
                 <div className="text-[#6B6B6B] text-xs">{p.features.join(' · ')}</div>
               </div>
               <div className="text-right flex-shrink-0">
-                <div className="text-[#C8A96E] font-light mb-2" style={{fontFamily:'Georgia,serif'}}>{p.price}</div>
+                <div className="text-[#C8A96E] font-light mb-2" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>{p.price}</div>
                 {p.plan !== tenant.plan && (
                   <a href={`/api/studio/create-checkout?plan=${p.plan}`} className="text-xs font-semibold tracking-widest uppercase px-4 py-2 bg-[#C8A96E] text-[#0A0A0A] hover:bg-[#A8854A] transition-colors inline-block">
                     {p.plan === 'starter' ? 'Downgrade' : 'Upgrade'}

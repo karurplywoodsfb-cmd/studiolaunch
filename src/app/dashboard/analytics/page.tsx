@@ -91,7 +91,7 @@ export default async function AnalyticsPage() {
     <div className="max-w-4xl">
       <div className="mb-8">
         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Analytics</div>
-        <h1 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8]">
+        <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
           Site <em>Performance</em>
         </h1>
       </div>
@@ -100,7 +100,7 @@ export default async function AnalyticsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-[#1A1A1A] mb-8">
         {STAT_CARDS.map(card => (
           <div key={card.label} className="bg-[#0A0A0A] p-6">
-            <div className="text-3xl font-light text-[#C8A96E] mb-1" style={{fontFamily:'Georgia,serif'}}>{card.value}</div>
+            <div className="text-3xl font-light text-[#C8A96E] mb-1" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>{card.value}</div>
             <div className="text-xs font-medium text-[#F5F0E8]/80 mb-0.5">{card.label}</div>
             <div className="text-xs text-[#6B6B6B]">{card.sub}</div>
           </div>

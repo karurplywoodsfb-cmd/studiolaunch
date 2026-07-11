@@ -82,7 +82,7 @@ export default function TeamPage() {
     <div className="max-w-3xl">
       <div className="mb-8">
         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Team</div>
-        <h1 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8]">
+        <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
           Team <em>Members</em>
         </h1>
       </div>

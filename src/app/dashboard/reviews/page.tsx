@@ -89,7 +89,7 @@ export default function ReviewsPage() {
     <div className="max-w-3xl">
       <div className="mb-8">
         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Reviews</div>
-        <h1 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8]">
+        <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
           Google <em>Reviews</em>
         </h1>
       </div>
@@ -98,16 +98,16 @@ export default function ReviewsPage() {
       {rating && (
         <div className="grid grid-cols-3 gap-px bg-[#1A1A1A] mb-8">
           <div className="bg-[#0A0A0A] p-6">
-            <div className="text-3xl font-light text-[#C8A96E] mb-1" style={{fontFamily:'Georgia,serif'}}>{rating.toFixed(1)}</div>
+            <div className="text-3xl font-light text-[#C8A96E] mb-1" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>{rating.toFixed(1)}</div>
             <div className="text-xs text-[#6B6B6B]">Average Rating</div>
             <StarRating rating={Math.round(rating)} />
           </div>
           <div className="bg-[#0A0A0A] p-6">
-            <div className="text-3xl font-light text-[#C8A96E] mb-1" style={{fontFamily:'Georgia,serif'}}>{reviewCount}</div>
+            <div className="text-3xl font-light text-[#C8A96E] mb-1" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>{reviewCount}</div>
             <div className="text-xs text-[#6B6B6B]">Total Reviews</div>
           </div>
           <div className="bg-[#0A0A0A] p-6">
-            <div className="text-3xl font-light text-[#C8A96E] mb-1" style={{fontFamily:'Georgia,serif'}}>{reviews.filter(r => r.is_featured).length}</div>
+            <div className="text-3xl font-light text-[#C8A96E] mb-1" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>{reviews.filter(r => r.is_featured).length}</div>
             <div className="text-xs text-[#6B6B6B]">Featured on Site</div>
           </div>
         </div>

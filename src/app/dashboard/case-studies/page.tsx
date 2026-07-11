@@ -289,7 +289,7 @@ export default function CaseStudiesPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Case Studies</div>
-          <h1 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8]">
+          <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
             Project <em>Arc</em> Builder
           </h1>
         </div>
@@ -304,7 +304,7 @@ export default function CaseStudiesPage() {
       {editing && (
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 style={{fontFamily:'Georgia,serif'}} className="text-xl font-light text-[#F5F0E8]">
+            <h2 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8]">
               {editing.id ? `Editing: ${editing.title}` : 'New Case Study'}
             </h2>
           </div>

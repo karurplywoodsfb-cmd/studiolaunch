@@ -46,6 +46,19 @@ export default function DashboardShell({ tenant, children }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [loggingOut, setLoggingOut]   = useState(false)
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [collapsed, setCollapsed] = useState(false)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('studio-dashboard-theme')
+    if (saved === 'light' || saved === 'dark') setTheme(saved)
+    setCollapsed(localStorage.getItem('studio-sidebar-collapsed') === '1')
+  }, [])
+
+  const toggleCollapsed = () => {
+    const next = !collapsed
+    setCollapsed(next)
+    localStorage.setItem('studio-sidebar-collapsed', next ? '1' : '0')
+  }
 
   useEffect(() => {
     const saved = localStorage.getItem('studio-dashboard-theme')
@@ -74,24 +87,24 @@ export default function DashboardShell({ tenant, children }: Props) {
 
   const sidebar = (
     <aside className={`
-      fixed inset-y-0 left-0 z-50 w-60 bg-[#0D0D0D] border-r border-[#1A1A1A] flex flex-col
-      transform transition-transform duration-300 lg:translate-x-0
+      fixed inset-y-0 left-0 z-50 w-60 ${collapsed ? 'lg:w-[76px]' : 'lg:w-60'} bg-[#0D0D0D] border-r border-[#1A1A1A] flex flex-col
+      transform transition-all duration-300 lg:translate-x-0
       shadow-[8px_0_32px_rgba(0,0,0,0.55)] lg:shadow-none
       ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
     `}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-16 border-b border-[#1A1A1A] flex-shrink-0">
-        <div className="w-7 h-7 border border-[#C8A96E] flex items-center justify-center flex-shrink-0">
-          <span className="text-[#C8A96E] font-light text-base" style={{fontFamily:'Georgia,serif'}}>{branding.logo_letter}</span>
+      <div className={`flex items-center gap-3 h-16 border-b border-[#1A1A1A] flex-shrink-0 ${collapsed ? 'lg:justify-center lg:px-0 px-5' : 'px-5'}`}>
+        <div className="w-8 h-8 rounded-full border border-[#C8A96E] flex items-center justify-center flex-shrink-0">
+          <span className="text-[#C8A96E] font-light text-base" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>{branding.logo_letter}</span>
         </div>
-        <div className="min-w-0 flex-1">
+        <div className={`min-w-0 flex-1 ${collapsed ? 'lg:hidden' : ''}`}>
           <div className="text-[#F5F0E8] text-xs font-medium truncate">{branding.business_name}</div>
           <div className="text-[#6B6B6B] text-xs truncate">{tenant.subdomain}.studiolaunch.in</div>
         </div>
         <button
           onClick={() => setSidebarOpen(false)}
           aria-label="Close sidebar"
-          className="lg:hidden text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors flex-shrink-0 p-1"
+          className={`lg:hidden text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors flex-shrink-0 p-1 ${collapsed ? 'lg:hidden' : ''}`}
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2l14 14M16 2L2 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
         </button>
@@ -99,33 +112,47 @@ export default function DashboardShell({ tenant, children }: Props) {
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-4 px-3">
-        <div className="space-y-0.5">
+        <div className="space-y-1">
           {NAV.map(item => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setSidebarOpen(false)}
+              title={collapsed ? item.label : undefined}
               className={`
-                flex items-center gap-3 px-3 py-2.5 text-sm rounded-none transition-colors
+                flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-colors
+                ${collapsed ? 'lg:justify-center' : ''}
                 ${isActive(item.href)
-                  ? 'bg-[#C8A96E]/10 text-[#C8A96E] border-l-2 border-[#C8A96E]'
-                  : 'text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] border-l-2 border-transparent'}
+                  ? 'bg-[#C8A96E]/10 text-[#C8A96E]'
+                  : 'text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A]'}
               `}
             >
               <NavIcon name={item.icon} />
-              {item.label}
+              <span className={collapsed ? 'lg:hidden' : ''}>{item.label}</span>
             </Link>
           ))}
         </div>
 
+        {/* Collapse toggle — desktop only */}
+        <button
+          onClick={toggleCollapsed}
+          className={`hidden lg:flex items-center gap-3 px-3 py-2.5 mt-2 text-sm text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] rounded-xl transition-colors w-full ${collapsed ? 'justify-center' : ''}`}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={`transition-transform ${collapsed ? 'rotate-180' : ''}`}>
+            <path d="M9 2L4 7l5 5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          {!collapsed && 'Collapse'}
+        </button>
+
         {/* Plan badge */}
-        <div className="mt-6 mx-2 border border-[#2A2A2A] p-3">
+        <div className={`mt-4 mx-2 border border-[#2A2A2A] rounded-xl p-3 ${collapsed ? 'lg:hidden' : ''}`}>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs tracking-widest uppercase text-[#6B6B6B]">Plan</span>
             <span className="text-xs font-medium text-[#C8A96E] capitalize">{tenant.plan}</span>
           </div>
           {tenant.plan === 'starter' && (
-            <Link href="/dashboard/settings?tab=billing" className="block text-center text-xs font-semibold tracking-widest uppercase bg-[#C8A96E] text-[#0A0A0A] py-2 hover:bg-[#A8854A] transition-colors">
+            <Link href="/dashboard/settings?tab=billing" className="block text-center text-xs font-semibold tracking-widest uppercase bg-[#C8A96E] text-[#0A0A0A] rounded-full py-2 hover:bg-[#A8854A] transition-colors">
               Upgrade
             </Link>
           )}
@@ -136,31 +163,34 @@ export default function DashboardShell({ tenant, children }: Props) {
       <div className="px-3 py-4 border-t border-[#1A1A1A] space-y-1 flex-shrink-0">
         <button
           onClick={toggleTheme}
-          className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] transition-colors w-full text-left"
+          title={collapsed ? (theme === 'dark' ? 'Light Mode' : 'Dark Mode') : undefined}
+          className={`flex items-center gap-3 px-3 py-2.5 text-sm text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] rounded-xl transition-colors w-full text-left ${collapsed ? 'lg:justify-center' : ''}`}
         >
           {theme === 'dark' ? (
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.3"/><path d="M7 1v1.5M7 11.5V13M13 7h-1.5M2.5 7H1M11.2 2.8l-1 1M3.8 10.2l-1 1M11.2 11.2l-1-1M3.8 3.8l-1-1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
           ) : (
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 8.5A5.5 5.5 0 015.5 2 5.5 5.5 0 108.5 12 5.5 5.5 0 0012 8.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/></svg>
           )}
-          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          <span className={collapsed ? 'lg:hidden' : ''}>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
         </button>
         <a
           href={siteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] transition-colors"
+          title={collapsed ? 'View Live Site' : undefined}
+          className={`flex items-center gap-3 px-3 py-2.5 text-sm text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] rounded-xl transition-colors ${collapsed ? 'lg:justify-center' : ''}`}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M7.5 1.5L13 7l-5.5 5.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          View Live Site
+          <span className={collapsed ? 'lg:hidden' : ''}>View Live Site</span>
         </a>
         <button
           onClick={handleLogout}
           disabled={loggingOut}
-          className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#6B6B6B] hover:text-red-400 hover:bg-[#1A1A1A] transition-colors w-full text-left"
+          title={collapsed ? 'Sign Out' : undefined}
+          className={`flex items-center gap-3 px-3 py-2.5 text-sm text-[#6B6B6B] hover:text-red-400 hover:bg-[#1A1A1A] rounded-xl transition-colors w-full text-left ${collapsed ? 'lg:justify-center' : ''}`}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 7h8M9 4l3 3-3 3M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          {loggingOut ? 'Signing out...' : 'Sign Out'}
+          <span className={collapsed ? 'lg:hidden' : ''}>{loggingOut ? 'Signing out...' : 'Sign Out'}</span>
         </button>
       </div>
     </aside>
@@ -179,7 +209,7 @@ export default function DashboardShell({ tenant, children }: Props) {
       )}
 
       {/* Main content */}
-      <div className="lg:pl-60 flex flex-col min-h-screen">
+      <div className={`flex flex-col min-h-screen transition-all duration-300 ${collapsed ? 'lg:pl-[76px]' : 'lg:pl-60'}`}>
         {/* Topbar */}
         <header className="sticky top-0 z-30 h-16 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-[#1A1A1A] flex items-center px-6 gap-4">
           <button
@@ -196,13 +226,13 @@ export default function DashboardShell({ tenant, children }: Props) {
             href={siteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:flex items-center gap-2 text-xs text-[#6B6B6B] hover:text-[#C8A96E] transition-colors border border-[#2A2A2A] px-3 py-1.5"
+            className="hidden sm:flex items-center gap-2 text-xs text-[#6B6B6B] hover:text-[#C8A96E] transition-colors border border-[#2A2A2A] rounded-full px-3 py-1.5"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M6 1l5 5-5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
             {tenant.subdomain}.studiolaunch.in
           </a>
 
-          <div className="w-8 h-8 bg-[#C8A96E]/10 border border-[#C8A96E]/30 flex items-center justify-center text-[#C8A96E] text-xs font-medium">
+          <div className="w-8 h-8 rounded-full bg-[#C8A96E]/10 border border-[#C8A96E]/30 flex items-center justify-center text-[#C8A96E] text-xs font-medium">
             {branding.logo_letter}
           </div>
         </header>

@@ -490,7 +490,7 @@ export default function PortfolioPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Portfolio</div>
-          <h1 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8]">
+          <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
             Your <em>Projects</em>
           </h1>
         </div>
@@ -519,7 +519,7 @@ export default function PortfolioPage() {
       {editing && (
         <div className="mb-8 bg-[#0D0D0D] border border-[#2A2A2A] p-6 lg:p-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 style={{fontFamily:'Georgia,serif'}} className="text-xl font-light text-[#F5F0E8]">
+            <h2 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8]">
               {editing.id ? 'Edit Project' : 'New Project'}
             </h2>
             <button onClick={() => setEditing(null)} className="text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors">

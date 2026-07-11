@@ -361,7 +361,7 @@ export default function LeadsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Leads</div>
-          <h1 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8]">
+          <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
             Consultation <em>Inbox</em>
           </h1>
         </div>
@@ -377,7 +377,7 @@ export default function LeadsPage() {
             >Pipeline</button>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-light text-[#C8A96E]" style={{fontFamily:'Georgia,serif'}}>{leads.filter(l=>l.status==='new').length}</div>
+            <div className="text-2xl font-light text-[#C8A96E]" style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}}>{leads.filter(l=>l.status==='new').length}</div>
             <div className="text-xs text-[#6B6B6B] tracking-widest uppercase">New</div>
           </div>
         </div>
