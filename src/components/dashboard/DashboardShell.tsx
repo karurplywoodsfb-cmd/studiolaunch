@@ -1,7 +1,7 @@
 'use client'
 // src/components/dashboard/DashboardShell.tsx
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Tenant } from '@/types'
@@ -45,6 +45,18 @@ export default function DashboardShell({ tenant, children }: Props) {
   const router     = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [loggingOut, setLoggingOut]   = useState(false)
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+
+  useEffect(() => {
+    const saved = localStorage.getItem('studio-dashboard-theme')
+    if (saved === 'light' || saved === 'dark') setTheme(saved)
+  }, [])
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem('studio-dashboard-theme', next)
+  }
 
   const siteUrl = getTenantUrl(tenant.subdomain)
   const { branding } = tenant
@@ -64,17 +76,25 @@ export default function DashboardShell({ tenant, children }: Props) {
     <aside className={`
       fixed inset-y-0 left-0 z-50 w-60 bg-[#0D0D0D] border-r border-[#1A1A1A] flex flex-col
       transform transition-transform duration-300 lg:translate-x-0
+      shadow-[8px_0_32px_rgba(0,0,0,0.55)] lg:shadow-none
       ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
     `}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 h-16 border-b border-[#1A1A1A] flex-shrink-0">
-        <div className="w-7 h-7 border border-[#C8A96E] flex items-center justify-center">
+        <div className="w-7 h-7 border border-[#C8A96E] flex items-center justify-center flex-shrink-0">
           <span className="text-[#C8A96E] font-light text-base" style={{fontFamily:'Georgia,serif'}}>{branding.logo_letter}</span>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="text-[#F5F0E8] text-xs font-medium truncate">{branding.business_name}</div>
           <div className="text-[#6B6B6B] text-xs truncate">{tenant.subdomain}.studiolaunch.in</div>
         </div>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close sidebar"
+          className="lg:hidden text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors flex-shrink-0 p-1"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2l14 14M16 2L2 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+        </button>
       </div>
 
       {/* Nav */}
@@ -114,6 +134,17 @@ export default function DashboardShell({ tenant, children }: Props) {
 
       {/* Bottom actions */}
       <div className="px-3 py-4 border-t border-[#1A1A1A] space-y-1 flex-shrink-0">
+        <button
+          onClick={toggleTheme}
+          className="flex items-center gap-3 px-3 py-2.5 text-sm text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] transition-colors w-full text-left"
+        >
+          {theme === 'dark' ? (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="3.5" stroke="currentColor" strokeWidth="1.3"/><path d="M7 1v1.5M7 11.5V13M13 7h-1.5M2.5 7H1M11.2 2.8l-1 1M3.8 10.2l-1 1M11.2 11.2l-1-1M3.8 3.8l-1-1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/></svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M12 8.5A5.5 5.5 0 015.5 2 5.5 5.5 0 108.5 12 5.5 5.5 0 0012 8.5z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/></svg>
+          )}
+          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+        </button>
         <a
           href={siteUrl}
           target="_blank"
@@ -136,13 +167,13 @@ export default function DashboardShell({ tenant, children }: Props) {
   )
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div data-theme={theme} className="studio-dashboard min-h-screen bg-[#0A0A0A] transition-colors duration-200">
       {sidebar}
 
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/75 backdrop-blur-sm lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}

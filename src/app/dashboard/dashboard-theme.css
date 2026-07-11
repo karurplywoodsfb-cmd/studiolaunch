@@ -1,0 +1,63 @@
+/* Auto-generated light-mode repaint for the studio dashboard. */
+/* Scoped entirely to [data-theme="light"] inside .studio-dashboard — never affects tenant sites or other routes. */
+[data-theme="light"] .bg-\[\#0A0A0A\] { background-color: #F7F3EA !important; }
+[data-theme="light"] .bg-\[\#0A0A0A\]\/70 { background-color: rgba(247,243,234,0.7) !important; }
+[data-theme="light"] .bg-\[\#0A0A0A\]\/90 { background-color: rgba(247,243,234,0.9) !important; }
+[data-theme="light"] .bg-\[\#0D0D0D\] { background-color: #FFFFFF !important; }
+[data-theme="light"] .bg-\[\#141414\] { background-color: #FBF8F1 !important; }
+[data-theme="light"] .bg-\[\#1A1A1A\] { background-color: #EAE3D2 !important; }
+[data-theme="light"] .bg-\[\#2A2A2A\] { background-color: #DAD2BC !important; }
+[data-theme="light"] .bg-\[\#A8854A\] { background-color: #A8854A !important; }
+[data-theme="light"] .bg-\[\#C8A96E\] { background-color: #C8A96E !important; }
+[data-theme="light"] .bg-\[\#C8A96E\]\/10 { background-color: rgba(200,169,110,0.1) !important; }
+[data-theme="light"] .bg-\[\#C8A96E\]\/5 { background-color: rgba(200,169,110,0.05) !important; }
+[data-theme="light"] .bg-\[\#C8A96E\]\/60 { background-color: rgba(200,169,110,0.6) !important; }
+[data-theme="light"] .border-\[\#0A0A0A\] { border-color: #0A0A0A !important; }
+[data-theme="light"] .border-\[\#1A1A1A\] { border-color: #EAE3D2 !important; }
+[data-theme="light"] .border-\[\#2A2A2A\] { border-color: #DAD2BC !important; }
+[data-theme="light"] .border-\[\#3A3A3A\] { border-color: #C9C0A6 !important; }
+[data-theme="light"] .border-\[\#6B6B6B\] { border-color: #6b6558 !important; }
+[data-theme="light"] .border-\[\#C8A96E\] { border-color: #C8A96E !important; }
+[data-theme="light"] .border-\[\#C8A96E\]\/20 { border-color: rgba(200,169,110,0.2) !important; }
+[data-theme="light"] .border-\[\#C8A96E\]\/25 { border-color: rgba(200,169,110,0.25) !important; }
+[data-theme="light"] .border-\[\#C8A96E\]\/30 { border-color: rgba(200,169,110,0.3) !important; }
+[data-theme="light"] .border-\[\#C8A96E\]\/40 { border-color: rgba(200,169,110,0.4) !important; }
+[data-theme="light"] .border-\[\#C8A96E\]\/50 { border-color: rgba(200,169,110,0.5) !important; }
+[data-theme="light"] .border-\[\#C8A96E\]\/60 { border-color: rgba(200,169,110,0.6) !important; }
+[data-theme="light"] .text-\[\#0A0A0A\] { color: #0A0A0A !important; }
+[data-theme="light"] .text-\[\#2A2A2A\] { color: #DAD2BC !important; }
+[data-theme="light"] .text-\[\#3A3A3A\] { color: #C9C0A6 !important; }
+[data-theme="light"] .text-\[\#6B6B6B\] { color: #6b6558 !important; }
+[data-theme="light"] .text-\[\#6B6B6B\]\/60 { color: rgba(107,101,88,0.6) !important; }
+[data-theme="light"] .text-\[\#A8854A\] { color: #6E5730 !important; }
+[data-theme="light"] .text-\[\#C8A96E\] { color: #8B6F3E !important; }
+[data-theme="light"] .text-\[\#F5F0E8\] { color: #211D17 !important; }
+[data-theme="light"] .text-\[\#F5F0E8\]\/70 { color: rgba(33,29,23,0.7) !important; }
+[data-theme="light"] .text-\[\#F5F0E8\]\/80 { color: rgba(33,29,23,0.8) !important; }
+[data-theme="light"] .bg-green-400 { background-color: #16A34A !important; }
+[data-theme="light"] .bg-green-400\/5 { background-color: rgba(21,128,61,0.05) !important; }
+[data-theme="light"] .bg-green-400\/10 { background-color: rgba(21,128,61,0.1) !important; }
+[data-theme="light"] .bg-green-400\/20 { background-color: rgba(21,128,61,0.16) !important; }
+[data-theme="light"] .bg-red-400\/5 { background-color: rgba(185,28,28,0.05) !important; }
+[data-theme="light"] .bg-red-400\/10 { background-color: rgba(185,28,28,0.1) !important; }
+[data-theme="light"] .bg-blue-400\/10 { background-color: rgba(29,78,216,0.1) !important; }
+[data-theme="light"] .border-green-400\/20 { border-color: rgba(21,128,61,0.25) !important; }
+[data-theme="light"] .border-green-400\/30 { border-color: rgba(21,128,61,0.35) !important; }
+[data-theme="light"] .border-green-400\/40 { border-color: rgba(21,128,61,0.45) !important; }
+[data-theme="light"] .border-green-500\/50 { border-color: rgba(21,128,61,0.5) !important; }
+[data-theme="light"] .border-red-400\/20 { border-color: rgba(185,28,28,0.25) !important; }
+[data-theme="light"] .border-red-400\/30 { border-color: rgba(185,28,28,0.35) !important; }
+[data-theme="light"] .border-red-400\/40 { border-color: rgba(185,28,28,0.45) !important; }
+[data-theme="light"] .border-blue-400\/20 { border-color: rgba(29,78,216,0.25) !important; }
+[data-theme="light"] .text-green-400 { color: #15803d !important; }
+[data-theme="light"] .text-red-400 { color: #b91c1c !important; }
+[data-theme="light"] .text-blue-400 { color: #1d4ed8 !important; }
+[data-theme="light"] .studio-dashboard input::placeholder,
+[data-theme="light"] .studio-dashboard textarea::placeholder { color: #A39A83 !important; opacity: 1; }
+[data-theme="light"] .studio-dashboard input[type="color"] { border-color: #DAD2BC !important; }
+[data-theme="light"] .studio-dashboard :focus-visible { outline: 2px solid #8B6F3E; outline-offset: 2px; }
+
+/* Baseline type-scale bump across the whole dashboard shell — applies in both themes. */
+.studio-dashboard .text-xs  { font-size: 0.8125rem; line-height: 1.4; }
+.studio-dashboard .text-sm  { font-size: 0.95rem;   line-height: 1.55; }
+.studio-dashboard .text-base{ font-size: 1.05rem;  line-height: 1.6; }
