@@ -138,6 +138,9 @@ export interface CaseStudy {
   solution_images: string[]
   published: boolean
   created_at: string
+  slug?: string
+  seo_title?: string
+  seo_description?: string
 }
 
 // ─── FAQ ──────────────────────────────────────────────────────────────────────

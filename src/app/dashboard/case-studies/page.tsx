@@ -4,9 +4,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { CaseStudy, FinishTier } from '@/types'
 import ImageUploader from '@/components/shared/ImageUploader'
+import { getTenantUrl } from '@/lib/utils'
 
 const EMPTY: Partial<CaseStudy> = {
-  title: '', subtitle: '',
+  title: '', subtitle: '', slug: '',
   brief_heading: '', brief_body: '',
   challenge_heading: '', challenge_body: '',
   solution_heading: '', solution_body: '',
@@ -29,7 +30,7 @@ const TIERS: { value: FinishTier; label: string }[] = [
 // Section divider
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="border border-[#1A1A1A] bg-[#0D0D0D]">
+    <div className="rounded-2xl border border-[#1A1A1A] bg-[#0D0D0D] overflow-hidden">
       <div className="px-5 py-3 border-b border-[#1A1A1A] bg-[#141414]">
         <div className="text-xs tracking-widest uppercase text-[#C8A96E] font-medium">{title}</div>
       </div>
@@ -61,8 +62,35 @@ function CaseStudyForm({
 }) {
   const [form, setForm] = useState(initial)
   const [materialInput, setMaterialInput] = useState('')
+  const [rewriting, setRewriting] = useState(false)
+  const [rewriteError, setRewriteError] = useState('')
 
   const set = (k: string, v: unknown) => setForm(p => ({ ...p, [k]: v }))
+
+  const rewriteWithAI = async () => {
+    setRewriting(true)
+    setRewriteError('')
+    try {
+      const res = await fetch('/api/case-studies/ai-rewrite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brief_body: form.brief_body, challenge_body: form.challenge_body,
+          solution_body: form.solution_body, outcome_body: form.outcome_body,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) { setRewriteError(json.error || 'Rewrite failed'); return }
+      if (json.data.brief_body)     set('brief_body', json.data.brief_body)
+      if (json.data.challenge_body) set('challenge_body', json.data.challenge_body)
+      if (json.data.solution_body)  set('solution_body', json.data.solution_body)
+      if (json.data.outcome_body)   set('outcome_body', json.data.outcome_body)
+    } catch {
+      setRewriteError('Something went wrong. Please try again.')
+    } finally {
+      setRewriting(false)
+    }
+  }
 
   const addMaterial = () => {
     const m = materialInput.trim()
@@ -87,6 +115,10 @@ function CaseStudyForm({
           <input value={form.subtitle || ''} onChange={e => set('subtitle', e.target.value)}
             className={inputCls} placeholder="A 4,200 sq.ft family villa redesigned for modern living" />
         </Field>
+        <Field label="URL Slug" hint="Leave blank to auto-generate from the title">
+          <input value={form.slug || ''} onChange={e => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+            className={inputCls} placeholder="the-whitefield-villa" />
+        </Field>
         <ImageUploader
           value={form.hero_image_url} onChange={url => set('hero_image_url', url)}
           folder="case-studies" label="Hero Image" aspectHint="16:9 · Min 1400px wide"
@@ -95,6 +127,18 @@ function CaseStudyForm({
 
       {/* 02 — Project Arc */}
       <Section title="02 — Project Arc (The Brief → Outcome)">
+        <div className="flex items-center justify-between -mt-2 mb-1">
+          <p className="text-xs text-[#6B6B6B] max-w-xs">Write your rough draft below, then let AI tighten the prose without inventing new facts.</p>
+          <button
+            type="button"
+            onClick={rewriteWithAI}
+            disabled={rewriting || (!form.brief_body && !form.challenge_body && !form.solution_body && !form.outcome_body)}
+            className="flex-shrink-0 text-xs font-semibold tracking-widest uppercase px-4 py-2 rounded-full bg-[#C8A96E]/10 border border-[#C8A96E]/30 text-[#C8A96E] hover:bg-[#C8A96E]/20 transition-colors disabled:opacity-40"
+          >
+            {rewriting ? 'Rewriting...' : '✦ AI Rewrite'}
+          </button>
+        </div>
+        {rewriteError && <div className="text-red-400 text-xs">{rewriteError}</div>}
         {[
           ['brief',     'The Brief',     'What was the client asking for?'],
           ['challenge', 'The Challenge', 'What made this project difficult?'],
@@ -225,11 +269,11 @@ function CaseStudyForm({
 
         <div className="flex gap-3">
           <button type="button" onClick={onCancel}
-            className="border border-[#2A2A2A] text-[#6B6B6B] text-xs font-medium tracking-widest uppercase px-6 py-3 hover:border-[#6B6B6B] transition-colors">
+            className="rounded-full border border-[#2A2A2A] text-[#6B6B6B] text-xs font-medium tracking-widest uppercase px-6 py-3 hover:border-[#6B6B6B] transition-colors">
             Cancel
           </button>
           <button type="button" onClick={() => onSave(form)} disabled={saving || !form.title}
-            className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-6 py-3 hover:bg-[#A8854A] transition-colors disabled:opacity-50">
+            className="rounded-full bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-6 py-3 hover:bg-[#A8854A] transition-colors disabled:opacity-50">
             {saving ? 'Saving...' : 'Save Case Study'}
           </button>
         </div>
@@ -244,11 +288,15 @@ export default function CaseStudiesPage() {
   const [editing, setEditing] = useState<Partial<CaseStudy> | null>(null)
   const [saving, setSaving]   = useState(false)
   const [error, setError]     = useState('')
+  const [siteBase, setSiteBase] = useState('')
 
   const fetchStudies = useCallback(async () => {
     const res  = await fetch('/api/case-studies')
     const json = await res.json()
     setStudies(json.data || [])
+    if (json.tenant) {
+      setSiteBase(json.tenant.custom_domain ? `https://${json.tenant.custom_domain}` : getTenantUrl(json.tenant.subdomain))
+    }
     setLoading(false)
   }, [])
 
@@ -285,7 +333,7 @@ export default function CaseStudiesPage() {
   }
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <div className="flex items-center justify-between mb-8">
         <div>
           <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Case Studies</div>
@@ -295,7 +343,7 @@ export default function CaseStudiesPage() {
         </div>
         {!editing && (
           <button onClick={() => { setEditing({...EMPTY}); setError('') }}
-            className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-3 hover:bg-[#A8854A] transition-colors flex items-center gap-2">
+            className="rounded-full bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-3 hover:bg-[#A8854A] transition-colors flex items-center gap-2">
             <span>＋</span> New Case Study
           </button>
         )}
@@ -317,50 +365,66 @@ export default function CaseStudiesPage() {
         loading ? (
           <div className="text-center py-20 text-[#6B6B6B] text-sm">Loading...</div>
         ) : studies.length === 0 ? (
-          <div className="text-center py-20 border border-dashed border-[#2A2A2A]">
+          <div className="text-center py-20 rounded-2xl border border-dashed border-[#2A2A2A]">
             <div className="text-[#6B6B6B] text-sm mb-4">No case studies yet</div>
             <p className="text-[#6B6B6B] text-xs max-w-xs mx-auto leading-relaxed mb-6">
               Case studies are the most powerful SEO content on your site. Each one can rank for specific project types in your city.
             </p>
             <button onClick={() => setEditing({...EMPTY})}
-              className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-3 hover:bg-[#A8854A] transition-colors">
+              className="rounded-full bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-3 hover:bg-[#A8854A] transition-colors">
               Create First Case Study
             </button>
           </div>
         ) : (
-          <div className="space-y-px bg-[#1A1A1A]">
-            {studies.map(study => (
-              <div key={study.id} className="bg-[#0A0A0A] flex gap-5 p-5 hover:bg-[#0D0D0D] transition-colors">
-                {/* Thumbnail */}
-                <div className="w-24 h-16 bg-[#141414] flex-shrink-0 overflow-hidden">
-                  {study.hero_image_url
-                    ? <img src={study.hero_image_url} alt={study.title} className="w-full h-full object-cover opacity-80" />
-                    : <div className="w-full h-full flex items-center justify-center text-[#3A3A3A] text-xs">No image</div>
-                  }
-                </div>
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-sm font-medium text-[#F5F0E8]">{study.title}</div>
-                      {study.subtitle && <div className="text-xs text-[#6B6B6B] mt-0.5 truncate">{study.subtitle}</div>}
-                    </div>
-                    <span className={`text-xs px-2 py-0.5 border flex-shrink-0 ${study.published ? 'text-green-400 border-green-400/30 bg-green-400/10' : 'text-[#6B6B6B] border-[#2A2A2A] bg-[#1A1A1A]'}`}>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {studies.map(study => {
+              const wordCount = [study.brief_body, study.challenge_body, study.solution_body, study.outcome_body]
+                .filter(Boolean).join(' ').split(/\s+/).filter(Boolean).length
+              const readingMins = wordCount > 0 ? Math.max(1, Math.round(wordCount / 200)) : null
+              const hasBeforeAfter = !!(study.before_image_url && study.after_image_url)
+              const previewUrl = study.slug && siteBase ? `${siteBase}/case-studies/${study.slug}` : null
+              return (
+                <div key={study.id} className="rounded-2xl border border-[#1A1A1A] bg-[#0D0D0D] overflow-hidden hover:border-[#C8A96E]/40 transition-colors">
+                  <div className="relative h-40 bg-[#141414]">
+                    {study.hero_image_url ? (
+                      <img src={study.hero_image_url} alt={study.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[#3A3A3A] text-xs">No cover image</div>
+                    )}
+                    <div className={`absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full font-medium ${study.published ? 'bg-green-400/20 text-green-400 border border-green-400/30' : 'bg-[#1A1A1A] text-[#6B6B6B] border border-[#2A2A2A]'}`}>
                       {study.published ? 'Live' : 'Draft'}
-                    </span>
+                    </div>
+                    {hasBeforeAfter && (
+                      <div className="absolute bottom-2 left-2 text-xs px-2 py-0.5 rounded-full bg-[#0A0A0A]/80 backdrop-blur-sm border border-[#2A2A2A] text-[#C8A96E]">
+                        Before / After
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-3 mt-3 text-xs text-[#6B6B6B]">
-                    {study.location && <span>{study.location}</span>}
-                    {study.area_sqft && <><span className="text-[#2A2A2A]">·</span><span>{study.area_sqft.toLocaleString('en-IN')} sq.ft</span></>}
-                    {study.year && <><span className="text-[#2A2A2A]">·</span><span>{study.year}</span></>}
-                    <span className="text-[#2A2A2A]">·</span>
-                    <button onClick={() => setEditing(study)} className="text-[#C8A96E] hover:text-[#F5F0E8] transition-colors">Edit</button>
-                    <span className="text-[#2A2A2A]">·</span>
-                    <button onClick={() => handleDelete(study.id)} className="hover:text-red-400 transition-colors">Delete</button>
+                  <div className="p-4">
+                    <div className="text-sm font-medium text-[#F5F0E8] mb-0.5">{study.title}</div>
+                    {study.subtitle && <div className="text-xs text-[#6B6B6B] mb-3 line-clamp-2">{study.subtitle}</div>}
+
+                    <div className="flex items-center gap-2 flex-wrap text-xs text-[#6B6B6B] mb-3">
+                      {study.duration_weeks && <span className="px-2 py-0.5 rounded-full bg-[#141414]">{study.duration_weeks}wk timeline</span>}
+                      {study.year && <span className="px-2 py-0.5 rounded-full bg-[#141414]">{study.year}</span>}
+                      {readingMins && <span className="px-2 py-0.5 rounded-full bg-[#141414]">{readingMins} min read</span>}
+                    </div>
+
+                    <div className="flex items-center gap-3 pt-3 border-t border-[#1A1A1A] text-xs">
+                      <button onClick={() => setEditing(study)} className="text-[#C8A96E] hover:text-[#F5F0E8] transition-colors">Edit</button>
+                      <span className="text-[#2A2A2A]">·</span>
+                      {previewUrl ? (
+                        <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors">Preview</a>
+                      ) : (
+                        <span className="text-[#3A3A3A]" title="Publish this case study to get a live preview link">Preview</span>
+                      )}
+                      <span className="text-[#2A2A2A]">·</span>
+                      <button onClick={() => handleDelete(study.id)} className="text-[#6B6B6B] hover:text-red-400 transition-colors">Delete</button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )
       )}
