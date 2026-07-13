@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { timeAgo, getTenantUrl } from '@/lib/utils'
-import { Lead } from '@/types'
+import { Lead, Tenant } from '@/types'
 
 function bucketByDay(rows: { created_at: string }[], days: number, now: Date) {
   const buckets: { date: string; count: number }[] = []
@@ -29,12 +29,13 @@ function trendDelta(buckets: { count: number }[]) {
   return { label: `${pct > 0 ? '+' : ''}${pct}%`, up: pct >= 0 }
 }
 
-async function getDashboardData(tenantId: string) {
+async function getDashboardData(tenant: Tenant) {
+  const tenantId = tenant.id
   const supabase = createAdminClient()
   const now = new Date()
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000).toISOString()
 
-  const [leadsRes, portfolioRes, caseRes, viewsRes, recentLeadsRes, reviewsRes, recentPortfolioRes] = await Promise.all([
+  const [leadsRes, portfolioRes, caseRes, viewsRes, recentLeadsRes, reviewsRes, recentPortfolioRes, draftPortfolioRes] = await Promise.all([
     supabase.from('leads').select('id, status, created_at', { count: 'exact' }).eq('tenant_id', tenantId),
     supabase.from('portfolio_projects').select('id, published', { count: 'exact' }).eq('tenant_id', tenantId),
     supabase.from('case_studies').select('id, published', { count: 'exact' }).eq('tenant_id', tenantId),
@@ -42,12 +43,14 @@ async function getDashboardData(tenantId: string) {
     supabase.from('leads').select('*').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(5),
     supabase.from('google_reviews').select('rating, author_name, created_at', { count: 'exact' }).eq('tenant_id', tenantId).order('created_at', { ascending: false }),
     supabase.from('portfolio_projects').select('id, title, created_at, published').eq('tenant_id', tenantId).order('created_at', { ascending: false }).limit(5),
+    supabase.from('portfolio_projects').select('id', { count: 'exact', head: true }).eq('tenant_id', tenantId).eq('published', false),
   ])
 
   const allLeads      = leadsRes.data || []
   const allReviews    = reviewsRes.data || []
   const newLeads      = allLeads.filter(l => l.status === 'new').length
   const avgRating     = allReviews.length ? allReviews.reduce((a, r) => a + r.rating, 0) / allReviews.length : 0
+  const draftCount    = draftPortfolioRes.count || 0
 
   const leadsTrend = bucketByDay(allLeads, 14, now)
   const viewsTrend = bucketByDay((viewsRes.data || []), 14, now)
@@ -58,6 +61,17 @@ async function getDashboardData(tenantId: string) {
     ...(recentPortfolioRes.data || []).map(p => ({ type: 'portfolio' as const, label: `Project added: ${p.title}`, created_at: p.created_at })),
     ...allReviews.slice(0, 5).map(r => ({ type: 'review' as const, label: `Review from ${r.author_name}`, created_at: r.created_at })),
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 6)
+
+  // Today's Tasks — generated from real gaps in the data, not fabricated placeholders
+  const tasks: { label: string; href: string }[] = []
+  if (newLeads > 0) tasks.push({ label: `Reply to ${newLeads} new lead${newLeads > 1 ? 's' : ''}`, href: '/dashboard/leads' })
+  if (draftCount > 0) tasks.push({ label: `Publish ${draftCount} draft project${draftCount > 1 ? 's' : ''}`, href: '/dashboard/portfolio' })
+  if ((portfolioRes.count || 0) === 0) tasks.push({ label: 'Add your first project', href: '/dashboard/portfolio?new=1' })
+  if ((caseRes.count || 0) === 0) tasks.push({ label: 'Write your first case study', href: '/dashboard/case-studies' })
+  if (!tenant.seo_enriched) tasks.push({ label: 'Run AI SEO enrichment', href: '/dashboard/settings?tab=seo' })
+  if (!tenant.content.hero_subtext) tasks.push({ label: 'Complete your homepage content', href: '/dashboard/settings?tab=content' })
+  if ((reviewsRes.count || 0) === 0) tasks.push({ label: 'Sync your Google Reviews', href: '/dashboard/reviews' })
+  if (!tenant.custom_domain) tasks.push({ label: 'Connect your custom domain', href: '/dashboard/settings?tab=domain' })
 
   return {
     totalLeads:     leadsRes.count      || 0,
@@ -73,6 +87,7 @@ async function getDashboardData(tenantId: string) {
     leadsDelta:     trendDelta(leadsTrend),
     viewsDelta:     trendDelta(viewsTrend),
     activity,
+    tasks: tasks.slice(0, 5),
   }
 }
 
@@ -99,7 +114,7 @@ export default async function DashboardPage({
   if (!tenant) redirect('/onboarding')
 
   const { welcome } = await searchParams
-  const data    = await getDashboardData(tenant.id)
+  const data    = await getDashboardData(tenant)
   const siteUrl = getTenantUrl(tenant.subdomain)
   const hour     = new Date().getHours()
   const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening'
@@ -172,50 +187,13 @@ export default async function DashboardPage({
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-5 gap-6 mb-6">
-
-        {/* Recent leads — cards, not rows */}
-        <div className="lg:col-span-3 bg-[#0D0D0D] border border-[#1A1A1A] rounded-2xl">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#1A1A1A]">
-            <div className="text-sm font-medium text-[#F5F0E8]">Recent Leads</div>
-            <Link href="/dashboard/leads" className="text-xs text-[#C8A96E] hover:text-[#F5F0E8] transition-colors tracking-widest uppercase">
-              View All
-            </Link>
-          </div>
-          {data.recentLeads.length === 0 ? (
-            <div className="px-5 py-10 text-center">
-              <div className="text-[#F5F0E8]/80 text-sm mb-2">Share your website to start receiving consultation requests.</div>
-              <p className="text-[#6B6B6B] text-xs leading-relaxed max-w-xs mx-auto">
-                When someone fills out your consultation form, they&apos;ll appear here instantly.
-              </p>
-            </div>
-          ) : (
-            <div className="p-3 space-y-2">
-              {data.recentLeads.map(lead => (
-                <Link key={lead.id} href={`/dashboard/leads?id=${lead.id}`}
-                  className="flex items-center gap-4 p-3 rounded-xl border border-transparent hover:border-[#2A2A2A] hover:bg-[#141414] transition-colors">
-                  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center flex-shrink-0 text-sm font-medium text-[#C8A96E]">
-                    {lead.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm text-[#F5F0E8] font-medium truncate">{lead.name}</div>
-                    <div className="text-xs text-[#6B6B6B] truncate">{lead.property_type} · {lead.budget_tier}</div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${statusColor[lead.status] || 'text-[#6B6B6B]'}`}>
-                      {lead.status}
-                    </span>
-                    <span className="text-xs text-[#6B6B6B]">{timeAgo(lead.created_at)}</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="grid lg:grid-cols-3 gap-6 mb-6">
 
         {/* Recent activity timeline */}
-        <div className="lg:col-span-2 bg-[#0D0D0D] border border-[#1A1A1A] rounded-2xl p-5">
-          <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-4">Recent Activity</div>
+        <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs tracking-widest uppercase text-[#6B6B6B]">Recent Activity</div>
+          </div>
           {data.activity.length === 0 ? (
             <p className="text-xs text-[#6B6B6B] leading-relaxed">Activity across leads, portfolio, and reviews will show up here.</p>
           ) : (
@@ -231,6 +209,63 @@ export default async function DashboardPage({
                     <div className="text-[10px] text-[#6B6B6B] mt-0.5">{timeAgo(item.created_at)}</div>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recent leads — cards, not rows */}
+        <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded-2xl">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#1A1A1A]">
+            <div className="text-sm font-medium text-[#F5F0E8]">Recent Leads</div>
+            <Link href="/dashboard/leads" className="text-xs text-[#C8A96E] hover:text-[#F5F0E8] transition-colors tracking-widest uppercase">
+              View All
+            </Link>
+          </div>
+          {data.recentLeads.length === 0 ? (
+            <div className="px-5 py-10 text-center">
+              <div className="text-[#F5F0E8]/80 text-sm mb-2">Share your website to start receiving consultation requests.</div>
+              <p className="text-[#6B6B6B] text-xs leading-relaxed max-w-xs mx-auto">
+                When someone fills out your consultation form, they&apos;ll appear here instantly.
+              </p>
+            </div>
+          ) : (
+            <div className="p-3 space-y-2">
+              {data.recentLeads.slice(0, 4).map(lead => (
+                <Link key={lead.id} href={`/dashboard/leads?id=${lead.id}`}
+                  className="flex items-center gap-3 p-2.5 rounded-xl border border-transparent hover:border-[#2A2A2A] hover:bg-[#141414] transition-colors">
+                  <div className="w-9 h-9 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center flex-shrink-0 text-sm font-medium text-[#C8A96E]">
+                    {lead.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-[#F5F0E8] font-medium truncate">{lead.name}</div>
+                    <div className="text-xs text-[#6B6B6B] truncate">{lead.property_type}</div>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize flex-shrink-0 ${statusColor[lead.status] || 'text-[#6B6B6B]'}`}>
+                    {lead.status}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Today's Tasks — generated from real gaps in your data */}
+        <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs tracking-widest uppercase text-[#6B6B6B]">Today&apos;s Tasks</div>
+            {data.tasks.length > 0 && <span className="text-xs text-[#6B6B6B]">{data.tasks.length} pending</span>}
+          </div>
+          {data.tasks.length === 0 ? (
+            <p className="text-xs text-[#6B6B6B] leading-relaxed">You&apos;re all caught up — nothing needs your attention right now.</p>
+          ) : (
+            <div className="space-y-1">
+              {data.tasks.map((task, i) => (
+                <Link key={i} href={task.href}
+                  className="flex items-center gap-3 py-2 px-1 rounded-lg hover:bg-[#141414] transition-colors group">
+                  <span className="w-4 h-4 rounded-full border border-[#3A3A3A] flex-shrink-0 group-hover:border-[#C8A96E] transition-colors" />
+                  <span className="text-xs text-[#F5F0E8]/85">{task.label}</span>
+                </Link>
               ))}
             </div>
           )}

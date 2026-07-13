@@ -405,9 +405,16 @@ export default function CaseStudiesPage() {
                     {study.subtitle && <div className="text-xs text-[#6B6B6B] mb-3 line-clamp-2">{study.subtitle}</div>}
 
                     <div className="flex items-center gap-2 flex-wrap text-xs text-[#6B6B6B] mb-3">
+                      {study.client_type && <span className="px-2 py-0.5 rounded-full bg-[#141414] capitalize">{study.client_type}</span>}
                       {study.duration_weeks && <span className="px-2 py-0.5 rounded-full bg-[#141414]">{study.duration_weeks}wk timeline</span>}
                       {study.year && <span className="px-2 py-0.5 rounded-full bg-[#141414]">{study.year}</span>}
                       {readingMins && <span className="px-2 py-0.5 rounded-full bg-[#141414]">{readingMins} min read</span>}
+                      {typeof study.views === 'number' && study.views > 0 && (
+                        <span className="px-2 py-0.5 rounded-full bg-[#141414] flex items-center gap-1">
+                          <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M1 7s2.2-4.5 6-4.5S13 7 13 7s-2.2 4.5-6 4.5S1 7 1 7z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.2"/></svg>
+                          {study.views}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center gap-3 pt-3 border-t border-[#1A1A1A] text-xs">

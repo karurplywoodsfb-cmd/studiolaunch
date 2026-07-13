@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react'
 import { Tenant, PortfolioProjectSEO } from '@/types'
+import AnalyticsTracker from '@/components/shared/AnalyticsTracker'
 
 const FINISH_LABEL: Record<string, string> = {
   premium: 'Premium',
@@ -479,6 +480,7 @@ export default function ProjectPageClient({ tenant, project, related }: Props) {
 
   return (
     <>
+      <AnalyticsTracker tenantId={tenant.id} />
       {nav}
       <main>{hero}{content}</main>
       {footer}

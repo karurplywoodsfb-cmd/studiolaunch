@@ -394,6 +394,9 @@ export default function PortfolioPage() {
   const [limitError, setLimitError] = useState('')
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkWorking, setBulkWorking] = useState(false)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all')
+  const [sortBy, setSortBy] = useState<'latest' | 'oldest' | 'views'>('latest')
 
   const fetchProjects = useCallback(async () => {
     const res  = await fetch('/api/portfolio')
@@ -516,10 +519,23 @@ export default function PortfolioPage() {
     setBulkWorking(false)
   }
 
+  const visibleProjects = projects
+    .filter(p => {
+      if (statusFilter === 'published' && !p.published) return false
+      if (statusFilter === 'draft' && p.published) return false
+      if (search && !p.title.toLowerCase().includes(search.toLowerCase()) && !p.location?.toLowerCase().includes(search.toLowerCase())) return false
+      return true
+    })
+    .sort((a, b) => {
+      if (sortBy === 'views') return (b.views || 0) - (a.views || 0)
+      if (sortBy === 'oldest') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
+
   return (
     <div className="max-w-5xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
         <div>
           <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Portfolio</div>
           <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
@@ -529,12 +545,52 @@ export default function PortfolioPage() {
         {!editing && (
           <button
             onClick={() => { setEditing({ ...EMPTY }); setError(''); setLimitError('') }}
-            className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-3 hover:bg-[#A8854A] transition-colors flex items-center gap-2"
+            className="rounded-full bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-3 hover:bg-[#A8854A] transition-colors flex items-center gap-2"
           >
             <span>＋</span> Add Project
           </button>
         )}
       </div>
+
+      {!editing && projects.length > 0 && (
+        <div className="flex items-center gap-3 mb-6 flex-wrap">
+          <div className="flex rounded-full border border-[#2A2A2A] p-1">
+            {([
+              { key: 'all',       label: `All (${projects.length})` },
+              { key: 'published', label: `Published (${projects.filter(p=>p.published).length})` },
+              { key: 'draft',     label: `Draft (${projects.filter(p=>!p.published).length})` },
+            ] as { key: typeof statusFilter; label: string }[]).map(f => (
+              <button
+                key={f.key}
+                onClick={() => setStatusFilter(f.key)}
+                className={`text-xs px-3 py-1.5 rounded-full whitespace-nowrap transition-colors ${statusFilter === f.key ? 'bg-[#C8A96E] text-[#0A0A0A]' : 'text-[#6B6B6B] hover:text-[#F5F0E8]'}`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <div className="relative flex-1 min-w-[180px]">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B6B6B]" width="13" height="13" viewBox="0 0 14 14" fill="none">
+              <circle cx="6" cy="6" r="5" stroke="currentColor" strokeWidth="1.3"/><path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            </svg>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search projects..."
+              className="w-full bg-[#0D0D0D] border border-[#2A2A2A] rounded-full text-[#F5F0E8] pl-9 pr-4 py-2 text-xs outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
+            />
+          </div>
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value as typeof sortBy)}
+            className="bg-[#0D0D0D] border border-[#2A2A2A] rounded-full text-[#F5F0E8] px-4 py-2 text-xs outline-none focus:border-[#C8A96E] transition-colors"
+          >
+            <option value="latest">Latest</option>
+            <option value="oldest">Oldest</option>
+            <option value="views">Most Viewed</option>
+          </select>
+        </div>
+      )}
 
       {/* Plan limit error */}
       {limitError && (
@@ -600,7 +656,8 @@ export default function PortfolioPage() {
       {/* Project grid */}
       {loading ? (
         <div className="text-center py-20 text-[#6B6B6B] text-sm">Loading projects...</div>
-      ) : projects.length === 0 && !editing ? (
+      ) : visibleProjects.length === 0 && !editing ? (
+        projects.length === 0 ? (
         <div className="text-center py-20 rounded-2xl border border-dashed border-[#2A2A2A]">
           <div className="text-[#6B6B6B] text-sm mb-4">No projects yet</div>
           <p className="text-[#6B6B6B] text-xs max-w-xs mx-auto leading-relaxed mb-6">
@@ -613,9 +670,14 @@ export default function PortfolioPage() {
             Add First Project
           </button>
         </div>
+        ) : (
+          <div className="text-center py-20 rounded-2xl border border-dashed border-[#2A2A2A]">
+            <div className="text-[#6B6B6B] text-sm">No projects match your filters</div>
+          </div>
+        )
       ) : (
         <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 [column-fill:_balance]">
-          {projects.map(project => {
+          {visibleProjects.map(project => {
             const slug = (project as PortfolioProject & { slug?: string }).slug
             const previewUrl = slug && siteBase ? `${siteBase}/projects/${slug}` : siteBase
             return (
@@ -683,6 +745,12 @@ export default function PortfolioPage() {
               <div className="p-4">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h3 className="text-sm font-medium text-[#F5F0E8] leading-tight">{project.title}</h3>
+                  {typeof project.views === 'number' && (
+                    <span className="flex items-center gap-1 text-xs text-[#6B6B6B] flex-shrink-0" title="Page views">
+                      <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M1 7s2.2-4.5 6-4.5S13 7 13 7s-2.2 4.5-6 4.5S1 7 1 7z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/><circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.2"/></svg>
+                      {project.views}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs text-[#6B6B6B] capitalize">{project.category}</span>

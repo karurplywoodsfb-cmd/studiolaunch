@@ -37,10 +37,11 @@ function NavIcon({ name }: { name: string }) {
 
 interface Props {
   tenant: Tenant
+  newLeadsCount?: number
   children: React.ReactNode
 }
 
-export default function DashboardShell({ tenant, children }: Props) {
+export default function DashboardShell({ tenant, newLeadsCount = 0, children }: Props) {
   const pathname   = usePathname()
   const router     = useRouter()
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -221,6 +222,22 @@ export default function DashboardShell({ tenant, children }: Props) {
           </button>
 
           <div className="flex-1" />
+
+          <Link
+            href="/dashboard/leads"
+            aria-label={newLeadsCount > 0 ? `${newLeadsCount} new leads` : 'No new leads'}
+            className="relative flex items-center justify-center w-8 h-8 rounded-full text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A] transition-colors"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M13 6a5 5 0 00-10 0c0 3.5-1.5 4.5-1.5 4.5h13S13 9.5 13 6z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6.5 13a1.5 1.5 0 003 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+            </svg>
+            {newLeadsCount > 0 && (
+              <span className="absolute top-0.5 right-0.5 min-w-[15px] h-[15px] px-1 rounded-full bg-[#C8A96E] text-[#0A0A0A] text-[9px] font-bold flex items-center justify-center">
+                {newLeadsCount > 9 ? '9+' : newLeadsCount}
+              </span>
+            )}
+          </Link>
 
           <a
             href={siteUrl}

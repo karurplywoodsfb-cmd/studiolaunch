@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { Tenant, CaseStudy } from '@/types'
 import BeforeAfterSlider, { PLACEHOLDER_IMG } from '@/components/tenant-site/BeforeAfterSlider'
 import WhatsAppButton from '@/components/tenant-site/WhatsAppButton'
+import AnalyticsTracker from '@/components/shared/AnalyticsTracker'
 import { getTenantUrl } from '@/lib/utils'
 
 interface Props {
@@ -55,6 +56,7 @@ export default function CaseStudyPageClient({ tenant, study }: Props) {
 
   return (
     <div style={{ background: t.bg, minHeight: '100vh' }}>
+      <AnalyticsTracker tenantId={tenant.id} />
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         background: scrolled ? t.navBg : 'transparent',

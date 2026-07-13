@@ -173,6 +173,28 @@ export default function ReviewsPage() {
         </div>
       )}
 
+      {/* Rating breakdown */}
+      {reviews.length > 0 && (
+        <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded-2xl p-6 mb-8">
+          <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-4">Rating Breakdown</div>
+          <div className="space-y-2">
+            {[5,4,3,2,1].map(star => {
+              const count = reviews.filter(r => r.rating === star).length
+              const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0
+              return (
+                <div key={star} className="flex items-center gap-3">
+                  <span className="text-xs text-[#6B6B6B] w-10 flex-shrink-0">{star} star</span>
+                  <div className="flex-1 h-1.5 rounded-full bg-[#1A1A1A] overflow-hidden">
+                    <div className="h-full bg-[#C8A96E] rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="text-xs text-[#6B6B6B] w-6 text-right flex-shrink-0">{count}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Sync panel */}
       <div className="bg-[#0D0D0D] border border-[#1A1A1A] rounded-2xl p-6 mb-8">
         <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-3">Google Places Sync</div>

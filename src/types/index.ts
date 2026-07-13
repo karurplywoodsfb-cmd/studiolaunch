@@ -97,6 +97,7 @@ export interface PortfolioProject {
   display_order: number
   published: boolean
   created_at: string
+  views?: number  // computed at API read-time from page_views, not a stored column
 }
 
 // ─── Case Study ───────────────────────────────────────────────────────────────
@@ -141,6 +142,7 @@ export interface CaseStudy {
   slug?: string
   seo_title?: string
   seo_description?: string
+  views?: number  // computed at API read-time from page_views
 }
 
 // ─── FAQ ──────────────────────────────────────────────────────────────────────

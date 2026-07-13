@@ -26,7 +26,24 @@ export async function GET() {
     .order('display_order', { ascending: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data, tenant: { subdomain: tenant.subdomain, custom_domain: tenant.custom_domain } })
+
+  // Attach a view count per project, matched by its live URL path
+  const { data: viewRows } = await admin
+    .from('page_views')
+    .select('path')
+    .eq('tenant_id', tenant.id)
+    .like('path', '/projects/%')
+
+  const viewCounts = new Map<string, number>()
+  for (const row of viewRows || []) {
+    viewCounts.set(row.path, (viewCounts.get(row.path) || 0) + 1)
+  }
+  const withViews = (data || []).map(p => ({
+    ...p,
+    views: p.slug ? (viewCounts.get(`/projects/${p.slug}`) || 0) : 0,
+  }))
+
+  return NextResponse.json({ data: withViews, tenant: { subdomain: tenant.subdomain, custom_domain: tenant.custom_domain } })
 }
 
 // POST — create portfolio item

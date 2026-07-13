@@ -23,7 +23,23 @@ export async function GET() {
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ data, tenant: { subdomain: tenant.subdomain, custom_domain: tenant.custom_domain } })
+
+  const { data: viewRows } = await admin
+    .from('page_views')
+    .select('path')
+    .eq('tenant_id', tenant.id)
+    .like('path', '/case-studies/%')
+
+  const viewCounts = new Map<string, number>()
+  for (const row of viewRows || []) {
+    viewCounts.set(row.path, (viewCounts.get(row.path) || 0) + 1)
+  }
+  const withViews = (data || []).map(s => ({
+    ...s,
+    views: s.slug ? (viewCounts.get(`/case-studies/${s.slug}`) || 0) : 0,
+  }))
+
+  return NextResponse.json({ data: withViews, tenant: { subdomain: tenant.subdomain, custom_domain: tenant.custom_domain } })
 }
 
 export async function POST(req: NextRequest) {
