@@ -1,0 +1,130 @@
+diff --git a/src/app/dashboard/settings/page.tsx b/src/app/dashboard/settings/page.tsx
+index 29d519e..12ad674 100644
+--- a/src/app/dashboard/settings/page.tsx
++++ b/src/app/dashboard/settings/page.tsx
+@@ -9,13 +9,13 @@ import ImageUploader from '@/components/shared/ImageUploader'
+ 
+ type Tab = 'content' | 'contact' | 'seo' | 'domain' | 'whitelabel' | 'billing'
+ 
+-const TABS: { value: Tab; label: string }[] = [
+-  { value: 'content',    label: 'Site Content' },
+-  { value: 'contact',    label: 'Contact & Branding' },
+-  { value: 'seo',        label: 'SEO Enrichment' },
+-  { value: 'domain',     label: 'Custom Domain' },
+-  { value: 'whitelabel', label: 'White Label' },
+-  { value: 'billing',    label: 'Plan & Billing' },
++const TABS: { value: Tab; label: string; description: string }[] = [
++  { value: 'content',    label: 'Site Content',     description: 'Your homepage headline, hero image, and the stats that build trust at a glance.' },
++  { value: 'contact',    label: 'Contact & Branding', description: 'Business identity, colors, template, and how visitors reach you.' },
++  { value: 'seo',        label: 'SEO Enrichment',    description: 'AI-generated meta description and FAQ content to help you rank locally.' },
++  { value: 'domain',     label: 'Custom Domain',     description: 'Connect your own domain (e.g. www.yourstudio.com) instead of the default subdomain.' },
++  { value: 'whitelabel', label: 'White Label',       description: 'Remove StudioLaunch branding from your public site footer.' },
++  { value: 'billing',    label: 'Plan & Billing',    description: 'Your current plan, usage limits, and upgrade options.' },
+ ]
+ 
+ const inputCls = 'w-full bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] px-4 py-3 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]'
+@@ -190,7 +190,7 @@ function SettingsInner() {
+   const showSave = tab === 'content' || tab === 'contact' || tab === 'domain' || tab === 'whitelabel'
+ 
+   return (
+-    <div className="max-w-3xl">
++    <div className="max-w-5xl">
+       <div className="mb-8">
+         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-2">Settings</div>
+         <h1 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-3xl font-light text-[#F5F0E8]">
+@@ -198,19 +198,36 @@ function SettingsInner() {
+         </h1>
+       </div>
+ 
+-      {/* Tabs */}
+-      <div className="flex gap-1 mb-8 overflow-x-auto pb-1 border-b border-[#1A1A1A]">
+-        {TABS.map(t => (
+-          <button key={t.value} onClick={() => setTab(t.value)}
+-            className={`text-xs px-4 py-3 whitespace-nowrap transition-colors border-b-2 -mb-px ${
+-              tab === t.value ? 'text-[#C8A96E] border-[#C8A96E]' : 'text-[#6B6B6B] border-transparent hover:text-[#F5F0E8]'
+-            }`}>{t.label}</button>
+-        ))}
+-      </div>
++      <div className="flex flex-col md:flex-row gap-8">
++        {/* Left settings nav */}
++        <aside className="md:w-56 flex-shrink-0">
++          <nav className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
++            {TABS.map(t => (
++              <button
++                key={t.value}
++                onClick={() => setTab(t.value)}
++                className={`text-left text-sm px-3 py-2.5 rounded-xl whitespace-nowrap transition-colors ${
++                  tab === t.value ? 'bg-[#C8A96E]/10 text-[#C8A96E]' : 'text-[#6B6B6B] hover:text-[#F5F0E8] hover:bg-[#1A1A1A]'
++                }`}
++              >
++                {t.label}
++              </button>
++            ))}
++          </nav>
++        </aside>
++
++        {/* Content */}
++        <div className="flex-1 min-w-0">
++          <div className="mb-6 pb-6 border-b border-[#1A1A1A]">
++            <p className="text-sm text-[#6B6B6B] leading-relaxed max-w-lg">
++              {TABS.find(t => t.value === tab)?.description}
++            </p>
++          </div>
+ 
+       {/* ── TAB: Site Content ── */}
+       {tab === 'content' && (
+-        <div className="space-y-6">
++        <div className="grid lg:grid-cols-2 gap-6">
++          <div className="space-y-6">
+           <div>
+             <label className={labelCls}>Hero Headline Line 1</label>
+             <input value={tenant.content.hero_headline_line1} onChange={e => update('content','hero_headline_line1',e.target.value)} className={inputCls} placeholder="Space" />
+@@ -239,6 +256,32 @@ function SettingsInner() {
+               </div>
+             ))}
+           </div>
++          </div>
++
++          {/* Live preview */}
++          <div className="lg:sticky lg:top-6 self-start">
++            <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-3">Live Preview</div>
++            <div className="rounded-2xl overflow-hidden border border-[#1A1A1A]" style={{ background: '#0A0A0A', aspectRatio: '4/5' }}>
++              <div className="relative w-full h-full flex flex-col justify-end p-6" style={{
++                backgroundImage: tenant.content.hero_image_url ? `linear-gradient(to top, rgba(10,10,10,0.95), rgba(10,10,10,0.3)), url(${tenant.content.hero_image_url})` : undefined,
++                backgroundSize: 'cover', backgroundPosition: 'center',
++              }}>
++                <div className="text-[9px] tracking-[0.3em] uppercase mb-2" style={{ color: tenant.branding.accent_color }}>
++                  {tenant.location.local_city}&apos;s Design Studio
++                </div>
++                <h3 className="leading-tight mb-2" style={{ fontFamily: "'Cormorant Garamond',Georgia,serif", fontSize: '1.6rem', fontWeight: 300, color: '#F5F0E8' }}>
++                  {tenant.content.hero_headline_line1} {tenant.content.hero_headline_line2}{' '}
++                  <em style={{ color: tenant.branding.accent_color, fontStyle: 'italic' }}>{tenant.content.hero_headline_line3}</em>
++                </h3>
++                <p className="text-xs leading-relaxed line-clamp-3" style={{ color: 'rgba(245,240,232,0.7)' }}>{tenant.content.hero_subtext}</p>
++                <div className="flex gap-4 mt-4 pt-4 text-[10px]" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', color: 'rgba(245,240,232,0.5)' }}>
++                  <span>{tenant.stats.project_count}+ Projects</span>
++                  <span>{tenant.stats.years_active}yr Experience</span>
++                </div>
++              </div>
++            </div>
++            <p className="text-xs text-[#3A3A3A] mt-2">Approximate — actual layout varies by template (Noir/Ivory) and screen size.</p>
++          </div>
+         </div>
+       )}
+ 
+@@ -440,12 +483,14 @@ function SettingsInner() {
+       {showSave && (
+         <div className="mt-8 flex items-center gap-4 pt-6 border-t border-[#1A1A1A]">
+           <button onClick={handleSave} disabled={saving}
+-            className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-8 py-3 hover:bg-[#A8854A] transition-colors disabled:opacity-50">
++            className="rounded-full bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-8 py-3 hover:bg-[#A8854A] transition-colors disabled:opacity-50">
+             {saving ? 'Saving...' : 'Save Changes'}
+           </button>
+           {saved && <span className="text-green-400 text-xs flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3 3 7-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>Saved</span>}
+         </div>
+       )}
++        </div>
++      </div>
+     </div>
+   )
+ }
