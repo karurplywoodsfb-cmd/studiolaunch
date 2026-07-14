@@ -1,0 +1,12 @@
+diff --git a/src/app/globals.css b/src/app/globals.css
+index 9df8a96..8d0e72b 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -1,6 +1,4 @@
+-@tailwind base;
+-@tailwind components;
+-@tailwind utilities;
++@import "tailwindcss";
+ 
+ :root {
+   --ink:        #0A0A0A;
