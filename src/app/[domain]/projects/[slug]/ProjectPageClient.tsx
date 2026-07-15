@@ -161,7 +161,7 @@ export default function ProjectPageClient({ tenant, project, related }: Props) {
 
   const siteRoot = typeof window !== 'undefined'
     ? window.location.origin
-    : `https://${tenant.subdomain}.studiolaunch.in`
+    : `https://${tenant.subdomain}.maspace.in`
 
   // ── Nav ──────────────────────────────────────────────────────────────────────
   const nav = (

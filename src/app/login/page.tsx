@@ -39,7 +39,7 @@ export default function LoginPage() {
           <div className="w-8 h-8 border border-[#C8A96E] flex items-center justify-center">
             <span className="text-[#C8A96E] text-lg font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
           </div>
-          <span className="text-sm tracking-[0.2em] uppercase font-light text-[#F5F0E8]">StudioLaunch</span>
+          <span className="text-sm tracking-[0.2em] uppercase font-light text-[#F5F0E8]">MaSpace</span>
         </Link>
 
         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">Welcome back</div>

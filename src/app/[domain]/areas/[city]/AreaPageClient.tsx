@@ -45,7 +45,7 @@ export default function AreaPageClient({ tenant, area, cityName, citySlug, portf
 
   const siteRoot = typeof window !== 'undefined'
     ? `${window.location.protocol}//${window.location.host}`
-    : `https://${tenant.subdomain}.studiolaunch.in`
+    : `https://${tenant.subdomain}.maspace.in`
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -329,7 +329,7 @@ export default function AreaPageClient({ tenant, area, cityName, citySlug, portf
         {!tenant.white_label && (
           <div style={{ color: '#6B6B6B', fontSize: '0.7rem' }}>
             Powered by{' '}
-            <a href="https://studiolaunch.in" style={{ color: accentColor, textDecoration: 'none' }}>StudioLaunch</a>
+            <a href="https://maspace.in" style={{ color: accentColor, textDecoration: 'none' }}>MaSpace</a>
           </div>
         )}
       </div>

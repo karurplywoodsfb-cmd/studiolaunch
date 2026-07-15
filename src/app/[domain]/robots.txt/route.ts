@@ -1,12 +1,12 @@
 // src/app/[domain]/robots.txt/route.ts
-// Generates robots.txt per tenant at mystudio.studiolaunch.in/robots.txt
+// Generates robots.txt per tenant at mystudio.maspace.in/robots.txt
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
 import { getTenantUrl } from '@/lib/utils'
 
 async function resolveTenant(domain: string) {
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
   return (await getTenantBySubdomain(subdomain)) || (await getTenantByDomain(domain))
 }

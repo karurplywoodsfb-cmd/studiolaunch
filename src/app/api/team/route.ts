@@ -100,9 +100,9 @@ export async function POST(req: NextRequest) {
     const studioName = (tenantFull?.branding as { business_name?: string })?.business_name || 'Your Studio'
 
     await resend.emails.send({
-      from:    process.env.RESEND_FROM_EMAIL || 'noreply@studiolaunch.in',
+      from:    process.env.RESEND_FROM_EMAIL || 'noreply@maspace.in',
       to:      email,
-      subject: `You've been invited to manage ${studioName} on StudioLaunch`,
+      subject: `You've been invited to manage ${studioName} on MaSpace`,
       html: `
         <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;background:#0A0A0A;color:#F5F0E8;padding:40px;">
           <div style="margin-bottom:32px;">
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
             <div style="font-size:28px;font-weight:300;">You&apos;ve been invited</div>
           </div>
           <p style="color:#6B6B6B;font-size:15px;line-height:1.7;margin-bottom:32px;">
-            You&apos;ve been invited to help manage <strong style="color:#F5F0E8;">${studioName}</strong> on StudioLaunch as an <strong style="color:#C8A96E;">${role || 'editor'}</strong>.
+            You&apos;ve been invited to help manage <strong style="color:#F5F0E8;">${studioName}</strong> on MaSpace as an <strong style="color:#C8A96E;">${role || 'editor'}</strong>.
           </p>
           <a href="${inviteUrl}" style="display:inline-block;background:#C8A96E;color:#0A0A0A;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:14px 28px;text-decoration:none;">
             Accept Invitation

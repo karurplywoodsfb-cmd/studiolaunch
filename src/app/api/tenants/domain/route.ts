@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Enter a valid domain, e.g. www.yourstudio.com' }, { status: 400 })
   }
 
-  const token = `studiolaunch-verify-${crypto.randomBytes(16).toString('hex')}`
+  const token = `maspace-verify-${crypto.randomBytes(16).toString('hex')}`
   const admin = createAdminClient()
 
   const { data, error } = await admin
@@ -76,7 +76,7 @@ export async function GET() {
   }
 
   try {
-    const records = await dns.resolveTxt(`_studiolaunch-verify.${full.custom_domain}`)
+    const records = await dns.resolveTxt(`_maspace-verify.${full.custom_domain}`)
     const found = records.flat().some(r => r === full.domain_verification_token)
 
     if (found) {

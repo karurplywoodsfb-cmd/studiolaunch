@@ -96,7 +96,7 @@ export default async function AdminPage() {
               <div className="flex items-center gap-1 mt-0.5">
                 <a href={getTenantUrl(t.subdomain)} target="_blank" rel="noopener noreferrer"
                   className="text-xs text-[#6B6B6B] hover:text-[#C8A96E] transition-colors truncate">
-                  {t.subdomain}.studiolaunch.in
+                  {t.subdomain}.maspace.in
                 </a>
                 {t.white_label && (
                   <span className="text-xs text-purple-400 border border-purple-400/30 px-1 py-0 flex-shrink-0">WL</span>

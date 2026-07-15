@@ -15,7 +15,7 @@ interface Props {
 
 // Resolve tenant from subdomain OR custom domain
 async function resolveTenant(domain: string): Promise<Tenant | null> {
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
 
   // Strip root domain suffix if present (rewrite adds subdomain as path segment)
   const subdomain = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')

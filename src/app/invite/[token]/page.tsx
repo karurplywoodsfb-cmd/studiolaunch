@@ -126,7 +126,7 @@ export default function InvitePage({ params }: Props) {
           <div className="w-7 h-7 border border-[#C8A96E] flex items-center justify-center">
             <span className="text-[#C8A96E] text-sm font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
           </div>
-          <span className="text-xs tracking-[0.2em] uppercase font-light text-[#F5F0E8]">StudioLaunch</span>
+          <span className="text-xs tracking-[0.2em] uppercase font-light text-[#F5F0E8]">MaSpace</span>
         </div>
 
         {error && !invite ? (

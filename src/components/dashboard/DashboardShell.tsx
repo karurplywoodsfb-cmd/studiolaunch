@@ -100,7 +100,7 @@ export default function DashboardShell({ tenant, newLeadsCount = 0, children }: 
         </div>
         <div className={`min-w-0 flex-1 ${collapsed ? 'lg:hidden' : ''}`}>
           <div className="text-[#F5F0E8] text-xs font-medium truncate">{branding.business_name}</div>
-          <div className="text-[#6B6B6B] text-xs truncate">{tenant.subdomain}.studiolaunch.in</div>
+          <div className="text-[#6B6B6B] text-xs truncate">{tenant.subdomain}.maspace.in</div>
         </div>
         <button
           onClick={() => setSidebarOpen(false)}
@@ -246,7 +246,7 @@ export default function DashboardShell({ tenant, newLeadsCount = 0, children }: 
             className="hidden sm:flex items-center gap-2 text-xs text-[#6B6B6B] hover:text-[#C8A96E] transition-colors border border-[#2A2A2A] rounded-full px-3 py-1.5"
           >
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M6 1l5 5-5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            {tenant.subdomain}.studiolaunch.in
+            {tenant.subdomain}.maspace.in
           </a>
 
           <div className="w-8 h-8 rounded-full bg-[#C8A96E]/10 border border-[#C8A96E]/30 flex items-center justify-center text-[#C8A96E] text-xs font-medium">

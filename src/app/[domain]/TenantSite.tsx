@@ -442,7 +442,7 @@ export default function TenantSite({ tenant, siteData }: Props) {
           </div>
           <div style={{color:'#6B6B6B',fontSize:'0.7rem'}}>
             {!tenant.white_label
-              ? <a href="https://studiolaunch.in" style={{color:accentColor,textDecoration:'none'}}>Powered by StudioLaunch</a>
+              ? <a href="https://maspace.in" style={{color:accentColor,textDecoration:'none'}}>Powered by MaSpace</a>
               : tenant.custom_footer_text
                 ? <span>{tenant.custom_footer_text}</span>
                 : null

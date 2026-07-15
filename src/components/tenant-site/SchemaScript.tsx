@@ -9,7 +9,7 @@ export default function SchemaScript({ tenant, faqs }: { tenant: Tenant; faqs: F
     '@graph': [
       {
         '@type': ['ArchitecturalService', 'LocalBusiness'],
-        '@id': `https://${tenant.subdomain}.studiolaunch.in/#organization`,
+        '@id': `https://${tenant.subdomain}.maspace.in/#organization`,
         name: branding.business_name,
         telephone: contact.phone_number,
         email: contact.email,

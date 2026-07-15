@@ -16,6 +16,12 @@ const config: Config = {
         surface:    '#141414',
         muted:      '#6B6B6B',
         rule:       '#2A2A2A',
+        // MaSpace brand palette (marketing site + onboarding)
+        ivory:      '#F7F5F0',
+        stone:      '#D9D2C4',
+        graphite:   '#1A1A1A',
+        bronze:     '#B38B59',
+        sage:       '#A8ADA1',
       },
       fontFamily: {
         display: ['"Cormorant Garamond"', 'Georgia', 'serif'],

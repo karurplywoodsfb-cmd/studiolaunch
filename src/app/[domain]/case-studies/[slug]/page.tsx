@@ -15,7 +15,7 @@ interface Props {
 }
 
 async function resolveTenant(domain: string): Promise<Tenant | null> {
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
   const bySubdomain = await getTenantBySubdomain(subdomain)
   if (bySubdomain) return bySubdomain

@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
 const APP_URL     = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export async function middleware(request: NextRequest) {
@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
   const host = hostname.replace(':3000', '').replace(':3001', '')
 
   // ── Determine if this is a tenant subdomain ───────────────────────────────
-  // Matches: mystudio.studiolaunch.in  OR  mystudio.localhost
+  // Matches: mystudio.maspace.in  OR  mystudio.localhost
   const isSubdomain =
     host.endsWith(`.${ROOT_DOMAIN}`) ||
     (host.includes('.') && host.endsWith('.localhost'))

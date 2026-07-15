@@ -171,7 +171,7 @@ function AreaForm({
         <div className="bg-[#141414] border border-[#2A2A2A] p-3 text-xs">
           <span className="text-[#6B6B6B]">Area page URL: </span>
           <span className="text-[#C8A96E] font-mono">
-            yourstudio.studiolaunch.in/areas/{form.city.toLowerCase().replace(/\s+/g, '-')}
+            yourstudio.maspace.in/areas/{form.city.toLowerCase().replace(/\s+/g, '-')}
           </span>
         </div>
       )}
@@ -254,7 +254,7 @@ export default function ServiceAreasPage() {
       {/* Info box */}
       <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-4 mb-6 text-xs text-[#6B6B6B] leading-relaxed">
         <strong className="text-[#F5F0E8]/70">How it works:</strong> Each city you add gets its own SEO landing page at{' '}
-        <code className="text-[#C8A96E] bg-[#141414] px-1.5 py-0.5">yourstudio.studiolaunch.in/areas/[city]</code>.
+        <code className="text-[#C8A96E] bg-[#141414] px-1.5 py-0.5">yourstudio.maspace.in/areas/[city]</code>.
         These pages rank for &ldquo;interior designer in [city]&rdquo; searches and link back to your main site. Each area page is automatically included in your sitemap.xml.
       </div>
 

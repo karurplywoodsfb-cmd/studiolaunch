@@ -203,7 +203,7 @@ function PortfolioForm({
             <div>
               <label className={labelCls}>URL Slug <span className="text-[#6B6B6B] normal-case tracking-normal">(auto-generated from title if blank)</span></label>
               <div className="flex items-center gap-2">
-                <span className="text-[#6B6B6B] text-sm flex-shrink-0">yourstudio.studiolaunch.in/projects/</span>
+                <span className="text-[#6B6B6B] text-sm flex-shrink-0">yourstudio.maspace.in/projects/</span>
                 <input
                   value={(form as PortfolioFormData).slug || ''}
                   onChange={e => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}

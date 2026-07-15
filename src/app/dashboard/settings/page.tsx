@@ -14,7 +14,7 @@ const TABS: { value: Tab; label: string; description: string }[] = [
   { value: 'contact',    label: 'Contact & Branding', description: 'Business identity, colors, template, and how visitors reach you.' },
   { value: 'seo',        label: 'SEO Enrichment',    description: 'AI-generated meta description and FAQ content to help you rank locally.' },
   { value: 'domain',     label: 'Custom Domain',     description: 'Connect your own domain (e.g. www.yourstudio.com) instead of the default subdomain.' },
-  { value: 'whitelabel', label: 'White Label',       description: 'Remove StudioLaunch branding from your public site footer.' },
+  { value: 'whitelabel', label: 'White Label',       description: 'Remove MaSpace branding from your public site footer.' },
   { value: 'billing',    label: 'Plan & Billing',    description: 'Your current plan, usage limits, and upgrade options.' },
 ]
 
@@ -95,13 +95,13 @@ function DomainVerificationPanel({
             <div className="text-[#6B6B6B] space-y-1">
               <div>Type: <span className="font-mono text-[#F5F0E8]/70">CNAME</span></div>
               <div>Name: <span className="font-mono text-[#F5F0E8]/70">www</span></div>
-              <div>Value: <span className="font-mono text-[#C8A96E]">cname.studiolaunch.in</span></div>
+              <div>Value: <span className="font-mono text-[#C8A96E]">cname.maspace.in</span></div>
             </div>
 
             <div className="text-[#C8A96E] font-medium tracking-widest uppercase pt-2">Step 2 — Verify ownership</div>
             <div className="text-[#6B6B6B] space-y-1">
               <div>Type: <span className="font-mono text-[#F5F0E8]/70">TXT</span></div>
-              <div>Name: <span className="font-mono text-[#F5F0E8]/70">_studiolaunch-verify.{tenant.custom_domain}</span></div>
+              <div>Name: <span className="font-mono text-[#F5F0E8]/70">_maspace-verify.{tenant.custom_domain}</span></div>
               <div>Value: <span className="font-mono text-[#C8A96E] break-all">{tenant.domain_verification_token}</span></div>
             </div>
           </div>
@@ -362,7 +362,7 @@ function SettingsInner() {
             <h3 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8] mb-4">Connect your own domain</h3>
             {tenant.plan === 'starter' ? (
               <div>
-                <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">Custom domains are on Studio and Agency plans. Your site is live at <span className="text-[#C8A96E]">{tenant.subdomain}.studiolaunch.in</span></p>
+                <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">Custom domains are on Studio and Agency plans. Your site is live at <span className="text-[#C8A96E]">{tenant.subdomain}.maspace.in</span></p>
                 <button onClick={() => setTab('billing')} className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-6 py-3 hover:bg-[#A8854A] transition-colors">Upgrade to Studio Plan</button>
               </div>
             ) : (
@@ -378,12 +378,12 @@ function SettingsInner() {
           <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-6">
             <div className="text-[#C8A96E] text-xs tracking-widest uppercase mb-3">White Label</div>
             <h3 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8] mb-3">
-              Remove StudioLaunch branding
+              Remove MaSpace branding
             </h3>
             {tenant.plan !== 'agency' ? (
               <div>
                 <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">
-                  White labelling removes all &ldquo;Powered by StudioLaunch&rdquo; references from your site. Available on the Agency plan.
+                  White labelling removes all &ldquo;Powered by MaSpace&rdquo; references from your site. Available on the Agency plan.
                 </p>
                 <button onClick={() => setTab('billing')}
                   className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-6 py-3 hover:bg-[#A8854A] transition-colors">
@@ -393,7 +393,7 @@ function SettingsInner() {
             ) : (
               <div className="space-y-6">
                 <p className="text-[#6B6B6B] text-sm leading-relaxed">
-                  When enabled, &ldquo;Powered by StudioLaunch&rdquo; is removed from your site footer. You can optionally show your own custom footer text instead.
+                  When enabled, &ldquo;Powered by MaSpace&rdquo; is removed from your site footer. You can optionally show your own custom footer text instead.
                 </p>
 
                 {/* Toggle */}
@@ -405,7 +405,7 @@ function SettingsInner() {
                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${tenant.white_label ? 'left-6' : 'left-1'}`} />
                   </div>
                   <span className="text-sm text-[#F5F0E8]/80">
-                    {tenant.white_label ? 'White label enabled — StudioLaunch branding hidden' : 'White label disabled — StudioLaunch branding shown'}
+                    {tenant.white_label ? 'White label enabled — MaSpace branding hidden' : 'White label disabled — MaSpace branding shown'}
                   </span>
                 </label>
 
@@ -427,7 +427,7 @@ function SettingsInner() {
                   <div className="flex justify-between items-center text-xs text-[#6B6B6B]">
                     <span>© {new Date().getFullYear()} {tenant.branding.business_name}. All rights reserved.</span>
                     {!tenant.white_label
-                      ? <span className="text-[#C8A96E]">Powered by StudioLaunch</span>
+                      ? <span className="text-[#C8A96E]">Powered by MaSpace</span>
                       : tenant.custom_footer_text
                         ? <span>{tenant.custom_footer_text}</span>
                         : <span className="italic opacity-40">No attribution</span>

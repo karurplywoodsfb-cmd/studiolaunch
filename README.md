@@ -1,12 +1,12 @@
-# StudioLaunch — Production Deployment Guide
+# MaSpace — Production Deployment Guide
 
 Premium SaaS website builder for Architects & Interior Design Studios.
 
 ## Architecture
 
 ```
-studiolaunch.in              → Marketing homepage + auth
-[subdomain].studiolaunch.in  → Tenant studio sites (dynamic)
+maspace.in              → Marketing homepage + auth
+[subdomain].maspace.in  → Tenant studio sites (dynamic)
 ```
 
 ## Stack
@@ -51,13 +51,13 @@ npx vercel --prod
 ```
 
 DNS: Add `A @ 76.76.21.21` and `CNAME * cname.vercel-dns.com`
-Vercel Domains: Add `studiolaunch.in` + `*.studiolaunch.in`
+Vercel Domains: Add `maspace.in` + `*.maspace.in`
 
 ## User Journey
 
 ```
 /signup → /onboarding (4 steps) → POST /api/tenants → /dashboard?welcome=1
-Site live at [subdomain].studiolaunch.in ✅
+Site live at [subdomain].maspace.in ✅
 Upload portfolio → case study → AI SEO → leads arrive → upgrade plan
 ```
 

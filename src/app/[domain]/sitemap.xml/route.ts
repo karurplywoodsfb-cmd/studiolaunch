@@ -1,6 +1,6 @@
 // src/app/[domain]/sitemap.xml/route.ts
 // Generates sitemap.xml dynamically for each tenant's subdomain/domain
-// URL: mystudio.studiolaunch.in/sitemap.xml
+// URL: mystudio.maspace.in/sitemap.xml
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
@@ -8,7 +8,7 @@ import { getTenantUrl } from '@/lib/utils'
 import { createAdminClient } from '@/lib/supabase/server'
 
 async function resolveTenant(domain: string) {
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
   return (await getTenantBySubdomain(subdomain)) || (await getTenantByDomain(domain))
 }

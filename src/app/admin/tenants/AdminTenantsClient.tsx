@@ -53,7 +53,7 @@ function PlanOverrideModal({
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1A1A]">
           <div>
             <div className="text-sm font-medium text-[#F5F0E8]">{tenant.business_name}</div>
-            <div className="text-xs text-[#6B6B6B]">{tenant.subdomain}.studiolaunch.in</div>
+            <div className="text-xs text-[#6B6B6B]">{tenant.subdomain}.maspace.in</div>
           </div>
           <button onClick={onClose} className="text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -87,7 +87,7 @@ function PlanOverrideModal({
           <div className="flex items-center justify-between py-3 border-t border-[#1A1A1A]">
             <div>
               <div className="text-sm text-[#F5F0E8]">White Label</div>
-              <div className="text-xs text-[#6B6B6B]">Remove StudioLaunch branding</div>
+              <div className="text-xs text-[#6B6B6B]">Remove MaSpace branding</div>
             </div>
             <div
               onClick={() => setWl(!wl)}

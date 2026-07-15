@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="text-xs font-mono text-red-400 tracking-widest uppercase">Admin Console</span>
           </div>
           <span className="text-[#2A2A2A]">|</span>
-          <span className="text-xs text-[#6B6B6B]" style={{fontFamily:'Georgia,serif'}}>StudioLaunch</span>
+          <span className="text-xs text-[#6B6B6B]" style={{fontFamily:'Georgia,serif'}}>MaSpace</span>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/dashboard" className="text-xs text-[#6B6B6B] hover:text-[#C8A96E] transition-colors tracking-widest uppercase">

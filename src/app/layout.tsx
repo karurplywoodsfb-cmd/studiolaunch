@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'StudioLaunch — Websites for Architects & Interior Designers',
+  title: 'MaSpace — Websites for Architects & Interior Designers',
   description: 'Launch a premium, SEO-optimised website for your architecture or interior design studio in minutes.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://studiolaunch.in'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://maspace.in'),
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

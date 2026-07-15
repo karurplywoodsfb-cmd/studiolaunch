@@ -1,6 +1,6 @@
 // src/app/[domain]/areas/[city]/page.tsx
 // Local SEO landing page — one per city in studio's service radius
-// URL pattern: mystudio.studiolaunch.in/areas/coimbatore
+// URL pattern: mystudio.maspace.in/areas/coimbatore
 
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
@@ -15,7 +15,7 @@ interface Props {
 }
 
 async function resolveTenant(domain: string): Promise<Tenant | null> {
-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
+  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
   return (await getTenantBySubdomain(subdomain)) || (await getTenantByDomain(domain))
 }

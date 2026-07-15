@@ -8,7 +8,7 @@ async function sendEmail(to: string, subject: string, html: string) {
   const { Resend } = await import('resend')
   const resend = new Resend(process.env.RESEND_API_KEY)
   await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL || 'noreply@studiolaunch.in',
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@maspace.in',
     to, subject, html,
   })
 }
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
                 .map(([k,v]) => `<tr><td style="padding:10px 0;border-bottom:1px solid #1A1A1A;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#6B6B6B;width:40%;">${k}</td><td style="padding:10px 0;border-bottom:1px solid #1A1A1A;font-size:14px;color:#F5F0E8;">${v}</td></tr>`).join('')}
             </table>
             ${notes ? `<div style="margin-top:24px;padding:16px;background:#141414;border-left:2px solid #C8A96E;"><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#6B6B6B;margin-bottom:8px;">Notes</div><div style="font-size:14px;color:#F5F0E8;line-height:1.6;">${notes}</div></div>` : ''}
-            <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A2A;font-size:11px;color:#6B6B6B;">Received via StudioLaunch · ${new Date().toLocaleString('en-IN')}</div>
+            <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A2A;font-size:11px;color:#6B6B6B;">Received via MaSpace · ${new Date().toLocaleString('en-IN')}</div>
           </div>
         `
       )
