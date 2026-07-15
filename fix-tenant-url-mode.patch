@@ -1,0 +1,233 @@
+diff --git a/middleware.ts b/middleware.ts
+index 81ac48c..146fbd2 100644
+--- a/middleware.ts
++++ b/middleware.ts
+@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
+     : null
+ 
+   // ── Reserved subdomains that are NOT tenants ──────────────────────────────
+-  const RESERVED = ['www', 'app', 'api', 'admin', 'mail', 'cdn']
++  const RESERVED = ['www', 'app', 'api', 'admin', 'mail', 'cdn', 'dashboard', 'login', 'signup', 'onboarding', 'invite']
+   const isTenantRequest = subdomain && !RESERVED.includes(subdomain)
+ 
+   // ── Supabase session refresh ──────────────────────────────────────────────
+diff --git a/src/app/[domain]/areas/[city]/page.tsx b/src/app/[domain]/areas/[city]/page.tsx
+index d84e0fc..f4b7c88 100644
+--- a/src/app/[domain]/areas/[city]/page.tsx
++++ b/src/app/[domain]/areas/[city]/page.tsx
+@@ -5,6 +5,7 @@
+ import { notFound } from 'next/navigation'
+ import type { Metadata } from 'next'
+ import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
++import { getTenantUrl } from '@/lib/utils'
+ import { createAdminClient } from '@/lib/supabase/server'
+ import { Tenant, ServiceAreaSEO, PortfolioProject } from '@/types'
+ import AreaPageClient from './AreaPageClient'
+@@ -60,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
+ 
+   const canonical = tenant.custom_domain
+     ? `https://${tenant.custom_domain}/areas/${city}`
+-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/areas/${city}`
++    : `${getTenantUrl(tenant.subdomain)}/areas/${city}`
+ 
+   return {
+     title,
+@@ -86,7 +87,7 @@ export default async function AreaPage({ params }: Props) {
+     '@graph': [
+       {
+         '@type': ['LocalBusiness', 'ArchitecturalService'],
+-        '@id':   `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/areas/${city}#localbusiness`,
++        '@id':   `${getTenantUrl(tenant.subdomain)}/areas/${city}#localbusiness`,
+         name:    branding.business_name,
+         description: `${branding.business_name} provides premium interior design and architectural services in ${cityName}, ${location.state}.`,
+         telephone:   contact.phone_number,
+@@ -120,9 +121,9 @@ export default async function AreaPage({ params }: Props) {
+       {
+         '@type': 'BreadcrumbList',
+         itemListElement: [
+-          { '@type': 'ListItem', position: 1, name: branding.business_name, item: `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/` },
+-          { '@type': 'ListItem', position: 2, name: 'Service Areas', item: `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/areas` },
+-          { '@type': 'ListItem', position: 3, name: `Interior Design in ${cityName}`, item: `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/areas/${city}` },
++          { '@type': 'ListItem', position: 1, name: branding.business_name, item: `${getTenantUrl(tenant.subdomain)}/` },
++          { '@type': 'ListItem', position: 2, name: 'Service Areas', item: `${getTenantUrl(tenant.subdomain)}/areas` },
++          { '@type': 'ListItem', position: 3, name: `Interior Design in ${cityName}`, item: `${getTenantUrl(tenant.subdomain)}/areas/${city}` },
+         ],
+       },
+     ],
+diff --git a/src/app/[domain]/case-studies/[slug]/page.tsx b/src/app/[domain]/case-studies/[slug]/page.tsx
+index b4eb996..a0c248c 100644
+--- a/src/app/[domain]/case-studies/[slug]/page.tsx
++++ b/src/app/[domain]/case-studies/[slug]/page.tsx
+@@ -5,6 +5,7 @@
+ import { notFound } from 'next/navigation'
+ import type { Metadata } from 'next'
+ import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
++import { getTenantUrl } from '@/lib/utils'
+ import { createAdminClient } from '@/lib/supabase/server'
+ import { Tenant, CaseStudy } from '@/types'
+ import CaseStudyPageClient from './CaseStudyPageClient'
+@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
+ 
+   const canonical = tenant.custom_domain
+     ? `https://${tenant.custom_domain}/case-studies/${slug}`
+-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/case-studies/${slug}`
++    : `${getTenantUrl(tenant.subdomain)}/case-studies/${slug}`
+ 
+   return {
+     title,
+diff --git a/src/app/[domain]/page.tsx b/src/app/[domain]/page.tsx
+index 8697add..12a1d78 100644
+--- a/src/app/[domain]/page.tsx
++++ b/src/app/[domain]/page.tsx
+@@ -4,6 +4,7 @@
+ import { notFound } from 'next/navigation'
+ import type { Metadata } from 'next'
+ import { getTenantBySubdomain, getTenantByDomain, getSiteData } from '@/lib/tenant'
++import { getTenantUrl } from '@/lib/utils'
+ import { Tenant } from '@/types'
+ import TenantSite from './TenantSite'
+ import IvoryTemplate from './IvoryTemplate'
+@@ -55,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
+     alternates: {
+       canonical: tenant.custom_domain
+         ? `https://${tenant.custom_domain}/`
+-        : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/`,
++        : `${getTenantUrl(tenant.subdomain)}/`,
+     },
+   }
+ }
+diff --git a/src/app/[domain]/projects/[slug]/page.tsx b/src/app/[domain]/projects/[slug]/page.tsx
+index 9b8a97d..06e2b00 100644
+--- a/src/app/[domain]/projects/[slug]/page.tsx
++++ b/src/app/[domain]/projects/[slug]/page.tsx
+@@ -5,6 +5,7 @@
+ import { notFound } from 'next/navigation'
+ import type { Metadata } from 'next'
+ import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
++import { getTenantUrl } from '@/lib/utils'
+ import { createAdminClient } from '@/lib/supabase/server'
+ import { Tenant, PortfolioProjectSEO } from '@/types'
+ import ProjectPageClient from './ProjectPageClient'
+@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
+ 
+   const canonical = tenant.custom_domain
+     ? `https://${tenant.custom_domain}/projects/${slug}`
+-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/projects/${slug}`
++    : `${getTenantUrl(tenant.subdomain)}/projects/${slug}`
+ 
+   return {
+     title,
+@@ -94,7 +95,7 @@ export default async function ProjectPage({ params }: Props) {
+     '@graph': [
+       {
+         '@type': 'CreativeWork',
+-        '@id':   `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/projects/${slug}#project`,
++        '@id':   `${getTenantUrl(tenant.subdomain)}/projects/${slug}#project`,
+         name:    project.title,
+         description: project.seo_description || project.full_description,
+         image:   project.images?.length ? project.images : (project.cover_image_url ? [project.cover_image_url] : []),
+@@ -135,19 +136,19 @@ export default async function ProjectPage({ params }: Props) {
+             '@type':    'ListItem',
+             position:   1,
+             name:       branding.business_name,
+-            item:       `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/`,
++            item:       `${getTenantUrl(tenant.subdomain)}/`,
+           },
+           {
+             '@type':    'ListItem',
+             position:   2,
+             name:       'Projects',
+-            item:       `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/projects`,
++            item:       `${getTenantUrl(tenant.subdomain)}/projects`,
+           },
+           {
+             '@type':    'ListItem',
+             position:   3,
+             name:       project.title,
+-            item:       `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/projects/${slug}`,
++            item:       `${getTenantUrl(tenant.subdomain)}/projects/${slug}`,
+           },
+         ],
+       },
+diff --git a/src/app/[domain]/robots.txt/route.ts b/src/app/[domain]/robots.txt/route.ts
+index 2a84d88..bb7e4b9 100644
+--- a/src/app/[domain]/robots.txt/route.ts
++++ b/src/app/[domain]/robots.txt/route.ts
+@@ -3,6 +3,7 @@
+ 
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
++import { getTenantUrl } from '@/lib/utils'
+ 
+ async function resolveTenant(domain: string) {
+   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
+@@ -23,7 +24,7 @@ export async function GET(
+ 
+   const baseUrl = tenant.custom_domain
+     ? `https://${tenant.custom_domain}`
+-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
++    : `${getTenantUrl(tenant.subdomain)}`
+ 
+   const txt = `User-agent: *
+ Allow: /
+diff --git a/src/app/[domain]/sitemap.xml/route.ts b/src/app/[domain]/sitemap.xml/route.ts
+index d65c68d..10009c9 100644
+--- a/src/app/[domain]/sitemap.xml/route.ts
++++ b/src/app/[domain]/sitemap.xml/route.ts
+@@ -4,6 +4,7 @@
+ 
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
++import { getTenantUrl } from '@/lib/utils'
+ import { createAdminClient } from '@/lib/supabase/server'
+ 
+ async function resolveTenant(domain: string) {
+@@ -26,7 +27,7 @@ export async function GET(
+ 
+   const baseUrl = tenant.custom_domain
+     ? `https://${tenant.custom_domain}`
+-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
++    : `${getTenantUrl(tenant.subdomain)}`
+ 
+   const admin = createAdminClient()
+ 
+diff --git a/src/lib/tenant.ts b/src/lib/tenant.ts
+index 3360a89..aa92089 100644
+--- a/src/lib/tenant.ts
++++ b/src/lib/tenant.ts
+@@ -90,7 +90,7 @@ export async function getSiteData(tenantId: string) {
+ 
+ // ── Check subdomain availability ──────────────────────────────────────────────
+ export async function isSubdomainAvailable(subdomain: string): Promise<boolean> {
+-  const RESERVED = ['www', 'app', 'api', 'admin', 'mail', 'cdn', 'dashboard', 'login', 'signup']
++  const RESERVED = ['www', 'app', 'api', 'admin', 'mail', 'cdn', 'dashboard', 'login', 'signup', 'onboarding', 'invite']
+   if (RESERVED.includes(subdomain)) return false
+   if (!/^[a-z0-9-]{3,30}$/.test(subdomain)) return false
+ 
+diff --git a/src/lib/utils.ts b/src/lib/utils.ts
+index 500b039..c28bfce 100644
+--- a/src/lib/utils.ts
++++ b/src/lib/utils.ts
+@@ -48,8 +48,22 @@ export function getInitials(name: string): string {
+ // Build the public URL for a tenant site
+ export function getTenantUrl(subdomain: string): string {
+   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++
+   if (process.env.NODE_ENV === 'development') {
+     return `http://${subdomain}.localhost:3000`
+   }
++
++  // Subdomain-per-tenant (mystudio.studiolaunch.in) is the real product design, and
++  // is what runs once a custom domain with wildcard DNS (*.studiolaunch.in → Vercel)
++  // is attached. Vercel's own shared *.vercel.app domain can't do wildcard subdomains
++  // for a project you don't own the apex of — so while testing there, set
++  // NEXT_PUBLIC_TENANT_URL_MODE=path in your environment variables to fall back to
++  // path-based links (studiolaunch.vercel.app/mystudio) instead. Remove/unset it
++  // (or set it to "subdomain") once your real domain is wired up.
++  if (process.env.NEXT_PUBLIC_TENANT_URL_MODE === 'path') {
++    const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${rootDomain}`
++    return `${appUrl.replace(/\/$/, '')}/${subdomain}`
++  }
++
+   return `https://${subdomain}.${rootDomain}`
+ }

@@ -5,6 +5,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
+import { getTenantUrl } from '@/lib/utils'
 import { createAdminClient } from '@/lib/supabase/server'
 import { Tenant, CaseStudy } from '@/types'
 import CaseStudyPageClient from './CaseStudyPageClient'
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const canonical = tenant.custom_domain
     ? `https://${tenant.custom_domain}/case-studies/${slug}`
-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/case-studies/${slug}`
+    : `${getTenantUrl(tenant.subdomain)}/case-studies/${slug}`
 
   return {
     title,

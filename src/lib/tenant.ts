@@ -90,7 +90,7 @@ export async function getSiteData(tenantId: string) {
 
 // ── Check subdomain availability ──────────────────────────────────────────────
 export async function isSubdomainAvailable(subdomain: string): Promise<boolean> {
-  const RESERVED = ['www', 'app', 'api', 'admin', 'mail', 'cdn', 'dashboard', 'login', 'signup']
+  const RESERVED = ['www', 'app', 'api', 'admin', 'mail', 'cdn', 'dashboard', 'login', 'signup', 'onboarding', 'invite']
   if (RESERVED.includes(subdomain)) return false
   if (!/^[a-z0-9-]{3,30}$/.test(subdomain)) return false
 

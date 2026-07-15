@@ -5,6 +5,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
+import { getTenantUrl } from '@/lib/utils'
 import { createAdminClient } from '@/lib/supabase/server'
 import { Tenant, ServiceAreaSEO, PortfolioProject } from '@/types'
 import AreaPageClient from './AreaPageClient'
@@ -60,7 +61,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const canonical = tenant.custom_domain
     ? `https://${tenant.custom_domain}/areas/${city}`
-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/areas/${city}`
+    : `${getTenantUrl(tenant.subdomain)}/areas/${city}`
 
   return {
     title,
@@ -86,7 +87,7 @@ export default async function AreaPage({ params }: Props) {
     '@graph': [
       {
         '@type': ['LocalBusiness', 'ArchitecturalService'],
-        '@id':   `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/areas/${city}#localbusiness`,
+        '@id':   `${getTenantUrl(tenant.subdomain)}/areas/${city}#localbusiness`,
         name:    branding.business_name,
         description: `${branding.business_name} provides premium interior design and architectural services in ${cityName}, ${location.state}.`,
         telephone:   contact.phone_number,
@@ -120,9 +121,9 @@ export default async function AreaPage({ params }: Props) {
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: branding.business_name, item: `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/` },
-          { '@type': 'ListItem', position: 2, name: 'Service Areas', item: `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/areas` },
-          { '@type': 'ListItem', position: 3, name: `Interior Design in ${cityName}`, item: `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/areas/${city}` },
+          { '@type': 'ListItem', position: 1, name: branding.business_name, item: `${getTenantUrl(tenant.subdomain)}/` },
+          { '@type': 'ListItem', position: 2, name: 'Service Areas', item: `${getTenantUrl(tenant.subdomain)}/areas` },
+          { '@type': 'ListItem', position: 3, name: `Interior Design in ${cityName}`, item: `${getTenantUrl(tenant.subdomain)}/areas/${city}` },
         ],
       },
     ],

@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
+import { getTenantUrl } from '@/lib/utils'
 
 async function resolveTenant(domain: string) {
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
@@ -23,7 +24,7 @@ export async function GET(
 
   const baseUrl = tenant.custom_domain
     ? `https://${tenant.custom_domain}`
-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+    : `${getTenantUrl(tenant.subdomain)}`
 
   const txt = `User-agent: *
 Allow: /

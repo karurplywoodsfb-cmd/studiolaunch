@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
     : null
 
   // ── Reserved subdomains that are NOT tenants ──────────────────────────────
-  const RESERVED = ['www', 'app', 'api', 'admin', 'mail', 'cdn']
+  const RESERVED = ['www', 'app', 'api', 'admin', 'mail', 'cdn', 'dashboard', 'login', 'signup', 'onboarding', 'invite']
   const isTenantRequest = subdomain && !RESERVED.includes(subdomain)
 
   // ── Supabase session refresh ──────────────────────────────────────────────

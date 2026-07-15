@@ -4,6 +4,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getTenantBySubdomain, getTenantByDomain, getSiteData } from '@/lib/tenant'
+import { getTenantUrl } from '@/lib/utils'
 import { Tenant } from '@/types'
 import TenantSite from './TenantSite'
 import IvoryTemplate from './IvoryTemplate'
@@ -55,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     alternates: {
       canonical: tenant.custom_domain
         ? `https://${tenant.custom_domain}/`
-        : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/`,
+        : `${getTenantUrl(tenant.subdomain)}/`,
     },
   }
 }

@@ -5,6 +5,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
+import { getTenantUrl } from '@/lib/utils'
 import { createAdminClient } from '@/lib/supabase/server'
 import { Tenant, PortfolioProjectSEO } from '@/types'
 import ProjectPageClient from './ProjectPageClient'
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const canonical = tenant.custom_domain
     ? `https://${tenant.custom_domain}/projects/${slug}`
-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/projects/${slug}`
+    : `${getTenantUrl(tenant.subdomain)}/projects/${slug}`
 
   return {
     title,
@@ -94,7 +95,7 @@ export default async function ProjectPage({ params }: Props) {
     '@graph': [
       {
         '@type': 'CreativeWork',
-        '@id':   `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/projects/${slug}#project`,
+        '@id':   `${getTenantUrl(tenant.subdomain)}/projects/${slug}#project`,
         name:    project.title,
         description: project.seo_description || project.full_description,
         image:   project.images?.length ? project.images : (project.cover_image_url ? [project.cover_image_url] : []),
@@ -135,19 +136,19 @@ export default async function ProjectPage({ params }: Props) {
             '@type':    'ListItem',
             position:   1,
             name:       branding.business_name,
-            item:       `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/`,
+            item:       `${getTenantUrl(tenant.subdomain)}/`,
           },
           {
             '@type':    'ListItem',
             position:   2,
             name:       'Projects',
-            item:       `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/projects`,
+            item:       `${getTenantUrl(tenant.subdomain)}/projects`,
           },
           {
             '@type':    'ListItem',
             position:   3,
             name:       project.title,
-            item:       `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/projects/${slug}`,
+            item:       `${getTenantUrl(tenant.subdomain)}/projects/${slug}`,
           },
         ],
       },

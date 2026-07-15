@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
+import { getTenantUrl } from '@/lib/utils'
 import { createAdminClient } from '@/lib/supabase/server'
 
 async function resolveTenant(domain: string) {
@@ -26,7 +27,7 @@ export async function GET(
 
   const baseUrl = tenant.custom_domain
     ? `https://${tenant.custom_domain}`
-    : `https://${tenant.subdomain}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`
+    : `${getTenantUrl(tenant.subdomain)}`
 
   const admin = createAdminClient()
 

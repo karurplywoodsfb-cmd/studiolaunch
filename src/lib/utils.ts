@@ -48,8 +48,22 @@ export function getInitials(name: string): string {
 // Build the public URL for a tenant site
 export function getTenantUrl(subdomain: string): string {
   const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
+
   if (process.env.NODE_ENV === 'development') {
     return `http://${subdomain}.localhost:3000`
   }
+
+  // Subdomain-per-tenant (mystudio.studiolaunch.in) is the real product design, and
+  // is what runs once a custom domain with wildcard DNS (*.studiolaunch.in → Vercel)
+  // is attached. Vercel's own shared *.vercel.app domain can't do wildcard subdomains
+  // for a project you don't own the apex of — so while testing there, set
+  // NEXT_PUBLIC_TENANT_URL_MODE=path in your environment variables to fall back to
+  // path-based links (studiolaunch.vercel.app/mystudio) instead. Remove/unset it
+  // (or set it to "subdomain") once your real domain is wired up.
+  if (process.env.NEXT_PUBLIC_TENANT_URL_MODE === 'path') {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${rootDomain}`
+    return `${appUrl.replace(/\/$/, '')}/${subdomain}`
+  }
+
   return `https://${subdomain}.${rootDomain}`
 }
