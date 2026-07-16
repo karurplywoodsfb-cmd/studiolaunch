@@ -40,24 +40,24 @@ const PLANS = [
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-ivory text-graphite" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <main className="min-h-screen bg-[#F7F5F0] text-[#1A1A1A]" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       {/* Nav */}
-      <nav className="sticky top-0 z-50 border-b border-stone/60 bg-ivory/90 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 border-b border-[#D9D2C4]/60 bg-[#F7F5F0]/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
           <Logo size={26} />
           <div className="hidden md:flex items-center gap-8">
             {NAV_LINKS.map(l => (
-              <a key={l.href} href={l.href} className="text-sm text-graphite/70 hover:text-graphite transition-colors">
+              <a key={l.href} href={l.href} className="text-sm text-[#1A1A1A]/70 hover:text-[#1A1A1A] transition-colors">
                 {l.label}
               </a>
             ))}
           </div>
           <div className="flex items-center gap-5">
-            <Link href="/login" className="hidden sm:block text-sm text-graphite/70 hover:text-graphite transition-colors">
+            <Link href="/login" className="hidden sm:block text-sm text-[#1A1A1A]/70 hover:text-[#1A1A1A] transition-colors">
               Login
             </Link>
-            <Link href="/signup" className="bg-graphite text-ivory text-sm font-medium px-5 py-2.5 hover:bg-graphite/85 transition-colors">
+            <Link href="/signup" className="bg-[#1A1A1A] text-[#F7F5F0] text-sm font-medium px-5 py-2.5 hover:bg-[#1A1A1A]/85 transition-colors">
               Start Free
             </Link>
           </div>
@@ -67,27 +67,27 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-6 pt-16 pb-24 grid lg:grid-cols-2 gap-12 items-center">
         <div>
-          <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-5">Design Operating System</div>
+          <div className="text-[#B38B59] text-xs tracking-[0.2em] uppercase mb-5">Design Operating System</div>
           <h1 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-5xl md:text-6xl font-light leading-[1.05] mb-6">
-            Your studio deserves a <em className="text-bronze not-italic">better website</em>
+            Your studio deserves a <em className="text-[#B38B59] not-italic">better website</em>
           </h1>
-          <p className="text-graphite/60 text-lg leading-relaxed mb-8 max-w-md">
+          <p className="text-[#1A1A1A]/60 text-lg leading-relaxed mb-8 max-w-md">
             Launch a premium, SEO-optimised website in under 20 minutes. Built-in lead capture, portfolio manager, case study builder, and AI content — designed specifically for architects and interior designers.
           </p>
           <div className="flex flex-wrap gap-4 mb-6">
-            <Link href="/signup" className="bg-graphite text-ivory text-sm font-medium px-7 py-3.5 hover:bg-graphite/85 transition-colors inline-flex items-center gap-2">
+            <Link href="/signup" className="bg-[#1A1A1A] text-[#F7F5F0] text-sm font-medium px-7 py-3.5 hover:bg-[#1A1A1A]/85 transition-colors inline-flex items-center gap-2">
               Start Free Trial
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M7.5 1.5L13 7l-5.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </Link>
-            <a href="#templates" className="border border-graphite/20 text-graphite text-sm font-medium px-7 py-3.5 hover:border-graphite/50 transition-colors">
+            <a href="#templates" className="border border-[#1A1A1A]/20 text-[#1A1A1A] text-sm font-medium px-7 py-3.5 hover:border-[#1A1A1A]/50 transition-colors">
               View Templates
             </a>
           </div>
-          <p className="text-graphite/45 text-xs">No credit card required · Cancel anytime · Your own subdomain instantly</p>
+          <p className="text-[#1A1A1A]/45 text-xs">No credit card required · Cancel anytime · Your own subdomain instantly</p>
         </div>
 
         {/* Hero visual */}
-        <div className="relative aspect-[4/3] bg-stone/40 rounded-sm overflow-hidden">
+        <div className="relative aspect-[4/3] bg-[#D9D2C4]/40 rounded-sm overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
             <svg width="100%" height="100%" viewBox="0 0 400 300" fill="none" preserveAspectRatio="xMidYMid slice">
               <rect width="400" height="300" fill="#D9D2C4" />
@@ -96,13 +96,13 @@ export default function HomePage() {
               <circle cx="270" cy="90" r="18" fill="#A8ADA1" />
             </svg>
           </div>
-          <div className="absolute bottom-6 left-6 right-6 bg-ivory shadow-xl rounded-sm p-4">
+          <div className="absolute bottom-6 left-6 right-6 bg-[#F7F5F0] shadow-xl rounded-sm p-4">
             <div className="flex items-center gap-1.5 mb-3">
-              <div className="w-2 h-2 rounded-full bg-stone" />
-              <div className="w-2 h-2 rounded-full bg-stone" />
-              <div className="w-2 h-2 rounded-full bg-stone" />
+              <div className="w-2 h-2 rounded-full bg-[#D9D2C4]" />
+              <div className="w-2 h-2 rounded-full bg-[#D9D2C4]" />
+              <div className="w-2 h-2 rounded-full bg-[#D9D2C4]" />
             </div>
-            <div className="bg-graphite text-ivory p-4">
+            <div className="bg-[#1A1A1A] text-[#F7F5F0] p-4">
               <div style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-lg">Spaces that inspire life.</div>
             </div>
           </div>
@@ -110,8 +110,8 @@ export default function HomePage() {
       </section>
 
       {/* Social proof strip */}
-      <div className="border-y border-stone/60 py-6 px-6">
-        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-8 text-graphite/40 text-xs tracking-widest uppercase">
+      <div className="border-y border-[#D9D2C4]/60 py-6 px-6">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-8 text-[#1A1A1A]/40 text-xs tracking-widest uppercase">
           <span>Chennai Studios</span>
           <span>·</span>
           <span>Coimbatore Architects</span>
@@ -127,16 +127,16 @@ export default function HomePage() {
       {/* Features */}
       <section id="features" className="max-w-6xl mx-auto px-6 py-24">
         <div className="max-w-xl mb-14">
-          <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-4">All You Need</div>
+          <div className="text-[#B38B59] text-xs tracking-[0.2em] uppercase mb-4">All You Need</div>
           <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light">
             Everything you need, in one intelligent platform.
           </h2>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-stone/60 border border-stone/60">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#D9D2C4]/60 border border-[#D9D2C4]/60">
           {FEATURES.map(f => (
-            <div key={f.title} className="bg-ivory p-8">
+            <div key={f.title} className="bg-[#F7F5F0] p-8">
               <h3 className="font-medium mb-2">{f.title}</h3>
-              <p className="text-sm text-graphite/55 leading-relaxed">{f.body}</p>
+              <p className="text-sm text-[#1A1A1A]/55 leading-relaxed">{f.body}</p>
             </div>
           ))}
         </div>
@@ -145,42 +145,42 @@ export default function HomePage() {
       {/* Templates / design systems */}
       <section id="templates" className="max-w-6xl mx-auto px-6 py-24">
         <div className="max-w-xl mb-14">
-          <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-4">Design Systems</div>
+          <div className="text-[#B38B59] text-xs tracking-[0.2em] uppercase mb-4">Design Systems</div>
           <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light">
             Choose a design system that matches your style.
           </h2>
-          <p className="text-graphite/55 mt-3">6 master design systems. Unlimited possibilities.</p>
+          <p className="text-[#1A1A1A]/55 mt-3">6 master design systems. Unlimited possibilities.</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {TEMPLATES.map((t, i) => (
             <div key={t.name} className="group cursor-pointer">
-              <div className={`aspect-[4/3] mb-3 ${i === TEMPLATES.length - 1 ? 'bg-graphite' : 'bg-stone/50'} flex items-center justify-center transition-transform group-hover:-translate-y-1`}>
-                <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className={`text-2xl ${i === TEMPLATES.length - 1 ? 'text-ivory' : 'text-graphite/70'}`}>
+              <div className={`aspect-[4/3] mb-3 ${i === TEMPLATES.length - 1 ? 'bg-[#1A1A1A]' : 'bg-[#D9D2C4]/50'} flex items-center justify-center transition-transform group-hover:-translate-y-1`}>
+                <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className={`text-2xl ${i === TEMPLATES.length - 1 ? 'text-[#F7F5F0]' : 'text-[#1A1A1A]/70'}`}>
                   {t.name}
                 </span>
               </div>
               <div className="text-sm font-medium">{t.name}</div>
-              <div className="text-xs text-graphite/45">{t.tag}</div>
+              <div className="text-xs text-[#1A1A1A]/45">{t.tag}</div>
             </div>
           ))}
         </div>
       </section>
 
       {/* How it works */}
-      <section className="bg-graphite text-ivory py-24 px-6">
+      <section className="bg-[#1A1A1A] text-[#F7F5F0] py-24 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-4">The Process</div>
+            <div className="text-[#B38B59] text-xs tracking-[0.2em] uppercase mb-4">The Process</div>
             <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light">
-              Live in <em className="text-bronze not-italic">20 minutes</em>
+              Live in <em className="text-[#B38B59] not-italic">20 minutes</em>
             </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-px bg-ivory/10">
+          <div className="grid md:grid-cols-3 gap-px bg-[#F7F5F0]/10">
             {PROCESS.map(step => (
-              <div key={step.n} className="bg-graphite p-10">
-                <div style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-bronze text-4xl font-light mb-6">{step.n}</div>
+              <div key={step.n} className="bg-[#1A1A1A] p-10">
+                <div style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-[#B38B59] text-4xl font-light mb-6">{step.n}</div>
                 <h3 className="text-lg font-medium mb-3">{step.title}</h3>
-                <p className="text-ivory/55 text-sm leading-relaxed">{step.body}</p>
+                <p className="text-[#F7F5F0]/55 text-sm leading-relaxed">{step.body}</p>
               </div>
             ))}
           </div>
@@ -190,31 +190,31 @@ export default function HomePage() {
       {/* Pricing */}
       <section id="pricing" className="max-w-6xl mx-auto px-6 py-24">
         <div className="text-center mb-16">
-          <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-4">Pricing</div>
+          <div className="text-[#B38B59] text-xs tracking-[0.2em] uppercase mb-4">Pricing</div>
           <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light">
-            Simple, <em className="text-bronze not-italic">honest</em> pricing
+            Simple, <em className="text-[#B38B59] not-italic">honest</em> pricing
           </h2>
         </div>
-        <div className="grid md:grid-cols-3 gap-px bg-stone/60 border border-stone/60">
+        <div className="grid md:grid-cols-3 gap-px bg-[#D9D2C4]/60 border border-[#D9D2C4]/60">
           {PLANS.map(plan => (
-            <div key={plan.name} className={`p-10 ${plan.highlighted ? 'bg-ivory border-2 border-bronze' : 'bg-ivory'}`}>
+            <div key={plan.name} className={`p-10 ${plan.highlighted ? 'bg-[#F7F5F0] border-2 border-[#B38B59]' : 'bg-[#F7F5F0]'}`}>
               {plan.highlighted && (
-                <div className="text-bronze text-xs tracking-widest uppercase mb-4">Most Popular</div>
+                <div className="text-[#B38B59] text-xs tracking-widest uppercase mb-4">Most Popular</div>
               )}
               <div className="font-medium mb-2">{plan.name}</div>
               <div className="flex items-baseline gap-1 mb-8">
-                <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light text-bronze">{plan.price}</span>
-                <span className="text-graphite/50 text-sm">{plan.period}</span>
+                <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light text-[#B38B59]">{plan.price}</span>
+                <span className="text-[#1A1A1A]/50 text-sm">{plan.period}</span>
               </div>
               <ul className="space-y-3 mb-10">
                 {plan.features.map(f => (
-                  <li key={f} className="flex items-start gap-3 text-sm text-graphite/60">
-                    <svg className="w-4 h-4 text-bronze mt-0.5 flex-shrink-0" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  <li key={f} className="flex items-start gap-3 text-sm text-[#1A1A1A]/60">
+                    <svg className="w-4 h-4 text-[#B38B59] mt-0.5 flex-shrink-0" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                     {f}
                   </li>
                 ))}
               </ul>
-              <Link href="/signup" className={`block text-center text-sm font-medium py-3 transition-colors ${plan.highlighted ? 'bg-graphite text-ivory hover:bg-graphite/85' : 'border border-graphite/25 text-graphite hover:border-graphite/60'}`}>
+              <Link href="/signup" className={`block text-center text-sm font-medium py-3 transition-colors ${plan.highlighted ? 'bg-[#1A1A1A] text-[#F7F5F0] hover:bg-[#1A1A1A]/85' : 'border border-[#1A1A1A]/25 text-[#1A1A1A] hover:border-[#1A1A1A]/60'}`}>
                 {plan.highlighted ? 'Start Free Trial' : plan.cta}
               </Link>
             </div>
@@ -224,15 +224,15 @@ export default function HomePage() {
 
       {/* CTA */}
       <section className="max-w-6xl mx-auto px-6 pb-24">
-        <div className="bg-stone/40 p-12 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="bg-[#D9D2C4]/40 p-12 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8">
           <div>
             <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-3xl font-light mb-2">
               Ready to design spaces that leave a lasting impression?
             </h2>
-            <p className="text-graphite/55">Start building your studio&apos;s digital presence today.</p>
+            <p className="text-[#1A1A1A]/55">Start building your studio&apos;s digital presence today.</p>
           </div>
           <div className="flex gap-4 flex-shrink-0">
-            <Link href="/signup" className="bg-graphite text-ivory text-sm font-medium px-7 py-3.5 hover:bg-graphite/85 transition-colors whitespace-nowrap">
+            <Link href="/signup" className="bg-[#1A1A1A] text-[#F7F5F0] text-sm font-medium px-7 py-3.5 hover:bg-[#1A1A1A]/85 transition-colors whitespace-nowrap">
               Start Free
             </Link>
           </div>
@@ -240,36 +240,36 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-graphite text-ivory/70 pt-16 pb-8 px-6">
-        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-ivory/10">
+      <footer className="bg-[#1A1A1A] text-[#F7F5F0]/70 pt-16 pb-8 px-6">
+        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-[#F7F5F0]/10">
           <div>
             <Logo size={26} dark />
-            <p className="text-xs text-ivory/40 mt-4 max-w-[220px]">Design operating system for architects &amp; interior designers.</p>
+            <p className="text-xs text-[#F7F5F0]/40 mt-4 max-w-[220px]">Design operating system for architects &amp; interior designers.</p>
           </div>
           <div>
-            <div className="text-ivory text-sm font-medium mb-4">Product</div>
+            <div className="text-[#F7F5F0] text-sm font-medium mb-4">Product</div>
             <ul className="space-y-2.5 text-sm">
-              <li><a href="#features" className="hover:text-ivory transition-colors">Features</a></li>
-              <li><a href="#templates" className="hover:text-ivory transition-colors">Templates</a></li>
-              <li><a href="#pricing" className="hover:text-ivory transition-colors">Pricing</a></li>
+              <li><a href="#features" className="hover:text-[#F7F5F0] transition-colors">Features</a></li>
+              <li><a href="#templates" className="hover:text-[#F7F5F0] transition-colors">Templates</a></li>
+              <li><a href="#pricing" className="hover:text-[#F7F5F0] transition-colors">Pricing</a></li>
             </ul>
           </div>
           <div>
-            <div className="text-ivory text-sm font-medium mb-4">Company</div>
+            <div className="text-[#F7F5F0] text-sm font-medium mb-4">Company</div>
             <ul className="space-y-2.5 text-sm">
-              <li><Link href="/login" className="hover:text-ivory transition-colors">Login</Link></li>
-              <li><Link href="/signup" className="hover:text-ivory transition-colors">Start Free</Link></li>
+              <li><Link href="/login" className="hover:text-[#F7F5F0] transition-colors">Login</Link></li>
+              <li><Link href="/signup" className="hover:text-[#F7F5F0] transition-colors">Start Free</Link></li>
             </ul>
           </div>
           <div>
-            <div className="text-ivory text-sm font-medium mb-4">Legal</div>
+            <div className="text-[#F7F5F0] text-sm font-medium mb-4">Legal</div>
             <ul className="space-y-2.5 text-sm">
-              <li><Link href="/privacy" className="hover:text-ivory transition-colors">Privacy</Link></li>
-              <li><Link href="/terms" className="hover:text-ivory transition-colors">Terms</Link></li>
+              <li><Link href="/privacy" className="hover:text-[#F7F5F0] transition-colors">Privacy</Link></li>
+              <li><Link href="/terms" className="hover:text-[#F7F5F0] transition-colors">Terms</Link></li>
             </ul>
           </div>
         </div>
-        <div className="max-w-6xl mx-auto pt-6 text-xs text-ivory/35">
+        <div className="max-w-6xl mx-auto pt-6 text-xs text-[#F7F5F0]/35">
           © {new Date().getFullYear()} MaSpace. All rights reserved.
         </div>
       </footer>

@@ -50,9 +50,9 @@ const INDIAN_STATES = [
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs tracking-widest uppercase text-graphite/50 mb-2">{label}</label>
+      <label className="block text-xs tracking-widest uppercase text-[#1A1A1A]/50 mb-2">{label}</label>
       {children}
-      {hint && <p className="text-xs text-graphite/40 mt-1.5">{hint}</p>}
+      {hint && <p className="text-xs text-[#1A1A1A]/40 mt-1.5">{hint}</p>}
     </div>
   )
 }
@@ -61,7 +61,7 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className="w-full bg-ivory border border-stone text-graphite px-4 py-3 text-sm outline-none focus:border-bronze transition-colors placeholder:text-graphite/30 rounded-md"
+      className="w-full bg-[#F7F5F0] border border-[#D9D2C4] text-[#1A1A1A] px-4 py-3 text-sm outline-none focus:border-[#B38B59] transition-colors placeholder:text-[#1A1A1A]/30 rounded-md"
     />
   )
 }
@@ -70,7 +70,7 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement> & { childre
   return (
     <select
       {...props}
-      className="w-full bg-ivory border border-stone text-graphite px-4 py-3 text-sm outline-none focus:border-bronze transition-colors rounded-md"
+      className="w-full bg-[#F7F5F0] border border-[#D9D2C4] text-[#1A1A1A] px-4 py-3 text-sm outline-none focus:border-[#B38B59] transition-colors rounded-md"
     >
       {props.children}
     </select>
@@ -255,13 +255,13 @@ export default function OnboardingPage() {
   const progress = (step / LAST_FORM_STEP) * 100
 
   return (
-    <div className="min-h-screen bg-ivory flex flex-col" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
+    <div className="min-h-screen bg-[#F7F5F0] flex flex-col" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
 
       {/* Top bar */}
-      <div className="border-b border-stone/60 px-6 h-16 flex items-center justify-between">
+      <div className="border-b border-[#D9D2C4]/60 px-6 h-16 flex items-center justify-between">
         <Logo size={24} />
         {step > 0 && step < TOTAL_STEPS - 1 && (
-          <div className="text-xs tracking-widest uppercase text-graphite/40">
+          <div className="text-xs tracking-widest uppercase text-[#1A1A1A]/40">
             Step {step} of {LAST_FORM_STEP}
           </div>
         )}
@@ -269,13 +269,13 @@ export default function OnboardingPage() {
 
       {/* Progress bar */}
       {step > 0 && step < TOTAL_STEPS - 1 && (
-        <div className="h-0.5 bg-stone/50">
-          <div className="h-full bg-bronze transition-all duration-500" style={{ width: `${progress}%` }} />
+        <div className="h-0.5 bg-[#D9D2C4]/50">
+          <div className="h-full bg-[#B38B59] transition-all duration-500" style={{ width: `${progress}%` }} />
         </div>
       )}
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-lg bg-white border border-stone/60 rounded-2xl shadow-sm p-10">
+        <div className="w-full max-w-lg bg-white border border-[#D9D2C4]/60 rounded-2xl shadow-sm p-10">
 
           {/* ── STEP 0: Welcome ─────────────────────────────────────────── */}
           {step === 0 && (
@@ -283,15 +283,15 @@ export default function OnboardingPage() {
               <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6">
                 <LogoMark size={44} />
               </div>
-              <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-3xl font-light text-graphite mb-3">
+              <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-3xl font-light text-[#1A1A1A] mb-3">
                 Welcome to MaSpace
               </h2>
-              <p className="text-graphite/55 text-sm mb-10 max-w-sm mx-auto">
+              <p className="text-[#1A1A1A]/55 text-sm mb-10 max-w-sm mx-auto">
                 The design operating system for architects &amp; interior designers. A few simple steps to get your studio site live.
               </p>
               <button
                 onClick={next}
-                className="bg-graphite text-ivory text-sm font-medium px-8 py-3.5 hover:bg-graphite/85 transition-colors inline-flex items-center gap-2 rounded-md"
+                className="bg-[#1A1A1A] text-[#F7F5F0] text-sm font-medium px-8 py-3.5 hover:bg-[#1A1A1A]/85 transition-colors inline-flex items-center gap-2 rounded-md"
               >
                 Get Started
                 <ArrowIcon />
@@ -309,10 +309,10 @@ export default function OnboardingPage() {
                     key={p.value}
                     onClick={() => set('persona', p.value)}
                     className={`w-full text-left px-5 py-4 border rounded-md transition-colors ${
-                      data.persona === p.value ? 'border-bronze bg-bronze/5' : 'border-stone hover:border-graphite/30'
+                      data.persona === p.value ? 'border-[#B38B59] bg-[#B38B59]/5' : 'border-[#D9D2C4] hover:border-[#1A1A1A]/30'
                     }`}
                   >
-                    <span className="text-sm text-graphite">{p.label}</span>
+                    <span className="text-sm text-[#1A1A1A]">{p.label}</span>
                   </button>
                 ))}
               </div>
@@ -331,13 +331,13 @@ export default function OnboardingPage() {
                   <Input value={data.tagline} onChange={e => set('tagline', e.target.value)} placeholder="Architectural Design Studio" />
                 </Field>
                 {data.business_name && (
-                  <div className="flex items-center gap-4 p-4 bg-ivory border border-stone rounded-md">
-                    <div className="w-10 h-10 border border-bronze rounded-md flex items-center justify-center">
-                      <span className="text-bronze text-xl font-light" style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}>{data.logo_letter}</span>
+                  <div className="flex items-center gap-4 p-4 bg-[#F7F5F0] border border-[#D9D2C4] rounded-md">
+                    <div className="w-10 h-10 border border-[#B38B59] rounded-md flex items-center justify-center">
+                      <span className="text-[#B38B59] text-xl font-light" style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}>{data.logo_letter}</span>
                     </div>
                     <div>
-                      <div className="text-graphite text-sm tracking-wide">{data.business_name}</div>
-                      <div className="text-graphite/45 text-xs mt-0.5">{data.tagline}</div>
+                      <div className="text-[#1A1A1A] text-sm tracking-wide">{data.business_name}</div>
+                      <div className="text-[#1A1A1A]/45 text-xs mt-0.5">{data.tagline}</div>
                     </div>
                   </div>
                 )}
@@ -355,25 +355,25 @@ export default function OnboardingPage() {
                     key={t.value}
                     onClick={() => set('template_id', t.value)}
                     className={`text-left border rounded-md overflow-hidden transition-colors ${
-                      data.template_id === t.value ? 'border-bronze' : 'border-stone hover:border-graphite/30'
+                      data.template_id === t.value ? 'border-[#B38B59]' : 'border-[#D9D2C4] hover:border-[#1A1A1A]/30'
                     }`}
                   >
-                    <div className={`aspect-[4/3] flex items-center justify-center ${t.value === 'noir' ? 'bg-graphite' : 'bg-stone/40'}`}>
-                      <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className={`text-lg ${t.value === 'noir' ? 'text-ivory' : 'text-graphite/70'}`}>
+                    <div className={`aspect-[4/3] flex items-center justify-center ${t.value === 'noir' ? 'bg-[#1A1A1A]' : 'bg-[#D9D2C4]/40'}`}>
+                      <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className={`text-lg ${t.value === 'noir' ? 'text-[#F7F5F0]' : 'text-[#1A1A1A]/70'}`}>
                         {t.label}
                       </span>
                     </div>
                     <div className="p-3">
-                      <div className="text-xs font-medium text-graphite flex items-center justify-between">
+                      <div className="text-xs font-medium text-[#1A1A1A] flex items-center justify-between">
                         {t.label}
                         {data.template_id === t.value && <CheckIcon />}
                       </div>
-                      <div className="text-[11px] text-graphite/45">{t.tag}</div>
+                      <div className="text-[11px] text-[#1A1A1A]/45">{t.tag}</div>
                     </div>
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-graphite/40 mt-4">
+              <p className="text-xs text-[#1A1A1A]/40 mt-4">
                 Your subdomain site currently renders on one shared layout — full per-template visual rendering for all six systems is on our roadmap. Your choice is saved now so it&apos;s ready the moment it ships.
               </p>
             </div>
@@ -413,15 +413,15 @@ export default function OnboardingPage() {
                     <Input type="email" value={data.email} onChange={e => set('email', e.target.value)} placeholder="hello@yourstudio.com" required />
                   </Field>
                 </div>
-                {data.phone_display && <div className="text-bronze text-xs -mt-3">Displays as: {data.phone_display}</div>}
+                {data.phone_display && <div className="text-[#B38B59] text-xs -mt-3">Displays as: {data.phone_display}</div>}
                 <Field label="Instagram Handle" hint="Without the @ symbol">
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-graphite/40 text-sm">@</span>
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1A1A1A]/40 text-sm">@</span>
                     <input
                       value={data.instagram_handle}
                       onChange={e => set('instagram_handle', e.target.value)}
                       placeholder="yourstudio"
-                      className="w-full bg-ivory border border-stone text-graphite pl-8 pr-4 py-3 text-sm outline-none focus:border-bronze transition-colors placeholder:text-graphite/30 rounded-md"
+                      className="w-full bg-[#F7F5F0] border border-[#D9D2C4] text-[#1A1A1A] pl-8 pr-4 py-3 text-sm outline-none focus:border-[#B38B59] transition-colors placeholder:text-[#1A1A1A]/30 rounded-md"
                     />
                   </div>
                 </Field>
@@ -435,13 +435,13 @@ export default function OnboardingPage() {
               <StepHeader n={5} title="Add your brand" hint="Upload your logo and choose your accent color." />
               <div className="space-y-6">
                 <Field label="Logo (optional)" hint="PNG, JPG or WebP · up to 10MB">
-                  <label className="flex flex-col items-center justify-center gap-2 border border-dashed border-stone rounded-md py-8 cursor-pointer hover:border-bronze/60 transition-colors">
+                  <label className="flex flex-col items-center justify-center gap-2 border border-dashed border-[#D9D2C4] rounded-md py-8 cursor-pointer hover:border-[#B38B59]/60 transition-colors">
                     {data.logo_url ? (
                       <img src={data.logo_url} alt="Uploaded logo" className="w-16 h-16 object-contain" />
                     ) : (
                       <UploadIcon />
                     )}
-                    <span className="text-xs text-graphite/50">
+                    <span className="text-xs text-[#1A1A1A]/50">
                       {logoUploading ? 'Uploading...' : data.logo_url ? 'Replace logo' : 'Upload your logo'}
                     </span>
                     <input
@@ -461,7 +461,7 @@ export default function OnboardingPage() {
                         key={s.hex}
                         onClick={() => set('accent_color', s.hex)}
                         title={s.label}
-                        className={`w-10 h-10 rounded-full border-2 transition-transform ${data.accent_color === s.hex ? 'border-graphite scale-110' : 'border-transparent'}`}
+                        className={`w-10 h-10 rounded-full border-2 transition-transform ${data.accent_color === s.hex ? 'border-[#1A1A1A] scale-110' : 'border-transparent'}`}
                         style={{ backgroundColor: s.hex }}
                       />
                     ))}
@@ -499,13 +499,13 @@ export default function OnboardingPage() {
                       }}
                       onBlur={() => checkSubdomain(data.subdomain)}
                       placeholder="yourstudio"
-                      className="flex-1 bg-ivory border border-stone text-graphite px-4 py-3 text-sm outline-none focus:border-bronze transition-colors placeholder:text-graphite/30 rounded-l-md"
+                      className="flex-1 bg-[#F7F5F0] border border-[#D9D2C4] text-[#1A1A1A] px-4 py-3 text-sm outline-none focus:border-[#B38B59] transition-colors placeholder:text-[#1A1A1A]/30 rounded-l-md"
                     />
-                    <div className="bg-stone/50 border border-l-0 border-stone px-4 py-3 text-xs text-graphite/50 whitespace-nowrap flex items-center rounded-r-md">
+                    <div className="bg-[#D9D2C4]/50 border border-l-0 border-[#D9D2C4] px-4 py-3 text-xs text-[#1A1A1A]/50 whitespace-nowrap flex items-center rounded-r-md">
                       .maspace.in
                     </div>
                   </div>
-                  {subdomainStatus === 'checking' && <div className="text-graphite/45 text-xs mt-1.5">Checking availability...</div>}
+                  {subdomainStatus === 'checking' && <div className="text-[#1A1A1A]/45 text-xs mt-1.5">Checking availability...</div>}
                   {subdomainStatus === 'available' && <div className="text-green-700 text-xs mt-1.5">✓ Available — this subdomain is yours</div>}
                   {subdomainStatus === 'taken' && <div className="text-red-600 text-xs mt-1.5">✗ Already taken — try a different name</div>}
                 </Field>
@@ -525,9 +525,9 @@ export default function OnboardingPage() {
                       onChange={e => setInviteEmail(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addInvite() } }}
                       placeholder="name@domain.com"
-                      className="flex-1 bg-ivory border border-stone text-graphite px-4 py-3 text-sm outline-none focus:border-bronze transition-colors placeholder:text-graphite/30 rounded-md"
+                      className="flex-1 bg-[#F7F5F0] border border-[#D9D2C4] text-[#1A1A1A] px-4 py-3 text-sm outline-none focus:border-[#B38B59] transition-colors placeholder:text-[#1A1A1A]/30 rounded-md"
                     />
-                    <button onClick={addInvite} className="border border-graphite/25 text-graphite text-sm px-5 rounded-md hover:border-graphite/50 transition-colors whitespace-nowrap">
+                    <button onClick={addInvite} className="border border-[#1A1A1A]/25 text-[#1A1A1A] text-sm px-5 rounded-md hover:border-[#1A1A1A]/50 transition-colors whitespace-nowrap">
                       + Add
                     </button>
                   </div>
@@ -535,15 +535,15 @@ export default function OnboardingPage() {
 
                 {data.team_invites.length > 0 && (
                   <div>
-                    <div className="text-xs tracking-widest uppercase text-graphite/50 mb-2">Invited Members</div>
+                    <div className="text-xs tracking-widest uppercase text-[#1A1A1A]/50 mb-2">Invited Members</div>
                     <div className="space-y-2">
                       {data.team_invites.map(inv => (
-                        <div key={inv.email} className="flex items-center justify-between border border-stone rounded-md px-4 py-3">
+                        <div key={inv.email} className="flex items-center justify-between border border-[#D9D2C4] rounded-md px-4 py-3">
                           <div>
-                            <div className="text-sm text-graphite">{inv.email}</div>
-                            <div className="text-xs text-graphite/45">Editor</div>
+                            <div className="text-sm text-[#1A1A1A]">{inv.email}</div>
+                            <div className="text-xs text-[#1A1A1A]/45">Editor</div>
                           </div>
-                          <button onClick={() => removeInvite(inv.email)} className="text-graphite/40 hover:text-red-600 text-xs">
+                          <button onClick={() => removeInvite(inv.email)} className="text-[#1A1A1A]/40 hover:text-red-600 text-xs">
                             Remove
                           </button>
                         </div>
@@ -558,21 +558,21 @@ export default function OnboardingPage() {
           {/* ── STEP 8: Complete ─────────────────────────────────────────── */}
           {step === 8 && (
             <div className="text-center">
-              <div className="w-14 h-14 border border-bronze rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="w-14 h-14 border border-[#B38B59] rounded-full flex items-center justify-center mx-auto mb-6">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="#B38B59" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
-              <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-3xl font-light text-graphite mb-3">
+              <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-3xl font-light text-[#1A1A1A] mb-3">
                 You&apos;re all set!
               </h2>
-              <p className="text-graphite/55 text-sm mb-8 max-w-sm mx-auto">
+              <p className="text-[#1A1A1A]/55 text-sm mb-8 max-w-sm mx-auto">
                 Your studio site is ready. Let&apos;s build something amazing.
               </p>
               {finalSubdomain && (
-                <div className="text-bronze font-mono text-sm mb-8">{getTenantUrl(finalSubdomain)}</div>
+                <div className="text-[#B38B59] font-mono text-sm mb-8">{getTenantUrl(finalSubdomain)}</div>
               )}
               <button
                 onClick={() => router.push('/dashboard?welcome=1')}
-                className="bg-graphite text-ivory text-sm font-medium px-8 py-3.5 hover:bg-graphite/85 transition-colors inline-flex items-center gap-2 rounded-md"
+                className="bg-[#1A1A1A] text-[#F7F5F0] text-sm font-medium px-8 py-3.5 hover:bg-[#1A1A1A]/85 transition-colors inline-flex items-center gap-2 rounded-md"
               >
                 Go to Dashboard
                 <ArrowIcon />
@@ -589,23 +589,23 @@ export default function OnboardingPage() {
 
           {/* Navigation */}
           {step > 0 && step < TOTAL_STEPS - 1 && (
-            <div className="flex justify-between items-center mt-8 pt-6 border-t border-stone/60">
+            <div className="flex justify-between items-center mt-8 pt-6 border-t border-[#D9D2C4]/60">
               {step > 1 ? (
-                <button onClick={back} className="text-xs tracking-widest uppercase text-graphite/50 border border-stone px-6 py-3 hover:border-graphite/40 transition-colors rounded-md">
+                <button onClick={back} className="text-xs tracking-widest uppercase text-[#1A1A1A]/50 border border-[#D9D2C4] px-6 py-3 hover:border-[#1A1A1A]/40 transition-colors rounded-md">
                   Back
                 </button>
               ) : <div />}
 
               <div className="flex items-center gap-3">
                 {step === 7 && data.team_invites.length === 0 && (
-                  <button onClick={handleNext} disabled={loading} className="text-xs tracking-widest uppercase text-graphite/45 hover:text-graphite px-4 py-3 transition-colors">
+                  <button onClick={handleNext} disabled={loading} className="text-xs tracking-widest uppercase text-[#1A1A1A]/45 hover:text-[#1A1A1A] px-4 py-3 transition-colors">
                     Skip
                   </button>
                 )}
                 <button
                   onClick={handleNext}
                   disabled={loading || logoUploading}
-                  className="bg-graphite text-ivory text-xs font-semibold tracking-widest uppercase px-8 py-3 hover:bg-graphite/85 transition-colors disabled:opacity-50 flex items-center gap-3 rounded-md"
+                  className="bg-[#1A1A1A] text-[#F7F5F0] text-xs font-semibold tracking-widest uppercase px-8 py-3 hover:bg-[#1A1A1A]/85 transition-colors disabled:opacity-50 flex items-center gap-3 rounded-md"
                 >
                   {loading ? 'Launching...' : step === LAST_FORM_STEP ? 'Launch My Site' : 'Continue'}
                   {!loading && <ArrowIcon small />}
@@ -623,9 +623,9 @@ export default function OnboardingPage() {
 function StepHeader({ n, title, hint }: { n: number; title: string; hint: string }) {
   return (
     <>
-      <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-3">Step {n} of {LAST_FORM_STEP}</div>
-      <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-2xl font-light text-graphite mb-2">{title}</h2>
-      <p className="text-graphite/50 text-sm mb-8">{hint}</p>
+      <div className="text-[#B38B59] text-xs tracking-[0.2em] uppercase mb-3">Step {n} of {LAST_FORM_STEP}</div>
+      <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-2xl font-light text-[#1A1A1A] mb-2">{title}</h2>
+      <p className="text-[#1A1A1A]/50 text-sm mb-8">{hint}</p>
     </>
   )
 }

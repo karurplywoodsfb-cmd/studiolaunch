@@ -39,12 +39,12 @@ export function Logo({
       <div>
         <span
           style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}
-          className={`text-xl tracking-wide ${dark ? 'text-ivory' : 'text-graphite'}`}
+          className={`text-xl tracking-wide ${dark ? 'text-[#F7F5F0]' : 'text-[#1A1A1A]'}`}
         >
           MaSpace
         </span>
         {tagline && (
-          <div className={`text-[10px] tracking-[0.25em] uppercase -mt-0.5 ${dark ? 'text-ivory/50' : 'text-bronze'}`}>
+          <div className={`text-[10px] tracking-[0.25em] uppercase -mt-0.5 ${dark ? 'text-[#F7F5F0]/50' : 'text-[#B38B59]'}`}>
             Designed by principles.
           </div>
         )}
