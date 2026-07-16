@@ -299,6 +299,15 @@ function SettingsInner() {
                 <input value={tenant.branding.accent_color} onChange={e => update('branding','accent_color',e.target.value)} className={inputCls + ' flex-1'} placeholder="#C8A96E" />
               </div>
             </div>
+          </div>
+          <ImageUploader
+            label="Logo Image"
+            value={tenant.branding.logo_url}
+            onChange={url => update('branding','logo_url',url)}
+            folder="logo"
+            aspectHint="Square, transparent background recommended — replaces the Logo Letter on your site when set"
+          />
+          <div className="grid grid-cols-2 gap-5">
             <div>
               <label className={labelCls}>Site Template</label>
               <select value={tenant.branding.theme || 'noir'} onChange={e => update('branding','theme', e.target.value)} className={inputCls}>

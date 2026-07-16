@@ -1,0 +1,2171 @@
+diff --git a/README.md b/README.md
+index 240f593..52a297d 100644
+--- a/README.md
++++ b/README.md
+@@ -1,12 +1,12 @@
+-# StudioLaunch — Production Deployment Guide
++# MaSpace — Production Deployment Guide
+ 
+ Premium SaaS website builder for Architects & Interior Design Studios.
+ 
+ ## Architecture
+ 
+ ```
+-studiolaunch.in              → Marketing homepage + auth
+-[subdomain].studiolaunch.in  → Tenant studio sites (dynamic)
++maspace.in              → Marketing homepage + auth
++[subdomain].maspace.in  → Tenant studio sites (dynamic)
+ ```
+ 
+ ## Stack
+@@ -51,13 +51,13 @@ npx vercel --prod
+ ```
+ 
+ DNS: Add `A @ 76.76.21.21` and `CNAME * cname.vercel-dns.com`
+-Vercel Domains: Add `studiolaunch.in` + `*.studiolaunch.in`
++Vercel Domains: Add `maspace.in` + `*.maspace.in`
+ 
+ ## User Journey
+ 
+ ```
+ /signup → /onboarding (4 steps) → POST /api/tenants → /dashboard?welcome=1
+-Site live at [subdomain].studiolaunch.in ✅
++Site live at [subdomain].maspace.in ✅
+ Upload portfolio → case study → AI SEO → leads arrive → upgrade plan
+ ```
+ 
+diff --git a/middleware.ts b/middleware.ts
+index 146fbd2..6b5675e 100644
+--- a/middleware.ts
++++ b/middleware.ts
+@@ -3,7 +3,7 @@
+ import { NextRequest, NextResponse } from 'next/server'
+ import { createServerClient } from '@supabase/ssr'
+ 
+-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
+ const APP_URL     = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+ 
+ export async function middleware(request: NextRequest) {
+@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
+   const host = hostname.replace(':3000', '').replace(':3001', '')
+ 
+   // ── Determine if this is a tenant subdomain ───────────────────────────────
+-  // Matches: mystudio.studiolaunch.in  OR  mystudio.localhost
++  // Matches: mystudio.maspace.in  OR  mystudio.localhost
+   const isSubdomain =
+     host.endsWith(`.${ROOT_DOMAIN}`) ||
+     (host.includes('.') && host.endsWith('.localhost'))
+diff --git a/package-lock.json b/package-lock.json
+index 1e2e893..e53d7f9 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,11 +1,11 @@
+ {
+-  "name": "studiolaunch",
++  "name": "maspace",
+   "version": "0.1.0",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+-      "name": "studiolaunch",
++      "name": "maspace",
+       "version": "0.1.0",
+       "dependencies": {
+         "@hookform/resolvers": "^5.4.0",
+diff --git a/package.json b/package.json
+index 50d34de..cffa369 100644
+--- a/package.json
++++ b/package.json
+@@ -1,5 +1,5 @@
+ {
+-  "name": "studiolaunch",
++  "name": "maspace",
+   "version": "0.1.0",
+   "private": true,
+   "scripts": {
+diff --git a/src/app/[domain]/TenantSite.tsx b/src/app/[domain]/TenantSite.tsx
+index 79be725..b2b822c 100644
+--- a/src/app/[domain]/TenantSite.tsx
++++ b/src/app/[domain]/TenantSite.tsx
+@@ -64,9 +64,13 @@ export default function TenantSite({ tenant, siteData }: Props) {
+       <div style={{maxWidth:'1280px',margin:'0 auto',padding:'0 2rem',display:'flex',alignItems:'center',justifyContent:'space-between',height:'72px'}}>
+         {/* Logo */}
+         <div style={{display:'flex',alignItems:'center',gap:'0.75rem'}}>
+-          <div style={{width:'32px',height:'32px',border:`1px solid ${accentColor}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+-            <span style={{color:accentColor,fontFamily:'Georgia,serif',fontSize:'1.1rem',fontWeight:300}}>{branding.logo_letter}</span>
+-          </div>
++          {branding.logo_url ? (
++            <img src={branding.logo_url} alt={`${branding.business_name} logo`} style={{width:'32px',height:'32px',objectFit:'contain'}} />
++          ) : (
++            <div style={{width:'32px',height:'32px',border:`1px solid ${accentColor}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
++              <span style={{color:accentColor,fontFamily:'Georgia,serif',fontSize:'1.1rem',fontWeight:300}}>{branding.logo_letter}</span>
++            </div>
++          )}
+           <div>
+             <div style={{color:'#F5F0E8',fontFamily:'Georgia,serif',fontSize:'0.9rem',fontWeight:300,letterSpacing:'0.2em'}}>{branding.business_name}</div>
+             <div style={{color:accentColor,fontSize:'0.52rem',letterSpacing:'0.2em',textTransform:'uppercase',marginTop:'1px'}}>{branding.tagline}</div>
+@@ -405,9 +409,13 @@ export default function TenantSite({ tenant, siteData }: Props) {
+         <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:'3rem',marginBottom:'3rem'}}>
+           <div>
+             <div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem'}}>
+-              <div style={{width:'32px',height:'32px',border:`1px solid ${accentColor}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+-                <span style={{color:accentColor,fontFamily:'Georgia,serif',fontSize:'1.1rem',fontWeight:300}}>{branding.logo_letter}</span>
+-              </div>
++              {branding.logo_url ? (
++                <img src={branding.logo_url} alt={`${branding.business_name} logo`} style={{width:'32px',height:'32px',objectFit:'contain'}} />
++              ) : (
++                <div style={{width:'32px',height:'32px',border:`1px solid ${accentColor}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
++                  <span style={{color:accentColor,fontFamily:'Georgia,serif',fontSize:'1.1rem',fontWeight:300}}>{branding.logo_letter}</span>
++                </div>
++              )}
+               <span style={{fontFamily:'Georgia,serif',fontSize:'0.9rem',fontWeight:300,letterSpacing:'0.2em',color:'#F5F0E8'}}>{branding.business_name}</span>
+             </div>
+             <p style={{color:'#6B6B6B',fontSize:'0.85rem',lineHeight:1.7,maxWidth:'320px',marginBottom:'1rem'}}>
+@@ -442,7 +450,7 @@ export default function TenantSite({ tenant, siteData }: Props) {
+           </div>
+           <div style={{color:'#6B6B6B',fontSize:'0.7rem'}}>
+             {!tenant.white_label
+-              ? <a href="https://studiolaunch.in" style={{color:accentColor,textDecoration:'none'}}>Powered by StudioLaunch</a>
++              ? <a href="https://maspace.in" style={{color:accentColor,textDecoration:'none'}}>Powered by MaSpace</a>
+               : tenant.custom_footer_text
+                 ? <span>{tenant.custom_footer_text}</span>
+                 : null
+diff --git a/src/app/[domain]/areas/[city]/AreaPageClient.tsx b/src/app/[domain]/areas/[city]/AreaPageClient.tsx
+index c4b9334..ab13647 100644
+--- a/src/app/[domain]/areas/[city]/AreaPageClient.tsx
++++ b/src/app/[domain]/areas/[city]/AreaPageClient.tsx
+@@ -45,7 +45,7 @@ export default function AreaPageClient({ tenant, area, cityName, citySlug, portf
+ 
+   const siteRoot = typeof window !== 'undefined'
+     ? `${window.location.protocol}//${window.location.host}`
+-    : `https://${tenant.subdomain}.studiolaunch.in`
++    : `https://${tenant.subdomain}.maspace.in`
+ 
+   const handleSubmit = async (e: React.FormEvent) => {
+     e.preventDefault()
+@@ -329,7 +329,7 @@ export default function AreaPageClient({ tenant, area, cityName, citySlug, portf
+         {!tenant.white_label && (
+           <div style={{ color: '#6B6B6B', fontSize: '0.7rem' }}>
+             Powered by{' '}
+-            <a href="https://studiolaunch.in" style={{ color: accentColor, textDecoration: 'none' }}>StudioLaunch</a>
++            <a href="https://maspace.in" style={{ color: accentColor, textDecoration: 'none' }}>MaSpace</a>
+           </div>
+         )}
+       </div>
+diff --git a/src/app/[domain]/areas/[city]/page.tsx b/src/app/[domain]/areas/[city]/page.tsx
+index f4b7c88..f217825 100644
+--- a/src/app/[domain]/areas/[city]/page.tsx
++++ b/src/app/[domain]/areas/[city]/page.tsx
+@@ -1,6 +1,6 @@
+ // src/app/[domain]/areas/[city]/page.tsx
+ // Local SEO landing page — one per city in studio's service radius
+-// URL pattern: mystudio.studiolaunch.in/areas/coimbatore
++// URL pattern: mystudio.maspace.in/areas/coimbatore
+ 
+ import { notFound } from 'next/navigation'
+ import type { Metadata } from 'next'
+@@ -15,7 +15,7 @@ interface Props {
+ }
+ 
+ async function resolveTenant(domain: string): Promise<Tenant | null> {
+-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
+   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
+   return (await getTenantBySubdomain(subdomain)) || (await getTenantByDomain(domain))
+ }
+diff --git a/src/app/[domain]/case-studies/[slug]/page.tsx b/src/app/[domain]/case-studies/[slug]/page.tsx
+index a0c248c..d53fe97 100644
+--- a/src/app/[domain]/case-studies/[slug]/page.tsx
++++ b/src/app/[domain]/case-studies/[slug]/page.tsx
+@@ -15,7 +15,7 @@ interface Props {
+ }
+ 
+ async function resolveTenant(domain: string): Promise<Tenant | null> {
+-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
+   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
+   const bySubdomain = await getTenantBySubdomain(subdomain)
+   if (bySubdomain) return bySubdomain
+diff --git a/src/app/[domain]/page.tsx b/src/app/[domain]/page.tsx
+index 12a1d78..33c9868 100644
+--- a/src/app/[domain]/page.tsx
++++ b/src/app/[domain]/page.tsx
+@@ -15,7 +15,7 @@ interface Props {
+ 
+ // Resolve tenant from subdomain OR custom domain
+ async function resolveTenant(domain: string): Promise<Tenant | null> {
+-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
+ 
+   // Strip root domain suffix if present (rewrite adds subdomain as path segment)
+   const subdomain = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
+diff --git a/src/app/[domain]/projects/[slug]/ProjectPageClient.tsx b/src/app/[domain]/projects/[slug]/ProjectPageClient.tsx
+index 7ffbba4..92c93c4 100644
+--- a/src/app/[domain]/projects/[slug]/ProjectPageClient.tsx
++++ b/src/app/[domain]/projects/[slug]/ProjectPageClient.tsx
+@@ -161,7 +161,7 @@ export default function ProjectPageClient({ tenant, project, related }: Props) {
+ 
+   const siteRoot = typeof window !== 'undefined'
+     ? window.location.origin
+-    : `https://${tenant.subdomain}.studiolaunch.in`
++    : `https://${tenant.subdomain}.maspace.in`
+ 
+   // ── Nav ──────────────────────────────────────────────────────────────────────
+   const nav = (
+diff --git a/src/app/[domain]/projects/[slug]/page.tsx b/src/app/[domain]/projects/[slug]/page.tsx
+index 06e2b00..3c5f80f 100644
+--- a/src/app/[domain]/projects/[slug]/page.tsx
++++ b/src/app/[domain]/projects/[slug]/page.tsx
+@@ -15,7 +15,7 @@ interface Props {
+ }
+ 
+ async function resolveTenant(domain: string): Promise<Tenant | null> {
+-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
+   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
+   const bySubdomain = await getTenantBySubdomain(subdomain)
+   if (bySubdomain) return bySubdomain
+diff --git a/src/app/[domain]/robots.txt/route.ts b/src/app/[domain]/robots.txt/route.ts
+index bb7e4b9..350f82b 100644
+--- a/src/app/[domain]/robots.txt/route.ts
++++ b/src/app/[domain]/robots.txt/route.ts
+@@ -1,12 +1,12 @@
+ // src/app/[domain]/robots.txt/route.ts
+-// Generates robots.txt per tenant at mystudio.studiolaunch.in/robots.txt
++// Generates robots.txt per tenant at mystudio.maspace.in/robots.txt
+ 
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
+ import { getTenantUrl } from '@/lib/utils'
+ 
+ async function resolveTenant(domain: string) {
+-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
+   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
+   return (await getTenantBySubdomain(subdomain)) || (await getTenantByDomain(domain))
+ }
+diff --git a/src/app/[domain]/sitemap.xml/route.ts b/src/app/[domain]/sitemap.xml/route.ts
+index 10009c9..57e9f9d 100644
+--- a/src/app/[domain]/sitemap.xml/route.ts
++++ b/src/app/[domain]/sitemap.xml/route.ts
+@@ -1,6 +1,6 @@
+ // src/app/[domain]/sitemap.xml/route.ts
+ // Generates sitemap.xml dynamically for each tenant's subdomain/domain
+-// URL: mystudio.studiolaunch.in/sitemap.xml
++// URL: mystudio.maspace.in/sitemap.xml
+ 
+ import { NextRequest, NextResponse } from 'next/server'
+ import { getTenantBySubdomain, getTenantByDomain } from '@/lib/tenant'
+@@ -8,7 +8,7 @@ import { getTenantUrl } from '@/lib/utils'
+ import { createAdminClient } from '@/lib/supabase/server'
+ 
+ async function resolveTenant(domain: string) {
+-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
+   const subdomain  = domain.replace(`.${rootDomain}`, '').replace('.localhost', '')
+   return (await getTenantBySubdomain(subdomain)) || (await getTenantByDomain(domain))
+ }
+diff --git a/src/app/admin/layout.tsx b/src/app/admin/layout.tsx
+index 3b1f9dc..8de7c9a 100644
+--- a/src/app/admin/layout.tsx
++++ b/src/app/admin/layout.tsx
+@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
+             <span className="text-xs font-mono text-red-400 tracking-widest uppercase">Admin Console</span>
+           </div>
+           <span className="text-[#2A2A2A]">|</span>
+-          <span className="text-xs text-[#6B6B6B]" style={{fontFamily:'Georgia,serif'}}>StudioLaunch</span>
++          <span className="text-xs text-[#6B6B6B]" style={{fontFamily:'Georgia,serif'}}>MaSpace</span>
+         </div>
+         <div className="flex items-center gap-4">
+           <Link href="/dashboard" className="text-xs text-[#6B6B6B] hover:text-[#C8A96E] transition-colors tracking-widest uppercase">
+diff --git a/src/app/admin/page.tsx b/src/app/admin/page.tsx
+index 73151da..2356ba2 100644
+--- a/src/app/admin/page.tsx
++++ b/src/app/admin/page.tsx
+@@ -96,7 +96,7 @@ export default async function AdminPage() {
+               <div className="flex items-center gap-1 mt-0.5">
+                 <a href={getTenantUrl(t.subdomain)} target="_blank" rel="noopener noreferrer"
+                   className="text-xs text-[#6B6B6B] hover:text-[#C8A96E] transition-colors truncate">
+-                  {t.subdomain}.studiolaunch.in
++                  {t.subdomain}.maspace.in
+                 </a>
+                 {t.white_label && (
+                   <span className="text-xs text-purple-400 border border-purple-400/30 px-1 py-0 flex-shrink-0">WL</span>
+diff --git a/src/app/admin/tenants/AdminTenantsClient.tsx b/src/app/admin/tenants/AdminTenantsClient.tsx
+index 2fb29f3..48d301d 100644
+--- a/src/app/admin/tenants/AdminTenantsClient.tsx
++++ b/src/app/admin/tenants/AdminTenantsClient.tsx
+@@ -53,7 +53,7 @@ function PlanOverrideModal({
+         <div className="flex items-center justify-between px-6 py-4 border-b border-[#1A1A1A]">
+           <div>
+             <div className="text-sm font-medium text-[#F5F0E8]">{tenant.business_name}</div>
+-            <div className="text-xs text-[#6B6B6B]">{tenant.subdomain}.studiolaunch.in</div>
++            <div className="text-xs text-[#6B6B6B]">{tenant.subdomain}.maspace.in</div>
+           </div>
+           <button onClick={onClose} className="text-[#6B6B6B] hover:text-[#F5F0E8] transition-colors">
+             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+@@ -87,7 +87,7 @@ function PlanOverrideModal({
+           <div className="flex items-center justify-between py-3 border-t border-[#1A1A1A]">
+             <div>
+               <div className="text-sm text-[#F5F0E8]">White Label</div>
+-              <div className="text-xs text-[#6B6B6B]">Remove StudioLaunch branding</div>
++              <div className="text-xs text-[#6B6B6B]">Remove MaSpace branding</div>
+             </div>
+             <div
+               onClick={() => setWl(!wl)}
+diff --git a/src/app/api/leads/route.ts b/src/app/api/leads/route.ts
+index e328e57..542f654 100644
+--- a/src/app/api/leads/route.ts
++++ b/src/app/api/leads/route.ts
+@@ -8,7 +8,7 @@ async function sendEmail(to: string, subject: string, html: string) {
+   const { Resend } = await import('resend')
+   const resend = new Resend(process.env.RESEND_API_KEY)
+   await resend.emails.send({
+-    from: process.env.RESEND_FROM_EMAIL || 'noreply@studiolaunch.in',
++    from: process.env.RESEND_FROM_EMAIL || 'noreply@maspace.in',
+     to, subject, html,
+   })
+ }
+@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
+                 .map(([k,v]) => `<tr><td style="padding:10px 0;border-bottom:1px solid #1A1A1A;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#6B6B6B;width:40%;">${k}</td><td style="padding:10px 0;border-bottom:1px solid #1A1A1A;font-size:14px;color:#F5F0E8;">${v}</td></tr>`).join('')}
+             </table>
+             ${notes ? `<div style="margin-top:24px;padding:16px;background:#141414;border-left:2px solid #C8A96E;"><div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#6B6B6B;margin-bottom:8px;">Notes</div><div style="font-size:14px;color:#F5F0E8;line-height:1.6;">${notes}</div></div>` : ''}
+-            <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A2A;font-size:11px;color:#6B6B6B;">Received via StudioLaunch · ${new Date().toLocaleString('en-IN')}</div>
++            <div style="margin-top:32px;padding-top:24px;border-top:1px solid #2A2A2A;font-size:11px;color:#6B6B6B;">Received via MaSpace · ${new Date().toLocaleString('en-IN')}</div>
+           </div>
+         `
+       )
+diff --git a/src/app/api/team/route.ts b/src/app/api/team/route.ts
+index d54c021..1e1028f 100644
+--- a/src/app/api/team/route.ts
++++ b/src/app/api/team/route.ts
+@@ -100,9 +100,9 @@ export async function POST(req: NextRequest) {
+     const studioName = (tenantFull?.branding as { business_name?: string })?.business_name || 'Your Studio'
+ 
+     await resend.emails.send({
+-      from:    process.env.RESEND_FROM_EMAIL || 'noreply@studiolaunch.in',
++      from:    process.env.RESEND_FROM_EMAIL || 'noreply@maspace.in',
+       to:      email,
+-      subject: `You've been invited to manage ${studioName} on StudioLaunch`,
++      subject: `You've been invited to manage ${studioName} on MaSpace`,
+       html: `
+         <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;background:#0A0A0A;color:#F5F0E8;padding:40px;">
+           <div style="margin-bottom:32px;">
+@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
+             <div style="font-size:28px;font-weight:300;">You&apos;ve been invited</div>
+           </div>
+           <p style="color:#6B6B6B;font-size:15px;line-height:1.7;margin-bottom:32px;">
+-            You&apos;ve been invited to help manage <strong style="color:#F5F0E8;">${studioName}</strong> on StudioLaunch as an <strong style="color:#C8A96E;">${role || 'editor'}</strong>.
++            You&apos;ve been invited to help manage <strong style="color:#F5F0E8;">${studioName}</strong> on MaSpace as an <strong style="color:#C8A96E;">${role || 'editor'}</strong>.
+           </p>
+           <a href="${inviteUrl}" style="display:inline-block;background:#C8A96E;color:#0A0A0A;font-size:12px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;padding:14px 28px;text-decoration:none;">
+             Accept Invitation
+diff --git a/src/app/api/tenants/domain/route.ts b/src/app/api/tenants/domain/route.ts
+index 08fc298..5ecbbda 100644
+--- a/src/app/api/tenants/domain/route.ts
++++ b/src/app/api/tenants/domain/route.ts
+@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
+     return NextResponse.json({ error: 'Enter a valid domain, e.g. www.yourstudio.com' }, { status: 400 })
+   }
+ 
+-  const token = `studiolaunch-verify-${crypto.randomBytes(16).toString('hex')}`
++  const token = `maspace-verify-${crypto.randomBytes(16).toString('hex')}`
+   const admin = createAdminClient()
+ 
+   const { data, error } = await admin
+@@ -76,7 +76,7 @@ export async function GET() {
+   }
+ 
+   try {
+-    const records = await dns.resolveTxt(`_studiolaunch-verify.${full.custom_domain}`)
++    const records = await dns.resolveTxt(`_maspace-verify.${full.custom_domain}`)
+     const found = records.flat().some(r => r === full.domain_verification_token)
+ 
+     if (found) {
+diff --git a/src/app/api/tenants/route.ts b/src/app/api/tenants/route.ts
+index dcda6f2..3a92d16 100644
+--- a/src/app/api/tenants/route.ts
++++ b/src/app/api/tenants/route.ts
+@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
+     const body: OnboardingData = await req.json()
+ 
+     const {
+-      business_name, tagline, logo_letter,
++      persona, business_name, tagline, logo_letter, logo_url, accent_color, template_id,
+       local_city, state, street_address, pin_code, geo_latitude, geo_longitude, service_radius_km,
+       phone_number, phone_display, email, instagram_handle,
+       project_count, years_active, sqft_total, subdomain,
+@@ -29,6 +29,9 @@ export async function POST(req: NextRequest) {
+       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+     }
+ 
++    const VALID_TEMPLATES = ['atelier','forma','terra','renaissance','gallery','noir']
++    const VALID_PERSONAS  = ['architect','interior_designer','design_studio','other']
++
+     // Check subdomain availability
+     const available = await isSubdomainAvailable(subdomain)
+     if (!available) {
+@@ -57,7 +60,16 @@ export async function POST(req: NextRequest) {
+         plan: 'starter',
+         plan_status: 'trialing',
+         onboarding_completed: true,
+-        branding: { business_name, tagline, logo_letter: logo_letter || business_name.charAt(0).toUpperCase(), primary_color: '#0A0A0A', accent_color: '#C8A96E' },
++        persona: VALID_PERSONAS.includes(persona || '') ? persona : null,
++        template_id: VALID_TEMPLATES.includes(template_id) ? template_id : 'atelier',
++        branding: {
++          business_name,
++          tagline,
++          logo_letter: logo_letter || business_name.charAt(0).toUpperCase(),
++          logo_url: logo_url || '',
++          primary_color: '#0A0A0A',
++          accent_color: accent_color || '#C8A96E',
++        },
+         contact: { phone_number, phone_display, email, instagram_handle, houzz_handle: '' },
+         location: { street_address, local_city, state, pin_code, geo_latitude: geo_latitude || '0', geo_longitude: geo_longitude || '0', service_radius_km: service_radius_km || 60 },
+         stats: { project_count: project_count || 0, years_active: years_active || 1, sqft_total: sqft_total || '1', city_radius: service_radius_km || 60 },
+diff --git a/src/app/api/upload/route.ts b/src/app/api/upload/route.ts
+index 9b4b106..c8cccb0 100644
+--- a/src/app/api/upload/route.ts
++++ b/src/app/api/upload/route.ts
+@@ -12,11 +12,13 @@ export async function POST(req: NextRequest) {
+     const { data: { user } } = await supabase.auth.getUser()
+     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+ 
+-    // Get tenant
++    // Get tenant — if one doesn't exist yet, this may be an onboarding-time
++    // upload (e.g. logo, before the tenant row is created). Fall back to a
++    // path keyed by the authenticated user so the file still lands somewhere
++    // safe, and gets referenced by URL once the tenant is created.
+     const admin = createAdminClient()
+     const { data: tenant } = await admin
+       .from('tenants').select('id, plan').eq('user_id', user.id).single()
+-    if (!tenant) return NextResponse.json({ error: 'No studio found' }, { status: 404 })
+ 
+     const formData = await req.formData()
+     const file     = formData.get('file') as File
+@@ -29,9 +31,11 @@ export async function POST(req: NextRequest) {
+       return NextResponse.json({ error: 'File too large. Maximum 10MB.' }, { status: 400 })
+ 
+     // Build storage path: tenantId/folder/timestamp-filename
++    // (or onboarding/{userId}/folder/... if the tenant doesn't exist yet)
+     const ext      = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+-    const path     = `${tenant.id}/${folder}/${fileName}`
++    const pathPrefix = tenant ? tenant.id : `onboarding/${user.id}`
++    const path     = `${pathPrefix}/${folder}/${fileName}`
+ 
+     const arrayBuffer = await file.arrayBuffer()
+     const buffer      = new Uint8Array(arrayBuffer)
+diff --git a/src/app/dashboard/portfolio/page.tsx b/src/app/dashboard/portfolio/page.tsx
+index 804783d..4a2155a 100644
+--- a/src/app/dashboard/portfolio/page.tsx
++++ b/src/app/dashboard/portfolio/page.tsx
+@@ -203,7 +203,7 @@ function PortfolioForm({
+             <div>
+               <label className={labelCls}>URL Slug <span className="text-[#6B6B6B] normal-case tracking-normal">(auto-generated from title if blank)</span></label>
+               <div className="flex items-center gap-2">
+-                <span className="text-[#6B6B6B] text-sm flex-shrink-0">yourstudio.studiolaunch.in/projects/</span>
++                <span className="text-[#6B6B6B] text-sm flex-shrink-0">yourstudio.maspace.in/projects/</span>
+                 <input
+                   value={(form as PortfolioFormData).slug || ''}
+                   onChange={e => set('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
+diff --git a/src/app/dashboard/service-areas/page.tsx b/src/app/dashboard/service-areas/page.tsx
+index 96f27b5..0a43f27 100644
+--- a/src/app/dashboard/service-areas/page.tsx
++++ b/src/app/dashboard/service-areas/page.tsx
+@@ -171,7 +171,7 @@ function AreaForm({
+         <div className="bg-[#141414] border border-[#2A2A2A] p-3 text-xs">
+           <span className="text-[#6B6B6B]">Area page URL: </span>
+           <span className="text-[#C8A96E] font-mono">
+-            yourstudio.studiolaunch.in/areas/{form.city.toLowerCase().replace(/\s+/g, '-')}
++            yourstudio.maspace.in/areas/{form.city.toLowerCase().replace(/\s+/g, '-')}
+           </span>
+         </div>
+       )}
+@@ -254,7 +254,7 @@ export default function ServiceAreasPage() {
+       {/* Info box */}
+       <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-4 mb-6 text-xs text-[#6B6B6B] leading-relaxed">
+         <strong className="text-[#F5F0E8]/70">How it works:</strong> Each city you add gets its own SEO landing page at{' '}
+-        <code className="text-[#C8A96E] bg-[#141414] px-1.5 py-0.5">yourstudio.studiolaunch.in/areas/[city]</code>.
++        <code className="text-[#C8A96E] bg-[#141414] px-1.5 py-0.5">yourstudio.maspace.in/areas/[city]</code>.
+         These pages rank for &ldquo;interior designer in [city]&rdquo; searches and link back to your main site. Each area page is automatically included in your sitemap.xml.
+       </div>
+ 
+diff --git a/src/app/dashboard/settings/page.tsx b/src/app/dashboard/settings/page.tsx
+index 12ad674..34b1239 100644
+--- a/src/app/dashboard/settings/page.tsx
++++ b/src/app/dashboard/settings/page.tsx
+@@ -14,7 +14,7 @@ const TABS: { value: Tab; label: string; description: string }[] = [
+   { value: 'contact',    label: 'Contact & Branding', description: 'Business identity, colors, template, and how visitors reach you.' },
+   { value: 'seo',        label: 'SEO Enrichment',    description: 'AI-generated meta description and FAQ content to help you rank locally.' },
+   { value: 'domain',     label: 'Custom Domain',     description: 'Connect your own domain (e.g. www.yourstudio.com) instead of the default subdomain.' },
+-  { value: 'whitelabel', label: 'White Label',       description: 'Remove StudioLaunch branding from your public site footer.' },
++  { value: 'whitelabel', label: 'White Label',       description: 'Remove MaSpace branding from your public site footer.' },
+   { value: 'billing',    label: 'Plan & Billing',    description: 'Your current plan, usage limits, and upgrade options.' },
+ ]
+ 
+@@ -95,13 +95,13 @@ function DomainVerificationPanel({
+             <div className="text-[#6B6B6B] space-y-1">
+               <div>Type: <span className="font-mono text-[#F5F0E8]/70">CNAME</span></div>
+               <div>Name: <span className="font-mono text-[#F5F0E8]/70">www</span></div>
+-              <div>Value: <span className="font-mono text-[#C8A96E]">cname.studiolaunch.in</span></div>
++              <div>Value: <span className="font-mono text-[#C8A96E]">cname.maspace.in</span></div>
+             </div>
+ 
+             <div className="text-[#C8A96E] font-medium tracking-widest uppercase pt-2">Step 2 — Verify ownership</div>
+             <div className="text-[#6B6B6B] space-y-1">
+               <div>Type: <span className="font-mono text-[#F5F0E8]/70">TXT</span></div>
+-              <div>Name: <span className="font-mono text-[#F5F0E8]/70">_studiolaunch-verify.{tenant.custom_domain}</span></div>
++              <div>Name: <span className="font-mono text-[#F5F0E8]/70">_maspace-verify.{tenant.custom_domain}</span></div>
+               <div>Value: <span className="font-mono text-[#C8A96E] break-all">{tenant.domain_verification_token}</span></div>
+             </div>
+           </div>
+@@ -299,6 +299,15 @@ function SettingsInner() {
+                 <input value={tenant.branding.accent_color} onChange={e => update('branding','accent_color',e.target.value)} className={inputCls + ' flex-1'} placeholder="#C8A96E" />
+               </div>
+             </div>
++          </div>
++          <ImageUploader
++            label="Logo Image"
++            value={tenant.branding.logo_url}
++            onChange={url => update('branding','logo_url',url)}
++            folder="logo"
++            aspectHint="Square, transparent background recommended — replaces the Logo Letter on your site when set"
++          />
++          <div className="grid grid-cols-2 gap-5">
+             <div>
+               <label className={labelCls}>Site Template</label>
+               <select value={tenant.branding.theme || 'noir'} onChange={e => update('branding','theme', e.target.value)} className={inputCls}>
+@@ -362,7 +371,7 @@ function SettingsInner() {
+             <h3 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8] mb-4">Connect your own domain</h3>
+             {tenant.plan === 'starter' ? (
+               <div>
+-                <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">Custom domains are on Studio and Agency plans. Your site is live at <span className="text-[#C8A96E]">{tenant.subdomain}.studiolaunch.in</span></p>
++                <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">Custom domains are on Studio and Agency plans. Your site is live at <span className="text-[#C8A96E]">{tenant.subdomain}.maspace.in</span></p>
+                 <button onClick={() => setTab('billing')} className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-6 py-3 hover:bg-[#A8854A] transition-colors">Upgrade to Studio Plan</button>
+               </div>
+             ) : (
+@@ -378,12 +387,12 @@ function SettingsInner() {
+           <div className="border border-[#1A1A1A] bg-[#0D0D0D] p-6">
+             <div className="text-[#C8A96E] text-xs tracking-widest uppercase mb-3">White Label</div>
+             <h3 style={{fontFamily:"'Cormorant Garamond',Georgia,serif"}} className="text-xl font-light text-[#F5F0E8] mb-3">
+-              Remove StudioLaunch branding
++              Remove MaSpace branding
+             </h3>
+             {tenant.plan !== 'agency' ? (
+               <div>
+                 <p className="text-[#6B6B6B] text-sm leading-relaxed mb-6">
+-                  White labelling removes all &ldquo;Powered by StudioLaunch&rdquo; references from your site. Available on the Agency plan.
++                  White labelling removes all &ldquo;Powered by MaSpace&rdquo; references from your site. Available on the Agency plan.
+                 </p>
+                 <button onClick={() => setTab('billing')}
+                   className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-6 py-3 hover:bg-[#A8854A] transition-colors">
+@@ -393,7 +402,7 @@ function SettingsInner() {
+             ) : (
+               <div className="space-y-6">
+                 <p className="text-[#6B6B6B] text-sm leading-relaxed">
+-                  When enabled, &ldquo;Powered by StudioLaunch&rdquo; is removed from your site footer. You can optionally show your own custom footer text instead.
++                  When enabled, &ldquo;Powered by MaSpace&rdquo; is removed from your site footer. You can optionally show your own custom footer text instead.
+                 </p>
+ 
+                 {/* Toggle */}
+@@ -405,7 +414,7 @@ function SettingsInner() {
+                     <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${tenant.white_label ? 'left-6' : 'left-1'}`} />
+                   </div>
+                   <span className="text-sm text-[#F5F0E8]/80">
+-                    {tenant.white_label ? 'White label enabled — StudioLaunch branding hidden' : 'White label disabled — StudioLaunch branding shown'}
++                    {tenant.white_label ? 'White label enabled — MaSpace branding hidden' : 'White label disabled — MaSpace branding shown'}
+                   </span>
+                 </label>
+ 
+@@ -427,7 +436,7 @@ function SettingsInner() {
+                   <div className="flex justify-between items-center text-xs text-[#6B6B6B]">
+                     <span>© {new Date().getFullYear()} {tenant.branding.business_name}. All rights reserved.</span>
+                     {!tenant.white_label
+-                      ? <span className="text-[#C8A96E]">Powered by StudioLaunch</span>
++                      ? <span className="text-[#C8A96E]">Powered by MaSpace</span>
+                       : tenant.custom_footer_text
+                         ? <span>{tenant.custom_footer_text}</span>
+                         : <span className="italic opacity-40">No attribution</span>
+diff --git a/src/app/invite/[token]/page.tsx b/src/app/invite/[token]/page.tsx
+index 668400c..944d064 100644
+--- a/src/app/invite/[token]/page.tsx
++++ b/src/app/invite/[token]/page.tsx
+@@ -126,7 +126,7 @@ export default function InvitePage({ params }: Props) {
+           <div className="w-7 h-7 border border-[#C8A96E] flex items-center justify-center">
+             <span className="text-[#C8A96E] text-sm font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
+           </div>
+-          <span className="text-xs tracking-[0.2em] uppercase font-light text-[#F5F0E8]">StudioLaunch</span>
++          <span className="text-xs tracking-[0.2em] uppercase font-light text-[#F5F0E8]">MaSpace</span>
+         </div>
+ 
+         {error && !invite ? (
+diff --git a/src/app/layout.tsx b/src/app/layout.tsx
+index c2a44df..c34db90 100644
+--- a/src/app/layout.tsx
++++ b/src/app/layout.tsx
+@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
+ import './globals.css'
+ 
+ export const metadata: Metadata = {
+-  title: 'StudioLaunch — Websites for Architects & Interior Designers',
++  title: 'MaSpace — Websites for Architects & Interior Designers',
+   description: 'Launch a premium, SEO-optimised website for your architecture or interior design studio in minutes.',
+-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://studiolaunch.in'),
++  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://maspace.in'),
+ }
+ 
+ export default function RootLayout({ children }: { children: React.ReactNode }) {
+diff --git a/src/app/login/page.tsx b/src/app/login/page.tsx
+index 73e57f3..48e868b 100644
+--- a/src/app/login/page.tsx
++++ b/src/app/login/page.tsx
+@@ -5,6 +5,7 @@ import { useState } from 'react'
+ import Link from 'next/link'
+ import { useRouter } from 'next/navigation'
+ import { createClient } from '@/lib/supabase/client'
++import { Logo } from '@/components/brand/Logo'
+ 
+ export default function LoginPage() {
+   const router = useRouter()
+@@ -36,10 +37,7 @@ export default function LoginPage() {
+       <div className="w-full max-w-sm">
+         {/* Logo */}
+         <Link href="/" className="flex items-center gap-3 mb-12 group">
+-          <div className="w-8 h-8 border border-[#C8A96E] flex items-center justify-center">
+-            <span className="text-[#C8A96E] text-lg font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
+-          </div>
+-          <span className="text-sm tracking-[0.2em] uppercase font-light text-[#F5F0E8]">StudioLaunch</span>
++          <Logo size={28} dark />
+         </Link>
+ 
+         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">Welcome back</div>
+diff --git a/src/app/onboarding/page.tsx b/src/app/onboarding/page.tsx
+index 7511834..fa2add6 100644
+--- a/src/app/onboarding/page.tsx
++++ b/src/app/onboarding/page.tsx
+@@ -1,19 +1,40 @@
+ 'use client'
+ // src/app/onboarding/page.tsx
+-// 4-step wizard: Branding → Location → Contact → Stats & Subdomain → LIVE
++// Welcome → Persona → Identity → Design System → Location & Contact →
++// Brand → Stats & Subdomain → Invite Team → Complete
+ 
+ import { useState, useEffect } from 'react'
+ import { useRouter } from 'next/navigation'
+ import { createClient } from '@/lib/supabase/client'
+-import { OnboardingData } from '@/types'
++import { OnboardingData, Persona, TemplateId } from '@/types'
+ import { slugify, getTenantUrl } from '@/lib/utils'
++import { Logo, LogoMark } from '@/components/brand/Logo'
+ 
+-// ── Step indicators ───────────────────────────────────────────────────────────
+-const STEPS = [
+-  { n: 1, label: 'Branding' },
+-  { n: 2, label: 'Location' },
+-  { n: 3, label: 'Contact' },
+-  { n: 4, label: 'Go Live' },
++const TOTAL_STEPS = 9 // 0=Welcome, 1..7=form, 8=Complete
++const LAST_FORM_STEP = 7
++
++const PERSONAS: { value: Persona; label: string }[] = [
++  { value: 'architect',          label: 'Architect' },
++  { value: 'interior_designer',  label: 'Interior Designer' },
++  { value: 'design_studio',      label: 'Design Studio' },
++  { value: 'other',              label: 'Other' },
++]
++
++const TEMPLATES: { value: TemplateId; label: string; tag: string }[] = [
++  { value: 'atelier',     label: 'Atelier',     tag: 'Warm · Timeless' },
++  { value: 'forma',       label: 'Forma',       tag: 'Clean · Minimal' },
++  { value: 'terra',       label: 'Terra',       tag: 'Organic · Textured' },
++  { value: 'renaissance', label: 'Renaissance', tag: 'Classic · Elegant' },
++  { value: 'gallery',     label: 'Gallery',     tag: 'Bold · Editorial' },
++  { value: 'noir',        label: 'Noir',        tag: 'Dark · Refined' },
++]
++
++const ACCENT_SWATCHES = [
++  { hex: '#B38B59', label: 'Bronze' },
++  { hex: '#1A1A1A', label: 'Graphite' },
++  { hex: '#A8ADA1', label: 'Sage' },
++  { hex: '#8C6D4F', label: 'Terracotta' },
++  { hex: '#6B7280', label: 'Slate' },
+ ]
+ 
+ const INDIAN_STATES = [
+@@ -25,15 +46,13 @@ const INDIAN_STATES = [
+   'Delhi','Jammu & Kashmir','Ladakh','Puducherry','Chandigarh',
+ ]
+ 
+-// ── Input component ───────────────────────────────────────────────────────────
+-function Field({
+-  label, hint, children
+-}: { label: string; hint?: string; children: React.ReactNode }) {
++// ── Shared bits ─────────────────────────────────────────────────────────────
++function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+   return (
+     <div>
+-      <label className="block text-xs tracking-widest uppercase text-[#6B6B6B] mb-2">{label}</label>
++      <label className="block text-xs tracking-widest uppercase text-graphite/50 mb-2">{label}</label>
+       {children}
+-      {hint && <p className="text-xs text-[#6B6B6B]/60 mt-1.5">{hint}</p>}
++      {hint && <p className="text-xs text-graphite/40 mt-1.5">{hint}</p>}
+     </div>
+   )
+ }
+@@ -42,7 +61,7 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+   return (
+     <input
+       {...props}
+-      className="w-full bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] px-4 py-3 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
++      className="w-full bg-ivory border border-stone text-graphite px-4 py-3 text-sm outline-none focus:border-bronze transition-colors placeholder:text-graphite/30 rounded-md"
+     />
+   )
+ }
+@@ -51,7 +70,7 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement> & { childre
+   return (
+     <select
+       {...props}
+-      className="w-full bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] px-4 py-3 text-sm outline-none focus:border-[#C8A96E] transition-colors appearance-none"
++      className="w-full bg-ivory border border-stone text-graphite px-4 py-3 text-sm outline-none focus:border-bronze transition-colors rounded-md"
+     >
+       {props.children}
+     </select>
+@@ -61,15 +80,22 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement> & { childre
+ // ── Main component ────────────────────────────────────────────────────────────
+ export default function OnboardingPage() {
+   const router = useRouter()
+-  const [step, setStep]       = useState(1)
++  const [step, setStep]       = useState(0) // 0 = Welcome
+   const [loading, setLoading] = useState(false)
+   const [error, setError]     = useState('')
+   const [subdomainStatus, setSubdomainStatus] = useState<'idle'|'checking'|'available'|'taken'>('idle')
++  const [logoUploading, setLogoUploading] = useState(false)
++  const [inviteEmail, setInviteEmail] = useState('')
++  const [finalSubdomain, setFinalSubdomain] = useState('')
+ 
+   const [data, setData] = useState<OnboardingData>({
++    persona: '',
+     business_name: '',
+     tagline: 'Architectural Design Studio',
+     logo_letter: '',
++    logo_url: '',
++    accent_color: '#B38B59',
++    template_id: 'atelier',
+     local_city: '',
+     state: 'Tamil Nadu',
+     street_address: '',
+@@ -85,6 +111,7 @@ export default function OnboardingPage() {
+     years_active: 1,
+     sqft_total: '1',
+     subdomain: '',
++    team_invites: [],
+   })
+ 
+   const set = (key: keyof OnboardingData, value: string | number) =>
+@@ -113,7 +140,6 @@ export default function OnboardingPage() {
+   // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [data.phone_number])
+ 
+-  // Check subdomain availability
+   const checkSubdomain = async (value: string) => {
+     if (!value || value.length < 3) return
+     setSubdomainStatus('checking')
+@@ -122,23 +148,50 @@ export default function OnboardingPage() {
+     setSubdomainStatus(json.available ? 'available' : 'taken')
+   }
+ 
+-  const next = () => { setError(''); setStep(s => Math.min(s + 1, 4)) }
+-  const back = () => { setError(''); setStep(s => Math.max(s - 1, 1)) }
++  const uploadLogo = async (file: File) => {
++    setLogoUploading(true)
++    setError('')
++    try {
++      const formData = new FormData()
++      formData.append('file', file)
++      formData.append('folder', 'logo')
++      const res = await fetch('/api/upload', { method: 'POST', body: formData })
++      const json = await res.json()
++      if (!res.ok) { setError(json.error || 'Logo upload failed'); return }
++      set('logo_url', json.url)
++    } catch {
++      setError('Logo upload failed. Please try again.')
++    } finally {
++      setLogoUploading(false)
++    }
++  }
++
++  const addInvite = () => {
++    const email = inviteEmail.trim().toLowerCase()
++    if (!email || !email.includes('@')) { setError('Enter a valid email address'); return }
++    if (data.team_invites.some(i => i.email === email)) { setError('Already added'); return }
++    setError('')
++    setData(prev => ({ ...prev, team_invites: [...prev.team_invites, { email, role: 'editor' }] }))
++    setInviteEmail('')
++  }
++
++  const removeInvite = (email: string) =>
++    setData(prev => ({ ...prev, team_invites: prev.team_invites.filter(i => i.email !== email) }))
++
++  const next = () => { setError(''); setStep(s => Math.min(s + 1, TOTAL_STEPS - 1)) }
++  const back = () => { setError(''); setStep(s => Math.max(s - 1, 0)) }
+ 
+   const validateStep = (): boolean => {
+-    if (step === 1) {
+-      if (!data.business_name.trim()) { setError('Business name is required'); return false }
+-    }
+-    if (step === 2) {
++    if (step === 1 && !data.persona) { setError('Choose the option that best describes you'); return false }
++    if (step === 2 && !data.business_name.trim()) { setError('Studio name is required'); return false }
++    if (step === 4) {
+       if (!data.local_city.trim())    { setError('City is required'); return false }
+       if (!data.street_address.trim()){ setError('Address is required'); return false }
+-    }
+-    if (step === 3) {
+       if (!data.phone_number.trim())  { setError('Phone number is required'); return false }
+       if (!data.email.trim())         { setError('Email is required'); return false }
+     }
+-    if (step === 4) {
+-      if (!data.subdomain.trim())     { setError('Subdomain is required'); return false }
++    if (step === 6) {
++      if (!data.subdomain.trim())      { setError('Subdomain is required'); return false }
+       if (subdomainStatus === 'taken') { setError('That subdomain is taken'); return false }
+     }
+     return true
+@@ -146,8 +199,8 @@ export default function OnboardingPage() {
+ 
+   const handleNext = () => {
+     if (!validateStep()) return
+-    if (step < 4) { next(); return }
+-    handleSubmit()
++    if (step === LAST_FORM_STEP) { handleSubmit(); return }
++    next()
+   }
+ 
+   const handleSubmit = async () => {
+@@ -163,10 +216,12 @@ export default function OnboardingPage() {
+       return
+     }
+ 
++    const { team_invites, ...tenantPayload } = data
++
+     const res = await fetch('/api/tenants', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+-      body: JSON.stringify({ ...data, user_id: user.id }),
++      body: JSON.stringify({ ...tenantPayload, user_id: user.id }),
+     })
+ 
+     const json = await res.json()
+@@ -177,120 +232,112 @@ export default function OnboardingPage() {
+       return
+     }
+ 
+-    router.push(`/dashboard?welcome=1`)
++    // Fire team invites now that the tenant exists (best-effort — failures
++    // here shouldn't block the user from reaching their new dashboard)
++    for (const invite of team_invites) {
++      try {
++        await fetch('/api/team', {
++          method: 'POST',
++          headers: { 'Content-Type': 'application/json' },
++          body: JSON.stringify({ email: invite.email, role: invite.role }),
++        })
++      } catch {
++        // non-fatal — they can re-invite from the dashboard
++      }
++    }
++
++    setFinalSubdomain(data.subdomain)
++    setLoading(false)
++    next() // advance to Complete screen
+   }
+ 
+   // ── Render ──────────────────────────────────────────────────────────────────
+-  const progress = ((step - 1) / (STEPS.length - 1)) * 100
++  const progress = (step / LAST_FORM_STEP) * 100
+ 
+   return (
+-    <div className="min-h-screen bg-[#0A0A0A] flex">
+-
+-      {/* Left panel — progress + preview */}
+-      <div className="hidden lg:flex flex-col w-80 bg-[#0D0D0D] border-r border-[#1A1A1A] p-10 justify-between">
+-        <div>
+-          <div className="flex items-center gap-3 mb-16">
+-            <div className="w-7 h-7 border border-[#C8A96E] flex items-center justify-center">
+-              <span className="text-[#C8A96E] text-sm font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
+-            </div>
+-            <span className="text-xs tracking-[0.2em] uppercase font-light text-[#F5F0E8]">StudioLaunch</span>
++    <div className="min-h-screen bg-ivory flex flex-col" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
++
++      {/* Top bar */}
++      <div className="border-b border-stone/60 px-6 h-16 flex items-center justify-between">
++        <Logo size={24} />
++        {step > 0 && step < TOTAL_STEPS - 1 && (
++          <div className="text-xs tracking-widest uppercase text-graphite/40">
++            Step {step} of {LAST_FORM_STEP}
+           </div>
++        )}
++      </div>
+ 
+-          <div className="space-y-6">
+-            {STEPS.map(s => (
+-              <div key={s.n} className="flex items-center gap-4">
+-                <div className={`w-7 h-7 flex items-center justify-center text-xs font-medium border transition-all ${
+-                  step > s.n  ? 'bg-[#C8A96E] border-[#C8A96E] text-[#0A0A0A]' :
+-                  step === s.n ? 'border-[#C8A96E] text-[#C8A96E]' :
+-                                  'border-[#2A2A2A] text-[#3A3A3A]'
+-                }`}>
+-                  {step > s.n ? '✓' : s.n}
+-                </div>
+-                <span className={`text-sm transition-colors ${step === s.n ? 'text-[#F5F0E8]' : step > s.n ? 'text-[#6B6B6B]' : 'text-[#3A3A3A]'}`}>
+-                  {s.label}
+-                </span>
+-              </div>
+-            ))}
+-          </div>
+-        </div>
+-
+-        {/* Live preview box */}
+-        <div className="border border-[#2A2A2A] p-5">
+-          <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-4">Your site URL</div>
+-          <div className="text-[#C8A96E] text-sm font-mono break-all">
+-            {data.subdomain
+-              ? `${data.subdomain}.studiolaunch.in`
+-              : 'yourstudio.studiolaunch.in'}
+-          </div>
+-          {data.business_name && (
+-            <div className="mt-4 pt-4 border-t border-[#1A1A1A]">
+-              <div className="text-[#F5F0E8] text-sm font-medium">{data.business_name}</div>
+-              <div className="text-[#6B6B6B] text-xs mt-1">{data.local_city || '—'}, {data.state}</div>
+-            </div>
+-          )}
++      {/* Progress bar */}
++      {step > 0 && step < TOTAL_STEPS - 1 && (
++        <div className="h-0.5 bg-stone/50">
++          <div className="h-full bg-bronze transition-all duration-500" style={{ width: `${progress}%` }} />
+         </div>
+-      </div>
++      )}
+ 
+-      {/* Right panel — form */}
+-      <div className="flex-1 flex items-start justify-center p-6 pt-16 overflow-y-auto">
+-        <div className="w-full max-w-lg">
++      <div className="flex-1 flex items-center justify-center px-6 py-12">
++        <div className="w-full max-w-lg bg-white border border-stone/60 rounded-2xl shadow-sm p-10">
+ 
+-          {/* Mobile progress */}
+-          <div className="lg:hidden mb-8">
+-            <div className="flex justify-between text-xs text-[#6B6B6B] mb-2">
+-              <span>{STEPS[step-1].label}</span>
+-              <span>Step {step} of {STEPS.length}</span>
+-            </div>
+-            <div className="h-0.5 bg-[#1A1A1A]">
+-              <div className="h-full bg-[#C8A96E] transition-all duration-500" style={{width:`${progress}%`}} />
++          {/* ── STEP 0: Welcome ─────────────────────────────────────────── */}
++          {step === 0 && (
++            <div className="text-center">
++              <div className="w-16 h-16 flex items-center justify-center mx-auto mb-6">
++                <LogoMark size={44} />
++              </div>
++              <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-3xl font-light text-graphite mb-3">
++                Welcome to MaSpace
++              </h2>
++              <p className="text-graphite/55 text-sm mb-10 max-w-sm mx-auto">
++                The design operating system for architects &amp; interior designers. A few simple steps to get your studio site live.
++              </p>
++              <button
++                onClick={next}
++                className="bg-graphite text-ivory text-sm font-medium px-8 py-3.5 hover:bg-graphite/85 transition-colors inline-flex items-center gap-2 rounded-md"
++              >
++                Get Started
++                <ArrowIcon />
++              </button>
+             </div>
+-          </div>
++          )}
+ 
+-          {/* ── STEP 1: Branding ────────────────────────────────────────── */}
++          {/* ── STEP 1: Persona ─────────────────────────────────────────── */}
+           {step === 1 && (
+             <div>
+-              <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">Step 1 of 4</div>
+-              <h2 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8] mb-2">
+-                Your studio<br/><em>identity</em>
+-              </h2>
+-              <p className="text-[#6B6B6B] text-sm mb-10">This appears on your site header, footer, and all SEO metadata.</p>
++              <StepHeader n={1} title="What best describes you?" hint="This helps us personalize your experience." />
++              <div className="space-y-3">
++                {PERSONAS.map(p => (
++                  <button
++                    key={p.value}
++                    onClick={() => set('persona', p.value)}
++                    className={`w-full text-left px-5 py-4 border rounded-md transition-colors ${
++                      data.persona === p.value ? 'border-bronze bg-bronze/5' : 'border-stone hover:border-graphite/30'
++                    }`}
++                  >
++                    <span className="text-sm text-graphite">{p.label}</span>
++                  </button>
++                ))}
++              </div>
++            </div>
++          )}
+ 
+-              <div className="space-y-6">
++          {/* ── STEP 2: Studio Identity ─────────────────────────────────── */}
++          {step === 2 && (
++            <div>
++              <StepHeader n={2} title="Your studio identity" hint="This appears on your site header, footer, and all SEO metadata." />
++              <div className="space-y-5">
+                 <Field label="Studio / Business Name" hint="E.g. Forma Studio, Vignesh Interiors, Studio Aura">
+-                  <Input
+-                    value={data.business_name}
+-                    onChange={e => set('business_name', e.target.value)}
+-                    placeholder="Forma Studio"
+-                    required
+-                  />
++                  <Input value={data.business_name} onChange={e => set('business_name', e.target.value)} placeholder="Forma Studio" required />
+                 </Field>
+-
+                 <Field label="Studio Tagline" hint="Shown under your logo — keep it short">
+-                  <Input
+-                    value={data.tagline}
+-                    onChange={e => set('tagline', e.target.value)}
+-                    placeholder="Architectural Design Studio"
+-                  />
+-                </Field>
+-
+-                <Field label="Logo Letter" hint="Single letter shown in your logo mark">
+-                  <Input
+-                    value={data.logo_letter}
+-                    onChange={e => set('logo_letter', e.target.value.charAt(0).toUpperCase())}
+-                    placeholder="F"
+-                    maxLength={1}
+-                  />
++                  <Input value={data.tagline} onChange={e => set('tagline', e.target.value)} placeholder="Architectural Design Studio" />
+                 </Field>
+-
+-                {/* Logo preview */}
+-                {data.logo_letter && (
+-                  <div className="flex items-center gap-4 p-5 bg-[#141414] border border-[#2A2A2A]">
+-                    <div className="w-10 h-10 border border-[#C8A96E] flex items-center justify-center">
+-                      <span className="text-[#C8A96E] text-xl font-light" style={{fontFamily:'Georgia,serif'}}>{data.logo_letter}</span>
++                {data.business_name && (
++                  <div className="flex items-center gap-4 p-4 bg-ivory border border-stone rounded-md">
++                    <div className="w-10 h-10 border border-bronze rounded-md flex items-center justify-center">
++                      <span className="text-bronze text-xl font-light" style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}>{data.logo_letter}</span>
+                     </div>
+                     <div>
+-                      <div className="text-[#F5F0E8] text-sm tracking-widest">{data.business_name || 'Your Studio Name'}</div>
+-                      <div className="text-[#6B6B6B] text-xs tracking-widest mt-0.5">{data.tagline}</div>
++                      <div className="text-graphite text-sm tracking-wide">{data.business_name}</div>
++                      <div className="text-graphite/45 text-xs mt-0.5">{data.tagline}</div>
+                     </div>
+                   </div>
+                 )}
+@@ -298,24 +345,48 @@ export default function OnboardingPage() {
+             </div>
+           )}
+ 
+-          {/* ── STEP 2: Location ─────────────────────────────────────────── */}
+-          {step === 2 && (
++          {/* ── STEP 3: Design System ────────────────────────────────────── */}
++          {step === 3 && (
+             <div>
+-              <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">Step 2 of 4</div>
+-              <h2 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8] mb-2">
+-                Studio<br/><em>location</em>
+-              </h2>
+-              <p className="text-[#6B6B6B] text-sm mb-10">Used in your Local SEO schema, footer, and location-targeted content.</p>
++              <StepHeader n={3} title="Choose your design system" hint="You can change this anytime from your dashboard." />
++              <div className="grid grid-cols-2 gap-3">
++                {TEMPLATES.map(t => (
++                  <button
++                    key={t.value}
++                    onClick={() => set('template_id', t.value)}
++                    className={`text-left border rounded-md overflow-hidden transition-colors ${
++                      data.template_id === t.value ? 'border-bronze' : 'border-stone hover:border-graphite/30'
++                    }`}
++                  >
++                    <div className={`aspect-[4/3] flex items-center justify-center ${t.value === 'noir' ? 'bg-graphite' : 'bg-stone/40'}`}>
++                      <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className={`text-lg ${t.value === 'noir' ? 'text-ivory' : 'text-graphite/70'}`}>
++                        {t.label}
++                      </span>
++                    </div>
++                    <div className="p-3">
++                      <div className="text-xs font-medium text-graphite flex items-center justify-between">
++                        {t.label}
++                        {data.template_id === t.value && <CheckIcon />}
++                      </div>
++                      <div className="text-[11px] text-graphite/45">{t.tag}</div>
++                    </div>
++                  </button>
++                ))}
++              </div>
++              <p className="text-xs text-graphite/40 mt-4">
++                Your subdomain site currently renders on one shared layout — full per-template visual rendering for all six systems is on our roadmap. Your choice is saved now so it&apos;s ready the moment it ships.
++              </p>
++            </div>
++          )}
+ 
+-              <div className="space-y-6">
++          {/* ── STEP 4: Location & Contact ───────────────────────────────── */}
++          {step === 4 && (
++            <div>
++              <StepHeader n={4} title="Location & contact" hint="Used in your Local SEO schema, footer, and lead notifications." />
++              <div className="space-y-5">
+                 <div className="grid grid-cols-2 gap-4">
+-                  <Field label="City" hint="Primary city you operate in">
+-                    <Input
+-                      value={data.local_city}
+-                      onChange={e => set('local_city', e.target.value)}
+-                      placeholder="Coimbatore"
+-                      required
+-                    />
++                  <Field label="City">
++                    <Input value={data.local_city} onChange={e => set('local_city', e.target.value)} placeholder="Coimbatore" required />
+                   </Field>
+                   <Field label="State">
+                     <Select value={data.state} onChange={e => set('state', e.target.value)}>
+@@ -323,98 +394,34 @@ export default function OnboardingPage() {
+                     </Select>
+                   </Field>
+                 </div>
+-
+-                <Field label="Street Address" hint="Shown in footer and Google Business schema">
+-                  <Input
+-                    value={data.street_address}
+-                    onChange={e => set('street_address', e.target.value)}
+-                    placeholder="14 Race Course Road"
+-                    required
+-                  />
++                <Field label="Street Address">
++                  <Input value={data.street_address} onChange={e => set('street_address', e.target.value)} placeholder="14 Race Course Road" required />
+                 </Field>
+-
+                 <div className="grid grid-cols-2 gap-4">
+                   <Field label="PIN Code">
+-                    <Input
+-                      value={data.pin_code}
+-                      onChange={e => set('pin_code', e.target.value)}
+-                      placeholder="641018"
+-                      maxLength={6}
+-                    />
++                    <Input value={data.pin_code} onChange={e => set('pin_code', e.target.value)} placeholder="641018" maxLength={6} />
+                   </Field>
+-                  <Field label="Service Radius (km)" hint="How far you travel">
+-                    <Input
+-                      type="number"
+-                      value={data.service_radius_km}
+-                      onChange={e => set('service_radius_km', Number(e.target.value))}
+-                      placeholder="60"
+-                      min={5}
+-                      max={500}
+-                    />
++                  <Field label="Service Radius (km)">
++                    <Input type="number" value={data.service_radius_km} onChange={e => set('service_radius_km', Number(e.target.value))} min={5} max={500} />
+                   </Field>
+                 </div>
+-
+                 <div className="grid grid-cols-2 gap-4">
+-                  <Field label="Latitude" hint="Optional — for precise map schema">
+-                    <Input
+-                      value={data.geo_latitude}
+-                      onChange={e => set('geo_latitude', e.target.value)}
+-                      placeholder="11.0168"
+-                    />
++                  <Field label="Phone Number" hint="Auto-formats as you type">
++                    <Input type="tel" value={data.phone_number} onChange={e => set('phone_number', e.target.value)} placeholder="98765 43210" required />
+                   </Field>
+-                  <Field label="Longitude">
+-                    <Input
+-                      value={data.geo_longitude}
+-                      onChange={e => set('geo_longitude', e.target.value)}
+-                      placeholder="76.9558"
+-                    />
++                  <Field label="Studio Email">
++                    <Input type="email" value={data.email} onChange={e => set('email', e.target.value)} placeholder="hello@yourstudio.com" required />
+                   </Field>
+                 </div>
+-              </div>
+-            </div>
+-          )}
+-
+-          {/* ── STEP 3: Contact ──────────────────────────────────────────── */}
+-          {step === 3 && (
+-            <div>
+-              <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">Step 3 of 4</div>
+-              <h2 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8] mb-2">
+-                Contact<br/><em>details</em>
+-              </h2>
+-              <p className="text-[#6B6B6B] text-sm mb-10">These appear on your site and in your local business schema.</p>
+-
+-              <div className="space-y-6">
+-                <Field label="Phone Number" hint="10-digit mobile number — we auto-format it">
+-                  <Input
+-                    type="tel"
+-                    value={data.phone_number}
+-                    onChange={e => set('phone_number', e.target.value)}
+-                    placeholder="98765 43210"
+-                    required
+-                  />
+-                  {data.phone_display && (
+-                    <div className="text-[#C8A96E] text-xs mt-1.5">Displays as: {data.phone_display}</div>
+-                  )}
+-                </Field>
+-
+-                <Field label="Studio Email" hint="For lead notifications and site display">
+-                  <Input
+-                    type="email"
+-                    value={data.email}
+-                    onChange={e => set('email', e.target.value)}
+-                    placeholder="hello@yourstudio.com"
+-                    required
+-                  />
+-                </Field>
+-
++                {data.phone_display && <div className="text-bronze text-xs -mt-3">Displays as: {data.phone_display}</div>}
+                 <Field label="Instagram Handle" hint="Without the @ symbol">
+                   <div className="relative">
+-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B6B6B] text-sm">@</span>
++                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-graphite/40 text-sm">@</span>
+                     <input
+                       value={data.instagram_handle}
+                       onChange={e => set('instagram_handle', e.target.value)}
+                       placeholder="yourstudio"
+-                      className="w-full bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] pl-8 pr-4 py-3 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
++                      className="w-full bg-ivory border border-stone text-graphite pl-8 pr-4 py-3 text-sm outline-none focus:border-bronze transition-colors placeholder:text-graphite/30 rounded-md"
+                     />
+                   </div>
+                 </Field>
+@@ -422,41 +429,62 @@ export default function OnboardingPage() {
+             </div>
+           )}
+ 
+-          {/* ── STEP 4: Stats + Subdomain ────────────────────────────────── */}
+-          {step === 4 && (
++          {/* ── STEP 5: Brand ────────────────────────────────────────────── */}
++          {step === 5 && (
+             <div>
+-              <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">Step 4 of 4</div>
+-              <h2 style={{fontFamily:'Georgia,serif'}} className="text-3xl font-light text-[#F5F0E8] mb-2">
+-                Final details &<br/><em>go live</em>
+-              </h2>
+-              <p className="text-[#6B6B6B] text-sm mb-10">Your stats appear in the hero section. Choose your permanent subdomain.</p>
+-
++              <StepHeader n={5} title="Add your brand" hint="Upload your logo and choose your accent color." />
+               <div className="space-y-6">
++                <Field label="Logo (optional)" hint="PNG, JPG or WebP · up to 10MB">
++                  <label className="flex flex-col items-center justify-center gap-2 border border-dashed border-stone rounded-md py-8 cursor-pointer hover:border-bronze/60 transition-colors">
++                    {data.logo_url ? (
++                      <img src={data.logo_url} alt="Uploaded logo" className="w-16 h-16 object-contain" />
++                    ) : (
++                      <UploadIcon />
++                    )}
++                    <span className="text-xs text-graphite/50">
++                      {logoUploading ? 'Uploading...' : data.logo_url ? 'Replace logo' : 'Upload your logo'}
++                    </span>
++                    <input
++                      type="file"
++                      accept="image/png,image/jpeg,image/webp"
++                      className="hidden"
++                      disabled={logoUploading}
++                      onChange={e => { const f = e.target.files?.[0]; if (f) uploadLogo(f) }}
++                    />
++                  </label>
++                </Field>
++
++                <Field label="Brand Accent Color">
++                  <div className="flex flex-wrap gap-3">
++                    {ACCENT_SWATCHES.map(s => (
++                      <button
++                        key={s.hex}
++                        onClick={() => set('accent_color', s.hex)}
++                        title={s.label}
++                        className={`w-10 h-10 rounded-full border-2 transition-transform ${data.accent_color === s.hex ? 'border-graphite scale-110' : 'border-transparent'}`}
++                        style={{ backgroundColor: s.hex }}
++                      />
++                    ))}
++                  </div>
++                </Field>
++              </div>
++            </div>
++          )}
++
++          {/* ── STEP 6: Stats + Subdomain ────────────────────────────────── */}
++          {step === 6 && (
++            <div>
++              <StepHeader n={6} title="Final details & go live" hint="Your stats appear in the hero section. Choose your permanent subdomain." />
++              <div className="space-y-5">
+                 <div className="grid grid-cols-3 gap-4">
+                   <Field label="Projects Done">
+-                    <Input
+-                      type="number"
+-                      value={data.project_count}
+-                      onChange={e => set('project_count', Number(e.target.value))}
+-                      placeholder="120"
+-                      min={0}
+-                    />
++                    <Input type="number" value={data.project_count} onChange={e => set('project_count', Number(e.target.value))} min={0} />
+                   </Field>
+                   <Field label="Years Active">
+-                    <Input
+-                      type="number"
+-                      value={data.years_active}
+-                      onChange={e => set('years_active', Number(e.target.value))}
+-                      placeholder="9"
+-                      min={1}
+-                    />
++                    <Input type="number" value={data.years_active} onChange={e => set('years_active', Number(e.target.value))} min={1} />
+                   </Field>
+-                  <Field label="Sq.ft (Lakhs)" hint="E.g. 12 = 12L sq.ft">
+-                    <Input
+-                      value={data.sqft_total}
+-                      onChange={e => set('sqft_total', e.target.value)}
+-                      placeholder="12"
+-                    />
++                  <Field label="Sq.ft (Lakhs)">
++                    <Input value={data.sqft_total} onChange={e => set('sqft_total', e.target.value)} placeholder="12" />
+                   </Field>
+                 </div>
+ 
+@@ -471,31 +499,55 @@ export default function OnboardingPage() {
+                       }}
+                       onBlur={() => checkSubdomain(data.subdomain)}
+                       placeholder="yourstudio"
+-                      className="flex-1 bg-[#141414] border border-[#2A2A2A] text-[#F5F0E8] px-4 py-3 text-sm outline-none focus:border-[#C8A96E] transition-colors placeholder:text-[#3A3A3A]"
++                      className="flex-1 bg-ivory border border-stone text-graphite px-4 py-3 text-sm outline-none focus:border-bronze transition-colors placeholder:text-graphite/30 rounded-l-md"
+                     />
+-                    <div className="bg-[#1A1A1A] border border-l-0 border-[#2A2A2A] px-4 py-3 text-xs text-[#6B6B6B] whitespace-nowrap flex items-center">
+-                      .studiolaunch.in
++                    <div className="bg-stone/50 border border-l-0 border-stone px-4 py-3 text-xs text-graphite/50 whitespace-nowrap flex items-center rounded-r-md">
++                      .maspace.in
+                     </div>
+                   </div>
+-                  {/* Subdomain status */}
+-                  {subdomainStatus === 'checking' && (
+-                    <div className="text-[#6B6B6B] text-xs mt-1.5">Checking availability...</div>
+-                  )}
+-                  {subdomainStatus === 'available' && (
+-                    <div className="text-green-400 text-xs mt-1.5">✓ Available — this subdomain is yours</div>
+-                  )}
+-                  {subdomainStatus === 'taken' && (
+-                    <div className="text-red-400 text-xs mt-1.5">✗ Already taken — try a different name</div>
+-                  )}
++                  {subdomainStatus === 'checking' && <div className="text-graphite/45 text-xs mt-1.5">Checking availability...</div>}
++                  {subdomainStatus === 'available' && <div className="text-green-700 text-xs mt-1.5">✓ Available — this subdomain is yours</div>}
++                  {subdomainStatus === 'taken' && <div className="text-red-600 text-xs mt-1.5">✗ Already taken — try a different name</div>}
++                </Field>
++              </div>
++            </div>
++          )}
++
++          {/* ── STEP 7: Invite Team ──────────────────────────────────────── */}
++          {step === 7 && (
++            <div>
++              <StepHeader n={7} title="Invite your team" hint="Optional — you can always invite more people later from the dashboard." />
++              <div className="space-y-5">
++                <Field label="Email Address">
++                  <div className="flex gap-2">
++                    <input
++                      value={inviteEmail}
++                      onChange={e => setInviteEmail(e.target.value)}
++                      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addInvite() } }}
++                      placeholder="name@domain.com"
++                      className="flex-1 bg-ivory border border-stone text-graphite px-4 py-3 text-sm outline-none focus:border-bronze transition-colors placeholder:text-graphite/30 rounded-md"
++                    />
++                    <button onClick={addInvite} className="border border-graphite/25 text-graphite text-sm px-5 rounded-md hover:border-graphite/50 transition-colors whitespace-nowrap">
++                      + Add
++                    </button>
++                  </div>
+                 </Field>
+ 
+-                {/* Preview card */}
+-                {data.subdomain && subdomainStatus === 'available' && (
+-                  <div className="border border-[#C8A96E]/30 bg-[#141414] p-5">
+-                    <div className="text-xs tracking-widest uppercase text-[#6B6B6B] mb-3">Your site will be live at</div>
+-                    <div className="text-[#C8A96E] font-mono">{data.subdomain}.studiolaunch.in</div>
+-                    <div className="text-[#6B6B6B] text-xs mt-3">
+-                      {data.business_name} · {data.local_city}, {data.state} · {data.phone_display}
++                {data.team_invites.length > 0 && (
++                  <div>
++                    <div className="text-xs tracking-widest uppercase text-graphite/50 mb-2">Invited Members</div>
++                    <div className="space-y-2">
++                      {data.team_invites.map(inv => (
++                        <div key={inv.email} className="flex items-center justify-between border border-stone rounded-md px-4 py-3">
++                          <div>
++                            <div className="text-sm text-graphite">{inv.email}</div>
++                            <div className="text-xs text-graphite/45">Editor</div>
++                          </div>
++                          <button onClick={() => removeInvite(inv.email)} className="text-graphite/40 hover:text-red-600 text-xs">
++                            Remove
++                          </button>
++                        </div>
++                      ))}
+                     </div>
+                   </div>
+                 )}
+@@ -503,38 +555,103 @@ export default function OnboardingPage() {
+             </div>
+           )}
+ 
++          {/* ── STEP 8: Complete ─────────────────────────────────────────── */}
++          {step === 8 && (
++            <div className="text-center">
++              <div className="w-14 h-14 border border-bronze rounded-full flex items-center justify-center mx-auto mb-6">
++                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12l6 6L20 6" stroke="#B38B59" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
++              </div>
++              <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-3xl font-light text-graphite mb-3">
++                You&apos;re all set!
++              </h2>
++              <p className="text-graphite/55 text-sm mb-8 max-w-sm mx-auto">
++                Your studio site is ready. Let&apos;s build something amazing.
++              </p>
++              {finalSubdomain && (
++                <div className="text-bronze font-mono text-sm mb-8">{getTenantUrl(finalSubdomain)}</div>
++              )}
++              <button
++                onClick={() => router.push('/dashboard?welcome=1')}
++                className="bg-graphite text-ivory text-sm font-medium px-8 py-3.5 hover:bg-graphite/85 transition-colors inline-flex items-center gap-2 rounded-md"
++              >
++                Go to Dashboard
++                <ArrowIcon />
++              </button>
++            </div>
++          )}
++
+           {/* Error */}
+           {error && (
+-            <div className="mt-6 text-red-400 text-xs border border-red-400/20 bg-red-400/5 px-4 py-3">
++            <div className="mt-6 text-red-600 text-xs border border-red-200 bg-red-50 px-4 py-3 rounded-md">
+               {error}
+             </div>
+           )}
+ 
+           {/* Navigation */}
+-          <div className="flex justify-between items-center mt-10 pt-8 border-t border-[#1A1A1A]">
+-            {step > 1 ? (
+-              <button onClick={back} className="text-xs tracking-widest uppercase text-[#6B6B6B] border border-[#2A2A2A] px-6 py-3 hover:border-[#6B6B6B] transition-colors">
+-                Back
+-              </button>
+-            ) : (
+-              <div />
+-            )}
+-
+-            <button
+-              onClick={handleNext}
+-              disabled={loading}
+-              className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-8 py-3 hover:bg-[#A8854A] transition-colors disabled:opacity-50 flex items-center gap-3"
+-            >
+-              {loading ? 'Launching...' : step === 4 ? 'Launch My Site' : 'Continue'}
+-              {!loading && (
+-                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
+-                  <path d="M1 7h12M7.5 1.5L13 7l-5.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+-                </svg>
+-              )}
+-            </button>
+-          </div>
++          {step > 0 && step < TOTAL_STEPS - 1 && (
++            <div className="flex justify-between items-center mt-8 pt-6 border-t border-stone/60">
++              {step > 1 ? (
++                <button onClick={back} className="text-xs tracking-widest uppercase text-graphite/50 border border-stone px-6 py-3 hover:border-graphite/40 transition-colors rounded-md">
++                  Back
++                </button>
++              ) : <div />}
++
++              <div className="flex items-center gap-3">
++                {step === 7 && data.team_invites.length === 0 && (
++                  <button onClick={handleNext} disabled={loading} className="text-xs tracking-widest uppercase text-graphite/45 hover:text-graphite px-4 py-3 transition-colors">
++                    Skip
++                  </button>
++                )}
++                <button
++                  onClick={handleNext}
++                  disabled={loading || logoUploading}
++                  className="bg-graphite text-ivory text-xs font-semibold tracking-widest uppercase px-8 py-3 hover:bg-graphite/85 transition-colors disabled:opacity-50 flex items-center gap-3 rounded-md"
++                >
++                  {loading ? 'Launching...' : step === LAST_FORM_STEP ? 'Launch My Site' : 'Continue'}
++                  {!loading && <ArrowIcon small />}
++                </button>
++              </div>
++            </div>
++          )}
+         </div>
+       </div>
+     </div>
+   )
+ }
++
++// ── Small shared pieces ──────────────────────────────────────────────────────
++function StepHeader({ n, title, hint }: { n: number; title: string; hint: string }) {
++  return (
++    <>
++      <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-3">Step {n} of {LAST_FORM_STEP}</div>
++      <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-2xl font-light text-graphite mb-2">{title}</h2>
++      <p className="text-graphite/50 text-sm mb-8">{hint}</p>
++    </>
++  )
++}
++
++function ArrowIcon({ small = false }: { small?: boolean }) {
++  const s = small ? 12 : 14
++  return (
++    <svg width={s} height={s} viewBox="0 0 14 14" fill="none">
++      <path d="M1 7h12M7.5 1.5L13 7l-5.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
++    </svg>
++  )
++}
++
++function CheckIcon() {
++  return (
++    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
++      <circle cx="7" cy="7" r="7" fill="#B38B59" />
++      <path d="M4 7l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
++    </svg>
++  )
++}
++
++function UploadIcon() {
++  return (
++    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
++      <path d="M12 16V4M12 4l-4 4M12 4l4 4M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" stroke="#B38B59" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
++    </svg>
++  )
++}
+diff --git a/src/app/page.tsx b/src/app/page.tsx
+index e816c76..f102d98 100644
+--- a/src/app/page.tsx
++++ b/src/app/page.tsx
+@@ -1,86 +1,186 @@
+-// src/app/page.tsx — Marketing homepage (studiolaunch.in)
++// src/app/page.tsx — Marketing homepage (maspace.in)
+ import Link from 'next/link'
++import { Logo } from '@/components/brand/Logo'
++
++const NAV_LINKS = [
++  { label: 'Features', href: '#features' },
++  { label: 'Templates', href: '#templates' },
++  { label: 'Pricing', href: '#pricing' },
++]
++
++const FEATURES = [
++  { title: 'Visual Builder', body: 'Drag, drop and design with total freedom — no code required.' },
++  { title: 'Lead Inbox', body: 'Every consultation request lands in your dashboard, ready to reply.' },
++  { title: 'Portfolio Manager', body: 'Organise projects, case studies and images with total control.' },
++  { title: 'Local SEO Engine', body: 'Built-in schema and location pages so you rank in your city.' },
++  { title: 'Google Reviews Sync', body: 'Pull your reviews in automatically to build trust on-site.' },
++  { title: 'Performance', body: 'Lightweight, fast-loading pages tuned for design-led studios.' },
++]
++
++const TEMPLATES = [
++  { name: 'Atelier', tag: 'Warm · Timeless' },
++  { name: 'Forma', tag: 'Clean · Minimal' },
++  { name: 'Terra', tag: 'Organic · Textured' },
++  { name: 'Renaissance', tag: 'Classic · Elegant' },
++  { name: 'Gallery', tag: 'Bold · Editorial' },
++  { name: 'Noir', tag: 'Dark · Refined' },
++]
++
++const PROCESS = [
++  { n: '01', title: 'Fill the wizard', body: 'Answer a few simple screens — your studio name, city, phone, and a few stats. No design skills needed.' },
++  { n: '02', title: 'Your site is live', body: 'Instantly published at yourstudio.maspace.in with all your content, schema, and SEO structure in place.' },
++  { n: '03', title: 'Leads come in', body: 'Every consultation request lands in your inbox and dashboard. Reply directly. Convert more clients.' },
++]
++
++const PLANS = [
++  { name: 'Starter', price: '₹999', period: '/mo', features: ['Subdomain site', 'Consultation form + inbox', '5 portfolio items', '1 case study', 'Basic analytics'], cta: 'Start Free', highlighted: false },
++  { name: 'Studio', price: '₹2,499', period: '/mo', features: ['Everything in Starter', 'Custom domain + SSL', 'Unlimited portfolio', 'Unlimited case studies', 'AI SEO enrichment', 'Advanced analytics'], cta: 'Most Popular', highlighted: true },
++  { name: 'Agency', price: '₹5,999', period: '/mo', features: ['Everything in Studio', 'White-label branding', '10 team members', 'Priority support', 'Multiple site variants'], cta: 'Contact Us', highlighted: false },
++]
+ 
+ export default function HomePage() {
+   return (
+-    <main className="min-h-screen bg-[#0A0A0A]">
++    <main className="min-h-screen bg-ivory text-graphite" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
++
+       {/* Nav */}
+-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#1A1A1A] bg-[#0A0A0A]/90 backdrop-blur-md">
++      <nav className="sticky top-0 z-50 border-b border-stone/60 bg-ivory/90 backdrop-blur-md">
+         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
+-          <div className="flex items-center gap-3">
+-            <div className="w-7 h-7 border border-[#C8A96E] flex items-center justify-center">
+-              <span className="text-[#C8A96E] text-sm font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
+-            </div>
+-            <span className="text-sm tracking-[0.2em] uppercase font-light">StudioLaunch</span>
++          <Logo size={26} />
++          <div className="hidden md:flex items-center gap-8">
++            {NAV_LINKS.map(l => (
++              <a key={l.href} href={l.href} className="text-sm text-graphite/70 hover:text-graphite transition-colors">
++                {l.label}
++              </a>
++            ))}
+           </div>
+-          <div className="flex items-center gap-6">
+-            <Link href="/login" className="text-xs text-[#6B6B6B] hover:text-[#F5F0E8] tracking-widest uppercase transition-colors">
+-              Sign In
++          <div className="flex items-center gap-5">
++            <Link href="/login" className="hidden sm:block text-sm text-graphite/70 hover:text-graphite transition-colors">
++              Login
+             </Link>
+-            <Link href="/signup" className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-5 py-2.5 hover:bg-[#A8854A] transition-colors">
+-              Start Free Trial
++            <Link href="/signup" className="bg-graphite text-ivory text-sm font-medium px-5 py-2.5 hover:bg-graphite/85 transition-colors">
++              Start Free
+             </Link>
+           </div>
+         </div>
+       </nav>
+ 
+       {/* Hero */}
+-      <section className="pt-40 pb-28 px-6">
+-        <div className="max-w-4xl mx-auto text-center">
+-          <div className="inline-block text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-8 border border-[#C8A96E]/30 px-4 py-1.5">
+-            Built for Architects & Interior Designers
+-          </div>
+-          <h1 style={{fontFamily:'Georgia,serif'}} className="text-5xl md:text-7xl font-light leading-[0.95] mb-8 text-[#F5F0E8]">
+-            Your studio deserves<br/>a <em className="text-[#C8A96E]">better website</em>
++      <section className="max-w-6xl mx-auto px-6 pt-16 pb-24 grid lg:grid-cols-2 gap-12 items-center">
++        <div>
++          <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-5">Design Operating System</div>
++          <h1 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-5xl md:text-6xl font-light leading-[1.05] mb-6">
++            Your studio deserves a <em className="text-bronze not-italic">better website</em>
+           </h1>
+-          <p className="text-[#6B6B6B] text-lg max-w-xl mx-auto mb-12 leading-relaxed">
+-            Launch a premium, SEO-optimised website in under 20 minutes. Built-in lead capture, portfolio manager, case study builder, and AI content — designed specifically for design studios.
++          <p className="text-graphite/60 text-lg leading-relaxed mb-8 max-w-md">
++            Launch a premium, SEO-optimised website in under 20 minutes. Built-in lead capture, portfolio manager, case study builder, and AI content — designed specifically for architects and interior designers.
+           </p>
+-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+-            <Link href="/signup" className="bg-[#C8A96E] text-[#0A0A0A] text-xs font-semibold tracking-widest uppercase px-8 py-4 hover:bg-[#A8854A] transition-colors inline-flex items-center gap-3 justify-center">
+-              Start 14-Day Free Trial
+-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M7.5 1.5L13 7l-5.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+-            </Link>
+-            <Link href="#how-it-works" className="border border-[#2A2A2A] text-[#F5F0E8]/70 text-xs font-medium tracking-widest uppercase px-8 py-4 hover:border-[#C8A96E]/50 transition-colors">
+-              See How It Works
++          <div className="flex flex-wrap gap-4 mb-6">
++            <Link href="/signup" className="bg-graphite text-ivory text-sm font-medium px-7 py-3.5 hover:bg-graphite/85 transition-colors inline-flex items-center gap-2">
++              Start Free Trial
++              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 7h12M7.5 1.5L13 7l-5.5 5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+             </Link>
++            <a href="#templates" className="border border-graphite/20 text-graphite text-sm font-medium px-7 py-3.5 hover:border-graphite/50 transition-colors">
++              View Templates
++            </a>
++          </div>
++          <p className="text-graphite/45 text-xs">No credit card required · Cancel anytime · Your own subdomain instantly</p>
++        </div>
++
++        {/* Hero visual */}
++        <div className="relative aspect-[4/3] bg-stone/40 rounded-sm overflow-hidden">
++          <div className="absolute inset-0 flex items-center justify-center">
++            <svg width="100%" height="100%" viewBox="0 0 400 300" fill="none" preserveAspectRatio="xMidYMid slice">
++              <rect width="400" height="300" fill="#D9D2C4" />
++              <rect x="40" y="40" width="120" height="220" fill="#EDE8DE" />
++              <rect x="180" y="40" width="180" height="100" fill="#C9B89A" />
++              <circle cx="270" cy="90" r="18" fill="#A8ADA1" />
++            </svg>
++          </div>
++          <div className="absolute bottom-6 left-6 right-6 bg-ivory shadow-xl rounded-sm p-4">
++            <div className="flex items-center gap-1.5 mb-3">
++              <div className="w-2 h-2 rounded-full bg-stone" />
++              <div className="w-2 h-2 rounded-full bg-stone" />
++              <div className="w-2 h-2 rounded-full bg-stone" />
++            </div>
++            <div className="bg-graphite text-ivory p-4">
++              <div style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-lg">Spaces that inspire life.</div>
++            </div>
+           </div>
+-          <p className="text-[#6B6B6B] text-xs mt-6">No credit card required · Cancel anytime · Your own subdomain instantly</p>
+         </div>
+       </section>
+ 
+       {/* Social proof strip */}
+-      <div className="border-y border-[#1A1A1A] py-6 px-6">
+-        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-8 text-[#6B6B6B] text-xs tracking-widest uppercase">
++      <div className="border-y border-stone/60 py-6 px-6">
++        <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-8 text-graphite/40 text-xs tracking-widest uppercase">
+           <span>Chennai Studios</span>
+-          <span className="text-[#2A2A2A]">·</span>
++          <span>·</span>
+           <span>Coimbatore Architects</span>
+-          <span className="text-[#2A2A2A]">·</span>
++          <span>·</span>
+           <span>Bangalore Interiors</span>
+-          <span className="text-[#2A2A2A]">·</span>
++          <span>·</span>
+           <span>Hyderabad Design</span>
+-          <span className="text-[#2A2A2A]">·</span>
++          <span>·</span>
+           <span>Mumbai Studios</span>
+         </div>
+       </div>
+ 
++      {/* Features */}
++      <section id="features" className="max-w-6xl mx-auto px-6 py-24">
++        <div className="max-w-xl mb-14">
++          <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-4">All You Need</div>
++          <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light">
++            Everything you need, in one intelligent platform.
++          </h2>
++        </div>
++        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-stone/60 border border-stone/60">
++          {FEATURES.map(f => (
++            <div key={f.title} className="bg-ivory p-8">
++              <h3 className="font-medium mb-2">{f.title}</h3>
++              <p className="text-sm text-graphite/55 leading-relaxed">{f.body}</p>
++            </div>
++          ))}
++        </div>
++      </section>
++
++      {/* Templates / design systems */}
++      <section id="templates" className="max-w-6xl mx-auto px-6 py-24">
++        <div className="max-w-xl mb-14">
++          <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-4">Design Systems</div>
++          <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light">
++            Choose a design system that matches your style.
++          </h2>
++          <p className="text-graphite/55 mt-3">6 master design systems. Unlimited possibilities.</p>
++        </div>
++        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
++          {TEMPLATES.map((t, i) => (
++            <div key={t.name} className="group cursor-pointer">
++              <div className={`aspect-[4/3] mb-3 ${i === TEMPLATES.length - 1 ? 'bg-graphite' : 'bg-stone/50'} flex items-center justify-center transition-transform group-hover:-translate-y-1`}>
++                <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className={`text-2xl ${i === TEMPLATES.length - 1 ? 'text-ivory' : 'text-graphite/70'}`}>
++                  {t.name}
++                </span>
++              </div>
++              <div className="text-sm font-medium">{t.name}</div>
++              <div className="text-xs text-graphite/45">{t.tag}</div>
++            </div>
++          ))}
++        </div>
++      </section>
++
+       {/* How it works */}
+-      <section id="how-it-works" className="py-28 px-6">
++      <section className="bg-graphite text-ivory py-24 px-6">
+         <div className="max-w-5xl mx-auto">
+-          <div className="text-center mb-20">
+-            <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-4">The Process</div>
+-            <h2 style={{fontFamily:'Georgia,serif'}} className="text-4xl md:text-5xl font-light text-[#F5F0E8]">Live in <em className="text-[#C8A96E]">20 minutes</em></h2>
++          <div className="text-center mb-16">
++            <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-4">The Process</div>
++            <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light">
++              Live in <em className="text-bronze not-italic">20 minutes</em>
++            </h2>
+           </div>
+-          <div className="grid md:grid-cols-3 gap-px bg-[#1A1A1A]">
+-            {[
+-              { n:'01', title:'Fill the wizard', body:'Answer 4 simple screens — your studio name, city, phone, and a few stats. No design skills needed.' },
+-              { n:'02', title:'Your site is live', body:'Instantly published at yourstudio.studiolaunch.in with all your content, schema, and SEO structure in place.' },
+-              { n:'03', title:'Leads come in', body:'Every consultation request lands in your inbox and dashboard. Reply directly. Convert more clients.' },
+-            ].map(step => (
+-              <div key={step.n} className="bg-[#0A0A0A] p-10">
+-                <div style={{fontFamily:'Georgia,serif'}} className="text-[#C8A96E] text-4xl font-light mb-6">{step.n}</div>
+-                <h3 className="text-[#F5F0E8] text-lg font-medium mb-3">{step.title}</h3>
+-                <p className="text-[#6B6B6B] text-sm leading-relaxed">{step.body}</p>
++          <div className="grid md:grid-cols-3 gap-px bg-ivory/10">
++            {PROCESS.map(step => (
++              <div key={step.n} className="bg-graphite p-10">
++                <div style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-bronze text-4xl font-light mb-6">{step.n}</div>
++                <h3 className="text-lg font-medium mb-3">{step.title}</h3>
++                <p className="text-ivory/55 text-sm leading-relaxed">{step.body}</p>
+               </div>
+             ))}
+           </div>
+@@ -88,52 +188,89 @@ export default function HomePage() {
+       </section>
+ 
+       {/* Pricing */}
+-      <section className="py-28 px-6 bg-[#0D0D0D]">
+-        <div className="max-w-5xl mx-auto">
+-          <div className="text-center mb-20">
+-            <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-4">Pricing</div>
+-            <h2 style={{fontFamily:'Georgia,serif'}} className="text-4xl font-light text-[#F5F0E8]">Simple, <em className="text-[#C8A96E]">honest</em> pricing</h2>
+-          </div>
+-          <div className="grid md:grid-cols-3 gap-px bg-[#1A1A1A]">
+-            {[
+-              { name:'Starter', price:'₹999', period:'/mo', features:['Subdomain site','Consultation form + inbox','5 portfolio items','1 case study','Basic analytics'], cta:'Start Free', highlighted:false },
+-              { name:'Studio', price:'₹2,499', period:'/mo', features:['Everything in Starter','Custom domain + SSL','Unlimited portfolio','Unlimited case studies','AI SEO enrichment','Advanced analytics'], cta:'Most Popular', highlighted:true },
+-              { name:'Agency', price:'₹5,999', period:'/mo', features:['Everything in Studio','White-label branding','10 team members','Priority support','Multiple site variants'], cta:'Contact Us', highlighted:false },
+-            ].map(plan => (
+-              <div key={plan.name} className={`p-10 ${plan.highlighted ? 'bg-[#141414] border border-[#C8A96E]/30' : 'bg-[#0A0A0A]'}`}>
+-                {plan.highlighted && (
+-                  <div className="text-[#C8A96E] text-xs tracking-widest uppercase mb-4">Most Popular</div>
+-                )}
+-                <div className="text-[#F5F0E8] font-medium mb-2">{plan.name}</div>
+-                <div className="flex items-baseline gap-1 mb-8">
+-                  <span style={{fontFamily:'Georgia,serif'}} className="text-4xl font-light text-[#C8A96E]">{plan.price}</span>
+-                  <span className="text-[#6B6B6B] text-sm">{plan.period}</span>
+-                </div>
+-                <ul className="space-y-3 mb-10">
+-                  {plan.features.map(f => (
+-                    <li key={f} className="flex items-start gap-3 text-sm text-[#6B6B6B]">
+-                      <svg className="w-4 h-4 text-[#C8A96E] mt-0.5 flex-shrink-0" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+-                      {f}
+-                    </li>
+-                  ))}
+-                </ul>
+-                <Link href="/signup" className={`block text-center text-xs font-semibold tracking-widest uppercase py-3 transition-colors ${plan.highlighted ? 'bg-[#C8A96E] text-[#0A0A0A] hover:bg-[#A8854A]' : 'border border-[#2A2A2A] text-[#F5F0E8]/70 hover:border-[#C8A96E]/50'}`}>
+-                  {plan.highlighted ? 'Start Free Trial' : plan.cta}
+-                </Link>
++      <section id="pricing" className="max-w-6xl mx-auto px-6 py-24">
++        <div className="text-center mb-16">
++          <div className="text-bronze text-xs tracking-[0.2em] uppercase mb-4">Pricing</div>
++          <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light">
++            Simple, <em className="text-bronze not-italic">honest</em> pricing
++          </h2>
++        </div>
++        <div className="grid md:grid-cols-3 gap-px bg-stone/60 border border-stone/60">
++          {PLANS.map(plan => (
++            <div key={plan.name} className={`p-10 ${plan.highlighted ? 'bg-ivory border-2 border-bronze' : 'bg-ivory'}`}>
++              {plan.highlighted && (
++                <div className="text-bronze text-xs tracking-widest uppercase mb-4">Most Popular</div>
++              )}
++              <div className="font-medium mb-2">{plan.name}</div>
++              <div className="flex items-baseline gap-1 mb-8">
++                <span style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-4xl font-light text-bronze">{plan.price}</span>
++                <span className="text-graphite/50 text-sm">{plan.period}</span>
+               </div>
+-            ))}
++              <ul className="space-y-3 mb-10">
++                {plan.features.map(f => (
++                  <li key={f} className="flex items-start gap-3 text-sm text-graphite/60">
++                    <svg className="w-4 h-4 text-bronze mt-0.5 flex-shrink-0" viewBox="0 0 16 16" fill="none"><path d="M2 8l4 4 8-8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
++                    {f}
++                  </li>
++                ))}
++              </ul>
++              <Link href="/signup" className={`block text-center text-sm font-medium py-3 transition-colors ${plan.highlighted ? 'bg-graphite text-ivory hover:bg-graphite/85' : 'border border-graphite/25 text-graphite hover:border-graphite/60'}`}>
++                {plan.highlighted ? 'Start Free Trial' : plan.cta}
++              </Link>
++            </div>
++          ))}
++        </div>
++      </section>
++
++      {/* CTA */}
++      <section className="max-w-6xl mx-auto px-6 pb-24">
++        <div className="bg-stone/40 p-12 md:p-16 flex flex-col md:flex-row items-center justify-between gap-8">
++          <div>
++            <h2 style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }} className="text-3xl font-light mb-2">
++              Ready to design spaces that leave a lasting impression?
++            </h2>
++            <p className="text-graphite/55">Start building your studio&apos;s digital presence today.</p>
++          </div>
++          <div className="flex gap-4 flex-shrink-0">
++            <Link href="/signup" className="bg-graphite text-ivory text-sm font-medium px-7 py-3.5 hover:bg-graphite/85 transition-colors whitespace-nowrap">
++              Start Free
++            </Link>
+           </div>
+         </div>
+       </section>
+ 
+       {/* Footer */}
+-      <footer className="border-t border-[#1A1A1A] py-10 px-6">
+-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+-          <div className="text-xs text-[#6B6B6B]">© {new Date().getFullYear()} StudioLaunch. All rights reserved.</div>
+-          <div className="flex gap-6 text-xs text-[#6B6B6B]">
+-            <Link href="/privacy" className="hover:text-[#C8A96E] transition-colors">Privacy</Link>
+-            <Link href="/terms" className="hover:text-[#C8A96E] transition-colors">Terms</Link>
++      <footer className="bg-graphite text-ivory/70 pt-16 pb-8 px-6">
++        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-ivory/10">
++          <div>
++            <Logo size={26} dark />
++            <p className="text-xs text-ivory/40 mt-4 max-w-[220px]">Design operating system for architects &amp; interior designers.</p>
++          </div>
++          <div>
++            <div className="text-ivory text-sm font-medium mb-4">Product</div>
++            <ul className="space-y-2.5 text-sm">
++              <li><a href="#features" className="hover:text-ivory transition-colors">Features</a></li>
++              <li><a href="#templates" className="hover:text-ivory transition-colors">Templates</a></li>
++              <li><a href="#pricing" className="hover:text-ivory transition-colors">Pricing</a></li>
++            </ul>
++          </div>
++          <div>
++            <div className="text-ivory text-sm font-medium mb-4">Company</div>
++            <ul className="space-y-2.5 text-sm">
++              <li><Link href="/login" className="hover:text-ivory transition-colors">Login</Link></li>
++              <li><Link href="/signup" className="hover:text-ivory transition-colors">Start Free</Link></li>
++            </ul>
+           </div>
++          <div>
++            <div className="text-ivory text-sm font-medium mb-4">Legal</div>
++            <ul className="space-y-2.5 text-sm">
++              <li><Link href="/privacy" className="hover:text-ivory transition-colors">Privacy</Link></li>
++              <li><Link href="/terms" className="hover:text-ivory transition-colors">Terms</Link></li>
++            </ul>
++          </div>
++        </div>
++        <div className="max-w-6xl mx-auto pt-6 text-xs text-ivory/35">
++          © {new Date().getFullYear()} MaSpace. All rights reserved.
+         </div>
+       </footer>
+     </main>
+diff --git a/src/app/signup/page.tsx b/src/app/signup/page.tsx
+index 0a86222..f15d113 100644
+--- a/src/app/signup/page.tsx
++++ b/src/app/signup/page.tsx
+@@ -5,6 +5,7 @@ import { useState } from 'react'
+ import Link from 'next/link'
+ import { useRouter } from 'next/navigation'
+ import { createClient } from '@/lib/supabase/client'
++import { Logo } from '@/components/brand/Logo'
+ 
+ export default function SignupPage() {
+   const router  = useRouter()
+@@ -50,10 +51,7 @@ export default function SignupPage() {
+     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
+       <div className="w-full max-w-sm">
+         <Link href="/" className="flex items-center gap-3 mb-12">
+-          <div className="w-8 h-8 border border-[#C8A96E] flex items-center justify-center">
+-            <span className="text-[#C8A96E] text-lg font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
+-          </div>
+-          <span className="text-sm tracking-[0.2em] uppercase font-light text-[#F5F0E8]">StudioLaunch</span>
++          <Logo size={28} dark />
+         </Link>
+ 
+         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">14-day free trial</div>
+diff --git a/src/components/brand/Logo.tsx b/src/components/brand/Logo.tsx
+new file mode 100644
+index 0000000..fddba10
+--- /dev/null
++++ b/src/components/brand/Logo.tsx
+@@ -0,0 +1,54 @@
++// src/components/brand/Logo.tsx
++// The MaSpace mark: an open black square bracket (the threshold) with a small
++// bronze bracket echoing it in the missing corner — from the brand guide.
++
++export function LogoMark({ size = 24, dark = false }: { size?: number; dark?: boolean }) {
++  const line = dark ? '#F7F5F0' : '#1A1A1A'
++  return (
++    <svg width={size} height={size} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
++      {/* Black bracket: left side, top, right side (partial), bottom (partial) — open at bottom-right */}
++      <path
++        d="M100 65 V20 H20 V100 H64"
++        stroke={line}
++        strokeWidth="7"
++        strokeLinecap="square"
++      />
++      {/* Bronze bracket echoing the missing corner */}
++      <path
++        d="M78 88 H110 V100"
++        stroke="#B38B59"
++        strokeWidth="7"
++        strokeLinecap="square"
++      />
++    </svg>
++  )
++}
++
++export function Logo({
++  size = 24,
++  dark = false,
++  tagline = false,
++}: {
++  size?: number
++  dark?: boolean
++  tagline?: boolean
++}) {
++  return (
++    <div className="flex items-center gap-2.5">
++      <LogoMark size={size} dark={dark} />
++      <div>
++        <span
++          style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}
++          className={`text-xl tracking-wide ${dark ? 'text-ivory' : 'text-graphite'}`}
++        >
++          MaSpace
++        </span>
++        {tagline && (
++          <div className={`text-[10px] tracking-[0.25em] uppercase -mt-0.5 ${dark ? 'text-ivory/50' : 'text-bronze'}`}>
++            Designed by principles.
++          </div>
++        )}
++      </div>
++    </div>
++  )
++}
+diff --git a/src/components/dashboard/DashboardShell.tsx b/src/components/dashboard/DashboardShell.tsx
+index c662202..572ad61 100644
+--- a/src/components/dashboard/DashboardShell.tsx
++++ b/src/components/dashboard/DashboardShell.tsx
+@@ -100,7 +100,7 @@ export default function DashboardShell({ tenant, newLeadsCount = 0, children }:
+         </div>
+         <div className={`min-w-0 flex-1 ${collapsed ? 'lg:hidden' : ''}`}>
+           <div className="text-[#F5F0E8] text-xs font-medium truncate">{branding.business_name}</div>
+-          <div className="text-[#6B6B6B] text-xs truncate">{tenant.subdomain}.studiolaunch.in</div>
++          <div className="text-[#6B6B6B] text-xs truncate">{tenant.subdomain}.maspace.in</div>
+         </div>
+         <button
+           onClick={() => setSidebarOpen(false)}
+@@ -246,7 +246,7 @@ export default function DashboardShell({ tenant, newLeadsCount = 0, children }:
+             className="hidden sm:flex items-center gap-2 text-xs text-[#6B6B6B] hover:text-[#C8A96E] transition-colors border border-[#2A2A2A] rounded-full px-3 py-1.5"
+           >
+             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M6 1l5 5-5 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+-            {tenant.subdomain}.studiolaunch.in
++            {tenant.subdomain}.maspace.in
+           </a>
+ 
+           <div className="w-8 h-8 rounded-full bg-[#C8A96E]/10 border border-[#C8A96E]/30 flex items-center justify-center text-[#C8A96E] text-xs font-medium">
+diff --git a/src/components/tenant-site/SchemaScript.tsx b/src/components/tenant-site/SchemaScript.tsx
+index 00adcdd..7c89273 100644
+--- a/src/components/tenant-site/SchemaScript.tsx
++++ b/src/components/tenant-site/SchemaScript.tsx
+@@ -9,7 +9,7 @@ export default function SchemaScript({ tenant, faqs }: { tenant: Tenant; faqs: F
+     '@graph': [
+       {
+         '@type': ['ArchitecturalService', 'LocalBusiness'],
+-        '@id': `https://${tenant.subdomain}.studiolaunch.in/#organization`,
++        '@id': `https://${tenant.subdomain}.maspace.in/#organization`,
+         name: branding.business_name,
+         telephone: contact.phone_number,
+         email: contact.email,
+diff --git a/src/lib/utils.ts b/src/lib/utils.ts
+index c28bfce..62dfb2d 100644
+--- a/src/lib/utils.ts
++++ b/src/lib/utils.ts
+@@ -47,18 +47,18 @@ export function getInitials(name: string): string {
+ 
+ // Build the public URL for a tenant site
+ export function getTenantUrl(subdomain: string): string {
+-  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'studiolaunch.in'
++  const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'maspace.in'
+ 
+   if (process.env.NODE_ENV === 'development') {
+     return `http://${subdomain}.localhost:3000`
+   }
+ 
+-  // Subdomain-per-tenant (mystudio.studiolaunch.in) is the real product design, and
+-  // is what runs once a custom domain with wildcard DNS (*.studiolaunch.in → Vercel)
++  // Subdomain-per-tenant (mystudio.maspace.in) is the real product design, and
++  // is what runs once a custom domain with wildcard DNS (*.maspace.in → Vercel)
+   // is attached. Vercel's own shared *.vercel.app domain can't do wildcard subdomains
+   // for a project you don't own the apex of — so while testing there, set
+   // NEXT_PUBLIC_TENANT_URL_MODE=path in your environment variables to fall back to
+-  // path-based links (studiolaunch.vercel.app/mystudio) instead. Remove/unset it
++  // path-based links (maspace.vercel.app/mystudio) instead. Remove/unset it
+   // (or set it to "subdomain") once your real domain is wired up.
+   if (process.env.NEXT_PUBLIC_TENANT_URL_MODE === 'path') {
+     const appUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${rootDomain}`
+diff --git a/src/types/index.ts b/src/types/index.ts
+index b4498f0..8aa532e 100644
+--- a/src/types/index.ts
++++ b/src/types/index.ts
+@@ -4,6 +4,8 @@ export type FinishTier = 'premium' | 'luxury' | 'ultra'
+ export type PlanType   = 'starter' | 'studio' | 'agency'
+ export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
+ export type ProjectCategory = 'villa' | 'apartment' | 'commercial' | 'other'
++export type Persona    = 'architect' | 'interior_designer' | 'design_studio' | 'other'
++export type TemplateId = 'atelier' | 'forma' | 'terra' | 'renaissance' | 'gallery' | 'noir'
+ 
+ // ─── Tenant (Studio) ──────────────────────────────────────────────────────────
+ 
+@@ -13,6 +15,7 @@ export interface StudioBranding {
+   business_name: string
+   tagline: string
+   logo_letter: string
++  logo_url?: string          // uploaded logo image, takes priority over logo_letter when set
+   primary_color: string      // hex
+   accent_color: string       // hex
+   theme?: SiteTheme          // which tenant-site template to render, defaults to 'noir'
+@@ -193,11 +196,17 @@ export interface OnboardingStep {
+ }
+ 
+ export type OnboardingData = {
+-  // Step 1 — Branding
++  // Persona (personalization only — not rendered on the site)
++  persona: Persona | ''
++  // Branding
+   business_name: string
+   tagline: string
+   logo_letter: string
+-  // Step 2 — Location
++  logo_url: string
++  accent_color: string
++  // Design system
++  template_id: TemplateId
++  // Location
+   local_city: string
+   state: string
+   street_address: string
+@@ -205,16 +214,19 @@ export type OnboardingData = {
+   geo_latitude: string
+   geo_longitude: string
+   service_radius_km: number
+-  // Step 3 — Contact
++  // Contact
+   phone_number: string
+   phone_display: string
+   email: string
+   instagram_handle: string
+-  // Step 4 — Stats & subdomain
++  // Stats & subdomain
+   project_count: number
+   years_active: number
+   sqft_total: string
+   subdomain: string
++  // Team invites — collected client-side, sent via /api/team AFTER the
++  // tenant is created (not part of the tenants row itself)
++  team_invites: { email: string; role: 'editor' }[]
+ }
+ 
+ // ─── API Response Types ───────────────────────────────────────────────────────
+diff --git a/supabase/migrations/008_onboarding_branding.sql b/supabase/migrations/008_onboarding_branding.sql
+new file mode 100644
+index 0000000..2e89ccd
+--- /dev/null
++++ b/supabase/migrations/008_onboarding_branding.sql
+@@ -0,0 +1,33 @@
++-- ═══════════════════════════════════════════════════════════════════
++-- MaSpace — Onboarding: persona, design system, brand logo
++-- Migration: 008_onboarding_branding
++-- ═══════════════════════════════════════════════════════════════════
++
++-- ─── Design system template ────────────────────────────────────────────────
++create type template_id as enum ('atelier', 'forma', 'terra', 'renaissance', 'gallery', 'noir');
++
++alter table tenants
++  add column if not exists template_id template_id not null default 'atelier';
++
++-- ─── Persona captured at onboarding (personalization only, not rendered) ───
++alter table tenants
++  add column if not exists persona text
++    check (persona in ('architect', 'interior_designer', 'design_studio', 'other'));
++
++-- ─── Logo file + accent color live inside the existing `branding` jsonb ────
++-- (keeps every branding field read/written in one place, matching the
++--  existing business_name / tagline / logo_letter / accent_color pattern)
++alter table tenants
++  alter column branding set default '{
++    "business_name": "",
++    "tagline": "Architectural Design Studio",
++    "logo_letter": "A",
++    "logo_url": "",
++    "primary_color": "#0A0A0A",
++    "accent_color": "#C8A96E"
++  }'::jsonb;
++
++-- Backfill logo_url key for any tenant created before this migration
++update tenants
++  set branding = branding || '{"logo_url": ""}'::jsonb
++  where not (branding ? 'logo_url');
+diff --git a/tailwind.config.ts b/tailwind.config.ts
+index f59c85c..c002060 100644
+--- a/tailwind.config.ts
++++ b/tailwind.config.ts
+@@ -16,6 +16,12 @@ const config: Config = {
+         surface:    '#141414',
+         muted:      '#6B6B6B',
+         rule:       '#2A2A2A',
++        // MaSpace brand palette (marketing site + onboarding)
++        ivory:      '#F7F5F0',
++        stone:      '#D9D2C4',
++        graphite:   '#1A1A1A',
++        bronze:     '#B38B59',
++        sage:       '#A8ADA1',
+       },
+       fontFamily: {
+         display: ['"Cormorant Garamond"', 'Georgia', 'serif'],

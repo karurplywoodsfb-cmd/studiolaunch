@@ -5,6 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Logo } from '@/components/brand/Logo'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -36,10 +37,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 mb-12 group">
-          <div className="w-8 h-8 border border-[#C8A96E] flex items-center justify-center">
-            <span className="text-[#C8A96E] text-lg font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
-          </div>
-          <span className="text-sm tracking-[0.2em] uppercase font-light text-[#F5F0E8]">MaSpace</span>
+          <Logo size={28} dark />
         </Link>
 
         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">Welcome back</div>

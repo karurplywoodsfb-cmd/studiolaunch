@@ -4,6 +4,8 @@ export type FinishTier = 'premium' | 'luxury' | 'ultra'
 export type PlanType   = 'starter' | 'studio' | 'agency'
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
 export type ProjectCategory = 'villa' | 'apartment' | 'commercial' | 'other'
+export type Persona    = 'architect' | 'interior_designer' | 'design_studio' | 'other'
+export type TemplateId = 'atelier' | 'forma' | 'terra' | 'renaissance' | 'gallery' | 'noir'
 
 // ─── Tenant (Studio) ──────────────────────────────────────────────────────────
 
@@ -13,6 +15,7 @@ export interface StudioBranding {
   business_name: string
   tagline: string
   logo_letter: string
+  logo_url?: string          // uploaded logo image, takes priority over logo_letter when set
   primary_color: string      // hex
   accent_color: string       // hex
   theme?: SiteTheme          // which tenant-site template to render, defaults to 'noir'
@@ -193,11 +196,17 @@ export interface OnboardingStep {
 }
 
 export type OnboardingData = {
-  // Step 1 — Branding
+  // Persona (personalization only — not rendered on the site)
+  persona: Persona | ''
+  // Branding
   business_name: string
   tagline: string
   logo_letter: string
-  // Step 2 — Location
+  logo_url: string
+  accent_color: string
+  // Design system
+  template_id: TemplateId
+  // Location
   local_city: string
   state: string
   street_address: string
@@ -205,16 +214,19 @@ export type OnboardingData = {
   geo_latitude: string
   geo_longitude: string
   service_radius_km: number
-  // Step 3 — Contact
+  // Contact
   phone_number: string
   phone_display: string
   email: string
   instagram_handle: string
-  // Step 4 — Stats & subdomain
+  // Stats & subdomain
   project_count: number
   years_active: number
   sqft_total: string
   subdomain: string
+  // Team invites — collected client-side, sent via /api/team AFTER the
+  // tenant is created (not part of the tenants row itself)
+  team_invites: { email: string; role: 'editor' }[]
 }
 
 // ─── API Response Types ───────────────────────────────────────────────────────

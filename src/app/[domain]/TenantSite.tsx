@@ -64,9 +64,13 @@ export default function TenantSite({ tenant, siteData }: Props) {
       <div style={{maxWidth:'1280px',margin:'0 auto',padding:'0 2rem',display:'flex',alignItems:'center',justifyContent:'space-between',height:'72px'}}>
         {/* Logo */}
         <div style={{display:'flex',alignItems:'center',gap:'0.75rem'}}>
-          <div style={{width:'32px',height:'32px',border:`1px solid ${accentColor}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <span style={{color:accentColor,fontFamily:'Georgia,serif',fontSize:'1.1rem',fontWeight:300}}>{branding.logo_letter}</span>
-          </div>
+          {branding.logo_url ? (
+            <img src={branding.logo_url} alt={`${branding.business_name} logo`} style={{width:'32px',height:'32px',objectFit:'contain'}} />
+          ) : (
+            <div style={{width:'32px',height:'32px',border:`1px solid ${accentColor}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <span style={{color:accentColor,fontFamily:'Georgia,serif',fontSize:'1.1rem',fontWeight:300}}>{branding.logo_letter}</span>
+            </div>
+          )}
           <div>
             <div style={{color:'#F5F0E8',fontFamily:'Georgia,serif',fontSize:'0.9rem',fontWeight:300,letterSpacing:'0.2em'}}>{branding.business_name}</div>
             <div style={{color:accentColor,fontSize:'0.52rem',letterSpacing:'0.2em',textTransform:'uppercase',marginTop:'1px'}}>{branding.tagline}</div>
@@ -405,9 +409,13 @@ export default function TenantSite({ tenant, siteData }: Props) {
         <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr',gap:'3rem',marginBottom:'3rem'}}>
           <div>
             <div style={{display:'flex',alignItems:'center',gap:'0.75rem',marginBottom:'1rem'}}>
-              <div style={{width:'32px',height:'32px',border:`1px solid ${accentColor}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                <span style={{color:accentColor,fontFamily:'Georgia,serif',fontSize:'1.1rem',fontWeight:300}}>{branding.logo_letter}</span>
-              </div>
+              {branding.logo_url ? (
+                <img src={branding.logo_url} alt={`${branding.business_name} logo`} style={{width:'32px',height:'32px',objectFit:'contain'}} />
+              ) : (
+                <div style={{width:'32px',height:'32px',border:`1px solid ${accentColor}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <span style={{color:accentColor,fontFamily:'Georgia,serif',fontSize:'1.1rem',fontWeight:300}}>{branding.logo_letter}</span>
+                </div>
+              )}
               <span style={{fontFamily:'Georgia,serif',fontSize:'0.9rem',fontWeight:300,letterSpacing:'0.2em',color:'#F5F0E8'}}>{branding.business_name}</span>
             </div>
             <p style={{color:'#6B6B6B',fontSize:'0.85rem',lineHeight:1.7,maxWidth:'320px',marginBottom:'1rem'}}>

@@ -12,11 +12,13 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // Get tenant
+    // Get tenant — if one doesn't exist yet, this may be an onboarding-time
+    // upload (e.g. logo, before the tenant row is created). Fall back to a
+    // path keyed by the authenticated user so the file still lands somewhere
+    // safe, and gets referenced by URL once the tenant is created.
     const admin = createAdminClient()
     const { data: tenant } = await admin
       .from('tenants').select('id, plan').eq('user_id', user.id).single()
-    if (!tenant) return NextResponse.json({ error: 'No studio found' }, { status: 404 })
 
     const formData = await req.formData()
     const file     = formData.get('file') as File
@@ -29,9 +31,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'File too large. Maximum 10MB.' }, { status: 400 })
 
     // Build storage path: tenantId/folder/timestamp-filename
+    // (or onboarding/{userId}/folder/... if the tenant doesn't exist yet)
     const ext      = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-    const path     = `${tenant.id}/${folder}/${fileName}`
+    const pathPrefix = tenant ? tenant.id : `onboarding/${user.id}`
+    const path     = `${pathPrefix}/${folder}/${fileName}`
 
     const arrayBuffer = await file.arrayBuffer()
     const buffer      = new Uint8Array(arrayBuffer)

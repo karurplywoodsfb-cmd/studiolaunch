@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const body: OnboardingData = await req.json()
 
     const {
-      business_name, tagline, logo_letter,
+      persona, business_name, tagline, logo_letter, logo_url, accent_color, template_id,
       local_city, state, street_address, pin_code, geo_latitude, geo_longitude, service_radius_km,
       phone_number, phone_display, email, instagram_handle,
       project_count, years_active, sqft_total, subdomain,
@@ -28,6 +28,9 @@ export async function POST(req: NextRequest) {
     if (!user_id || !business_name || !subdomain || !local_city || !phone_number) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
+
+    const VALID_TEMPLATES = ['atelier','forma','terra','renaissance','gallery','noir']
+    const VALID_PERSONAS  = ['architect','interior_designer','design_studio','other']
 
     // Check subdomain availability
     const available = await isSubdomainAvailable(subdomain)
@@ -57,7 +60,16 @@ export async function POST(req: NextRequest) {
         plan: 'starter',
         plan_status: 'trialing',
         onboarding_completed: true,
-        branding: { business_name, tagline, logo_letter: logo_letter || business_name.charAt(0).toUpperCase(), primary_color: '#0A0A0A', accent_color: '#C8A96E' },
+        persona: VALID_PERSONAS.includes(persona || '') ? persona : null,
+        template_id: VALID_TEMPLATES.includes(template_id) ? template_id : 'atelier',
+        branding: {
+          business_name,
+          tagline,
+          logo_letter: logo_letter || business_name.charAt(0).toUpperCase(),
+          logo_url: logo_url || '',
+          primary_color: '#0A0A0A',
+          accent_color: accent_color || '#C8A96E',
+        },
         contact: { phone_number, phone_display, email, instagram_handle, houzz_handle: '' },
         location: { street_address, local_city, state, pin_code, geo_latitude: geo_latitude || '0', geo_longitude: geo_longitude || '0', service_radius_km: service_radius_km || 60 },
         stats: { project_count: project_count || 0, years_active: years_active || 1, sqft_total: sqft_total || '1', city_radius: service_radius_km || 60 },

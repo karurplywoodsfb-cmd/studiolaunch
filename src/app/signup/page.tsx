@@ -5,6 +5,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { Logo } from '@/components/brand/Logo'
 
 export default function SignupPage() {
   const router  = useRouter()
@@ -50,10 +51,7 @@ export default function SignupPage() {
     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <Link href="/" className="flex items-center gap-3 mb-12">
-          <div className="w-8 h-8 border border-[#C8A96E] flex items-center justify-center">
-            <span className="text-[#C8A96E] text-lg font-light" style={{fontFamily:'Georgia,serif'}}>S</span>
-          </div>
-          <span className="text-sm tracking-[0.2em] uppercase font-light text-[#F5F0E8]">MaSpace</span>
+          <Logo size={28} dark />
         </Link>
 
         <div className="text-[#C8A96E] text-xs tracking-[0.3em] uppercase mb-3">14-day free trial</div>

@@ -1,5 +1,6 @@
 // src/app/page.tsx — Marketing homepage (maspace.in)
 import Link from 'next/link'
+import { Logo } from '@/components/brand/Logo'
 
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
@@ -37,23 +38,6 @@ const PLANS = [
   { name: 'Agency', price: '₹5,999', period: '/mo', features: ['Everything in Studio', 'White-label branding', '10 team members', 'Priority support', 'Multiple site variants'], cta: 'Contact Us', highlighted: false },
 ]
 
-function MaSpaceMark({ dark = false }: { dark?: boolean }) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M2 2h13v13" stroke={dark ? '#F7F5F0' : '#1A1A1A'} strokeWidth="1.3" />
-        <path d="M22 22H9V9" stroke="#B38B59" strokeWidth="1.3" />
-      </svg>
-      <span
-        style={{ fontFamily: 'Cormorant Garamond, Georgia, serif' }}
-        className={`text-xl tracking-wide ${dark ? 'text-ivory' : 'text-graphite'}`}
-      >
-        MaSpace
-      </span>
-    </div>
-  )
-}
-
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-ivory text-graphite" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
@@ -61,7 +45,7 @@ export default function HomePage() {
       {/* Nav */}
       <nav className="sticky top-0 z-50 border-b border-stone/60 bg-ivory/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16">
-          <MaSpaceMark />
+          <Logo size={26} />
           <div className="hidden md:flex items-center gap-8">
             {NAV_LINKS.map(l => (
               <a key={l.href} href={l.href} className="text-sm text-graphite/70 hover:text-graphite transition-colors">
@@ -259,7 +243,7 @@ export default function HomePage() {
       <footer className="bg-graphite text-ivory/70 pt-16 pb-8 px-6">
         <div className="max-w-6xl mx-auto grid sm:grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-ivory/10">
           <div>
-            <MaSpaceMark dark />
+            <Logo size={26} dark />
             <p className="text-xs text-ivory/40 mt-4 max-w-[220px]">Design operating system for architects &amp; interior designers.</p>
           </div>
           <div>
